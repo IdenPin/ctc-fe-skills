@@ -24,6 +24,10 @@ npx skills add IdenPin/ctc-fe-skills -y
   ```bash
   npx skills add IdenPin/ctc-fe-skills --skill fe-vue3 -y
   ```
+* **只安装 PostgreSQL 数据库同步规范 (`postgres-sync`)**：
+  ```bash
+  npx skills add IdenPin/ctc-fe-skills --skill postgres-sync -y
+  ```
 
 ---
 
@@ -39,7 +43,13 @@ npx skills add IdenPin/ctc-fe-skills -y
   * [governance.md](file:///Users/pdeng/ctc/ctc-fe-skills/fe-structure/references/governance.md) (测试、i18n、配置就近治理)
 
 ### 2. [fe-vue3](file:///Users/pdeng/ctc/ctc-fe-skills/fe-vue3/SKILL.md) — Vue 3 & TS 编码风格规范
-* **核心职责**：规范 SFC `<script setup>` 组件内部的 **8段式逻辑书写顺序**。针对 TypeScript 类型安全实施 **`any` 警告降级与局部逃生通道（`eslint-disable-next-line`）** 的平滑过渡策略，强制 scoped 样式隔离，并配有 ESLint/Prettier 的“无分号”标准配置模板。
+* **核心职责**：规范 SFC `<script setup>` 组件内部的 **8段式逻辑书写顺序**。针对 TypeScript 类型安全实施 **`any` 警告降级与局部逃生通道（`eslint-disable-next-line`）** 的平滑过渡策略，强制 scoped 样式隔离，并配有 ESLint/Prettier 的"无分号"标准配置模板。
+
+### 3. [postgres-sync](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/SKILL.md) — PostgreSQL 数据库同步规范
+* **核心职责**：把远程 PostgreSQL 数据库（测试/预发服）整库同步到本地实例。封装了完整的 **删库 → 重建 → dump → restore → 校验** 流程，提供一键脚本 `sync.sh` 与手动命令两种方式，覆盖 macOS `libpq` 安装、权限角色缺失、会话占用等常见坑。
+* **主要文件**：
+  * [SKILL.md](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/SKILL.md) (规范文档：前置条件、参数、流程、常见坑)
+  * [sync.sh](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/scripts/sync.sh) (一键同步脚本)
 
 ---
 
@@ -48,7 +58,8 @@ npx skills add IdenPin/ctc-fe-skills -y
 这些规范在设计之初就深度考虑了 **AI 协同编码（RAG 检索）**。本地安装完成后，你可以在与 AI 助手聊天时直接引用：
 
 > **Prompts 引用示例**：
-> * “*请参照本地 `fe-structure` 规范，为我现有的 views 进行就近闭环重构，说明移动步骤。*”
-> * “*根据本地 `fe-vue3` 规范，帮我写一个列表筛选组件，注意 script setup 内部的逻辑书写顺序，不需要写分号。*”
+> * "*请参照本地 `fe-structure` 规范，为我现有的 views 进行就近闭环重构，说明移动步骤。*"
+> * "*根据本地 `fe-vue3` 规范，帮我写一个列表筛选组件，注意 script setup 内部的逻辑书写顺序，不需要写分号。*"
+> * "*参照本地 `postgres-sync` 规范，把测试服的数据库同步到本地，帮我执行一键脚本。*"
 
 AI 会自动根据安装好的规范，产出结构一致、完美合规的代码，省去了大量人工修改和 Code Review 的心智成本。
