@@ -1,5 +1,5 @@
 ---
-name: ctc-ctc-fe-structure
+name: ctc-fe-structure
 description: >
   现代前端目录结构与架构演进规范。讨论或改造 Vue、React、Vite、TypeScript、中后台、业务系统、AI 友好目录、FSD、features/shared/app/services、views/api/store/components 拆分、老项目渐进重构、新项目脚手架目录设计时必须使用。适用于判断文件该放哪里、如何划分业务模块、路由和 store 如何组织、如何让目录既方便人工开发又方便 AI 检索。
 metadata:
