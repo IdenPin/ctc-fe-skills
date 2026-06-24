@@ -1,5 +1,5 @@
 ---
-name: fe-vue3
+name: ctc-fe-vue3
 description: >
   现代 Vue 3、TypeScript 与 CSS 编写风格与代码规范。规范了 <script setup> 声明顺序、TypeScript 强类型边界、就近样式、防循环依赖以及静态工具链（ESLint/Prettier）校验规则。适用于日常开发、架构评审 and AI 代码生成时的风格约束。
 ---
