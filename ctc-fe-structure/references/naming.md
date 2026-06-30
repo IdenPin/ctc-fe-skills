@@ -2,7 +2,7 @@
 
 ## 核心策略
 
-**目录一律短横线 (`kebab-case`)，组件一律大驼峰 (`PascalCase`)，组合函数一律以 `use` 开头的小驼峰 (`camelCase`)，普通 TS 文件按领域语义命名并保持全项目统一。**
+**目录一律短横线 (`kebab-case`)，组件一律大驼峰 (`PascalCase`)，组合函数一律以 `use` 开头的小驼峰 (`camelCase`)，普通 TS/JS 文件一律小驼峰 (`camelCase`) 并按领域语义命名，保持全项目统一。**
 
 ## 目录命名 (`kebab-case`)
 
@@ -132,5 +132,6 @@ src/                                     src/
 
 ### 样式与测试文件
 
-- **样式**：组件私有样式优先写在组件内。独立样式文件使用语义名：`user-table.css`、`theme-vars.css`。避免 `style.css`、`common.scss`。
-- **测试**：单元测试与被测文件同名：`UserFormModal.test.ts`。端到端测试可用场景名：`user-create.spec.ts`。
+- **样式**（非 TS/JS，不受核心策略约束）：组件私有样式优先写在组件内。独立样式文件遵循 CSS 业界惯例使用语义性短横线：`user-table.css`、`theme-vars.css`。避免 `style.css`、`common.scss`。
+- **单元测试**：与被测文件同名，跟随被测文件的大小写风格：`UserFormModal.test.ts`、`dateRange.test.ts`。
+- **端到端测试**：统一小驼峰场景名：`userCreate.spec.ts`、`orderRefund.spec.ts`。
