@@ -1,6 +1,6 @@
 {
   "name": "ctc-fe-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "这是一个专为 `ctcfront` 团队定制的前端开发规范 Skill 仓库。该规范通过 `skills` 客户端进行分发，可直接供团队成员或 AI 编码助手（如 Cursor、Gemini 等）在开发中进行静态约束与规范调用。",
   "homepage": "https://github.com/IdenPin/ctc-fe-skills#readme",
   "bugs": {
