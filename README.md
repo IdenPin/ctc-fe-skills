@@ -53,6 +53,29 @@ npx skills add IdenPin/ctc-fe-skills -y
 
 ---
 
+## 📋 更新日志
+
+### v1.0.1 (2026-06-30)
+
+- **重构**：`fe-structure` 重命名为 `ctc-fe-structure`，统一命名空间
+- **新增**：ctc-fe-vue3 — Vue 3 + TS 编码风格规范（SFC 8段式逻辑顺序、类型安全策略、scoped 样式隔离）
+- **新增**：postgres-sync — PostgreSQL 数据库同步规范（一键 sync.sh 脚本）
+- **新增**：依赖越界治理分册（boundaries.md），含 eslint-plugin-import-x 硬拦截 + 三层逃生通道机制
+- **完善**：文件命名规范（naming.md），明确普通 TS/JS 小驼峰、样式 kebab-case、E2E 测试小驼峰
+- **元数据**：添加 package.json 配置，设置仓库地址和版本号
+
+### v1.0.0 (初始版本)
+
+- 初始化 ctc-fe-skills 仓库
+- 建立 ctc-fe-structure 目录拓扑与依赖治理规范
+  - 目录简化原则（5 条核心原则）
+  - 命名规范（目录、组件、局部文件）
+  - 单向依赖与 Router/Store 边界
+  - 老项目就近闭环迁移方案
+  - 测试、i18n、配置就近治理规则
+
+---
+
 ## 🤖 配合 AI 协同开发 (AI-Friendly)
 
 这些规范在设计之初就深度考虑了 **AI 协同编码（RAG 检索）**。本地安装完成后，你可以在与 AI 助手聊天时直接引用：
