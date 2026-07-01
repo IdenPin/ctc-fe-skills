@@ -28,6 +28,10 @@ npx skills add IdenPin/ctc-fe-skills -y
   ```bash
   npx skills add IdenPin/ctc-fe-skills --skill postgres-sync -y
   ```
+* **只安装浏览器兼容性适配规范 (`ctc-fe-adapt-broswer`)**：
+  ```bash
+  npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
+  ```
 
 ---
 
@@ -51,9 +55,16 @@ npx skills add IdenPin/ctc-fe-skills -y
   * [SKILL.md](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/SKILL.md) (规范文档：前置条件、参数、流程、常见坑)
   * [sync.sh](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/scripts/sync.sh) (一键同步脚本)
 
+### 4. [ctc-fe-adapt-broswer](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-adapt-broswer/skill.md) — 浏览器兼容性适配规范
+* **核心职责**：为 Vite + Vue 3 项目适配老旧浏览器（奇安信信创浏览器、低版本 Chrome/Edge 等），通过 `@vitejs/plugin-legacy` 生成兼容产物，解决政企信创环境下的页面白屏与语法错误问题。
+
 ---
 
 ## 📋 更新日志
+
+### v1.0.2 (2026-06-30)
+
+- **新增**：ctc-fe-adapt-broswer — 浏览器兼容性适配规范，解决 Vite + Vue 3 在政企信创环境下的老旧浏览器兼容问题
 
 ### v1.0.1 (2026-06-30)
 
