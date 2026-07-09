@@ -1,9 +1,9 @@
 ---
 name: ctc-fe-adapt-broswer
 description: 为 Vite + Vue 3 + Tailwind CSS 4 项目适配老旧浏览器（奇安信信创浏览器、低版本 Chrome/Edge 等），覆盖 JS 语法降级与 CSS 现代特性兼容。适用于需要支持政企信创环境、国产浏览器、低版本 Chromium 内核浏览器的前端项目。
+---
 
 > 本文是基于新版 `legacyCss.ts` 源码（含 CSS 嵌套降级、逻辑属性转换、独立 transform 属性兼容等增强）更新的 skill 副本。
----
 
 # CTC 前端浏览器兼容性适配
 
