@@ -1,229 +1,138 @@
 ---
 name: ctc-fe-vue3
-description: >
-  现代 Vue 3、TypeScript 与 CSS 编写风格与代码规范。规范了 <script setup> 声明顺序、TypeScript 强类型边界、就近样式、防循环依赖以及静态工具链（ESLint/Prettier）校验规则。适用于日常开发、架构评审 and AI 代码生成时的风格约束。
+description: Use when writing, refactoring, reviewing, or generating Vue 3 single-file components with TypeScript, including component APIs, Composition API state, imports, styles, error handling, and ESLint or Prettier configuration.
 ---
 
-# FE Vue 3 Style & Best Practices
+# CTC Vue 3 与 TypeScript 规范
 
-## 核心目标
+## 核心原则
 
-建立一套高可读性、高健壮性、且对 AI 极度友好的 Vue 3 代码编写风格规范。
+优先保证组件 API 清晰、类型边界安全、副作用可追踪和规则可执行。代码排列服务于理解，不以形式一致性替代正确性。
 
-1. **结构一致性**：统一组件内部代码组织顺序，降低跨模块理解难度。
-2. **TS 类型安全**：拒绝 `any` 与非安全断言，发挥静态类型系统的最大价值。
-3. **就近样式隔离**：杜绝全局污染与死代码，实现组件样式的物理隔离。
-4. **零循环依赖**：规范内部导入路径，从编码阶段根绝打包循环依赖问题。
+## 规范等级
 
----
+| 等级 | 含义 | 执行方式 |
+| --- | --- | --- |
+| MUST | 违反后可能造成缺陷、越界或长期维护风险 | ESLint、TypeScript、测试或明确 Review 门禁 |
+| SHOULD | 团队默认做法，特定场景可说明理由后偏离 | Review |
+| MAY | 可选建议 | 开发者判断 |
 
-## 1. 适用场景 (When to Use)
+## SFC 组织
 
-- 编写、重构或评审 Vue 3 + TypeScript 业务组件或公共组件时。
-- 需要规范团队代码格式、TS 类型安全、样式域隔离、消除循环依赖时。
-- 引导 AI 助手生成符合项目最高标准的 Vue 3 组件代码时。
+使用 `<script setup lang="ts">`。SFC block 默认按 `script → template → style` 排列；组件样式使用 `scoped` 或 CSS Modules，全局主题与 Reset 放在 `shared/styles`。
 
----
+`script setup` 推荐按以下顺序组织，但不要为了顺序拆散强相关逻辑：
 
-## 2. `<script setup>` 组件内部声明顺序
+1. imports：第三方、跨层公共能力、当前模块相对路径、type-only imports。
+2. component macros：`defineOptions`、`defineModel`、`defineProps`、`defineEmits`、`defineSlots`。
+3. infrastructure：router、store、inject 和 composable 初始化。
+4. local state：`ref`、`reactive`。
+5. derived state：`computed`、`watch`、`watchEffect`。
+6. methods：业务方法和事件处理器。
+7. lifecycle：按组件生命周期排列。
+8. public surface：仅在父组件确需命令式调用时使用 `defineExpose`。
 
-为了保持组件代码结构的清晰可预测，所有单文件组件（SFC）的 `<script setup>` 必须严格遵循以下 **8 段式声明顺序**。各段落之间使用空行分隔：
+宏顺序和 `defineExpose` 位置由 ESLint 检查；其余段落顺序属于 SHOULD，不宣称能够由现有 ESLint 规则完整强制。
 
-```vue
-<script setup lang="ts">
-// ----------------------------------------------------
-// 1. Imports (依赖导入)
-// 先外部依赖库，再 shared 全局基础设施，最后本地局部文件
-// ----------------------------------------------------
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { CommonButton } from '@/shared/components'
-import { useUserStore } from '../store'
-import { getUserDetailApi } from '../api'
-import type { UserDetail } from '../types'
+## 组件 API
 
-// ----------------------------------------------------
-// 2. Component Macros (组件宏定义)
-// 必须且仅允许使用编译时宏定义 Props, Emits 等，统一使用 TS 类型定义
-// ----------------------------------------------------
-interface Props {
-  userId: string
-  theme?: 'dark' | 'light'
-}
-const props = withDefaults(defineProps<Props>(), {
-  theme: 'light'
-})
+- MUST 使用类型声明定义 props 和 emits；事件名表达已经发生的事实或明确动作。
+- MUST 保持 props 只读，禁止修改传入对象来隐式通知父组件。
+- SHOULD 优先使用 props、emits 和 slots；只有确需双向绑定时使用 `defineModel`。
+- SHOULD 避免无意义的 `defineExpose`。需要暴露时只公开稳定方法，不直接暴露可随意修改的内部状态。
+- SHOULD 将超过一个组件复用且拥有独立状态或副作用的逻辑提取为 composable。
 
-const emit = defineEmits<{
-  (e: 'success', data: UserDetail): void
-  (e: 'error', error: Error): void
-}>()
+## TypeScript 边界
 
-defineOptions({
-  name: 'UserCardDetail'
-})
+- MUST 将外部输入视为不可信边界：接口响应、JSON、路由参数、storage 和 `catch` 变量使用 `unknown` 后收窄。
+- MUST 禁止无说明的 `any`。第三方类型缺失时仅允许单行豁免，并写明原因或债务编号。
+- MUST 禁止用 `as Error`、双重断言或非空断言掩盖不确定性。
+- SHOULD 让 TypeScript 推导局部实现类型，在组件 API、共享函数和接口边界显式声明类型。
+- MAY 对对象结构使用 `interface` 或 `type`，同一模块保持一致；联合、元组和映射类型使用 `type`。不要为二者制造无业务价值的 Review 争议。
 
-// ----------------------------------------------------
-// 3. Reactive State (响应式状态声明)
-// ref, reactive 声明，变量名采用驼峰，布尔值推荐 is/has 前缀
-// ----------------------------------------------------
-const userDetail = ref<UserDetail | null>(null)
-const isLoading = ref(false)
-
-// ----------------------------------------------------
-// 4. Computed & Watchers (计算属性与侦听器)
-// 先 Computed 后 Watchers，保证副作用逻辑就近
-// ----------------------------------------------------
-const displayName = computed(() => {
-  return userDetail.value ? `${userDetail.value.firstName} ${userDetail.value.lastName}` : ''
-})
-
-// ----------------------------------------------------
-// 5. Stores & Routes (全局/局部基础设施初始化)
-// 统一就近获取 store 和 route，避免与业务状态混淆
-// ----------------------------------------------------
-const route = useRoute()
-const userStore = useUserStore()
-
-// ----------------------------------------------------
-// 6. Methods & Event Handlers (业务逻辑与事件处理器)
-// 函数命名具有清晰的动作语义，采用小驼峰
-// ----------------------------------------------------
-async function fetchUserDetail(id: string) {
-  isLoading.value = true
-  try {
-    const res = await getUserDetailApi(id)
-    userDetail.value = res.data
-    emit('success', res.data)
-  } catch (error) {
-    emit('error', error as Error)
-  } finally {
-    isLoading.value = false
-  }
+```ts
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value))
 }
 
-function handleRefresh() {
-  fetchUserDetail(props.userId)
-}
-
-// ----------------------------------------------------
-// 7. Lifecycle Hooks (生命周期钩子)
-// 按执行顺序从上到下排列
-// ----------------------------------------------------
-onMounted(() => {
-  if (props.userId) {
-    fetchUserDetail(props.userId)
-  }
-})
-
-// ----------------------------------------------------
-// 8. Expose (对外暴露)
-// 必须精确限定外部父组件能够通过 ref 访问的属性或方法
-// ----------------------------------------------------
-defineExpose({
-  refresh: handleRefresh,
-  isLoading
-})
-</script>
-```
-
----
-
-## 3. TypeScript 编码规范
-
-### 3.1 妥善处理 `any` 与非安全类型（新人友好过渡）
-- **软限制 `any`**：在日常业务开发中，允许使用 `any` 快速跑通逻辑，但 ESLint 会以 **Warn**（黄色警告）在 IDE 中提示。建议在熟悉类型后逐步用具体类型或 `unknown`（配合类型收窄）代替。
-- **局部逃生通道**：在确实无法取得 TS 定义或复杂的第三方库场景下，如必须使用 `any`，**必须**使用单行注释进行局部豁免，避免全局规则失效：
-  ```typescript
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rawData: any = await getLegacyApi()
-  ```
-- **避免非空断言 `!`**：禁止随意使用 `data!.name`，优先使用可选链 `data?.name` 与空值合并 `data?.name ?? 'Default'`。
-- **强制使用 `as` 替代 `<Type>` 进行断言**：避免在 TSX / JSX 中产生标签解析冲突。
-
-### 3.2 Type 与 Interface 的职责划分
-- **使用 `interface`**：
-  - 定义组件 Props、Emits。
-  - 定义后端 API 返回的数据实体结构。
-  - 定义具有可扩展性、需要被继承或声明合并（Declaration Merging）的公共对象结构。
-- **使用 `type`**：
-  - 定义联合类型（如 `type Theme = 'light' | 'dark'`）。
-  - 定义交叉类型、元组、函数签名。
-  - 定义只读或临时泛型别名。
-
----
-
-## 4. 局部样式与作用域治理
-
-### 4.1 样式作用域物理隔离
-- **强制 scoped**：除全局主题（`src/shared/styles`）外，所有组件的 `<style>` 标签必须声明 `scoped`：
-  ```vue
-  <style scoped>
-  .user-card-container {
-    padding: 16px;
-  }
-  </style>
-  ```
-- **禁止在局部组件修改全局样式**：禁止在局部组件中使用不加 scoped 的全局 `<style>` 来覆写第三方组件库（如 Element Plus、Ant Design Vue），如需覆盖必须使用 `:deep()` 伪类：
-  ```css
-  /* 推荐写法 */
-  .user-card-container :deep(.el-button) {
-    border-radius: 8px;
-  }
-  ```
-
-### 4.2 消除硬编码颜色与尺寸
-- **禁止硬编码颜色**：禁止在 CSS 中写死特定十六进制颜色值（如 `#333333`、`#409eff`），必须使用全局 CSS 变量或 Tailwind 语义化 Token（如 `var(--color-text-primary)`）。
-- **尺寸弹性**：避免写死容器的高度，优先使用 Flexbox / Grid 自适应或 `min-height` / `max-height`。
-
----
-
-## 5. 引入规范与零循环依赖
-
-### 5.1 模块内部就近相对引入
-- **禁止向外绕行**：在同一个模块（如 `features/user/`）内部，文件之间的引用**必须优先使用相对路径**（如 `./components/Avatar.vue`），绝对禁止绕行至模块大门口的 `index.ts` 导出层再引回来（如 `@/features/user`），这会引发打包时的**循环依赖**。
-- **跨模块规范引用**：若需使用其他模块的能力，必须且仅能通过对方模块的 `index.ts` 安全沙箱接口引入，禁止穿透对方的私有深层目录。
-
----
-
-## 6. 自动化工具链配置推荐
-
-为了让以上规范强制生效，建议在项目中集成以下配置规则：
-
-### 6.1 ESLint 关键配置规则 (`eslint.config.js`)
-```javascript
-module.exports = {
-  rules: {
-    // 强制 Vue 3 单文件组件的宏和生命周期声明顺序
-    'vue/define-macros-order': ['error', {
-      order: ['defineProps', 'defineEmits', 'defineOptions', 'defineSlots']
-    }],
-    // 强制组件内部的 script, template, style 标签排序（已更新为最新 block-order 规则）
-    'vue/block-order': ['error', {
-      order: ['script', 'template', 'style']
-    }],
-    // 限制 any 滥用（降级为 warn 以免阻断新人编译，保留 IDE 警告提示）
-    '@typescript-eslint/no-explicit-any': 'warn',
-    // 限制 non-null 断言
-    '@typescript-eslint/no-non-null-assertion': 'warn',
-    // 强限制组件名必须为大驼峰且为多单词（页面入口除外）
-    'vue/multi-word-component-names': ['error', {
-      ignores: ['index', 'page', 'layout']
-    }]
-  }
+try {
+  await saveUser()
+} catch (error: unknown) {
+  emit('error', toError(error))
 }
 ```
 
-### 6.2 Prettier 基础配置 (`.prettierrc`)
-```json
-{
-  "semi": false,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "useTabs": false,
-  "printWidth": 100,
-  "trailingComma": "none",
-  "bracketSpacing": true,
-  "arrowParens": "avoid"
-}
+## 响应式状态与副作用
+
+- MUST 使用 `computed` 表达可推导状态，禁止通过 `watch` 手工同步一份重复状态。
+- MUST 清理定时器、事件监听器和可取消请求，避免组件卸载后的副作用。
+- MUST 处理异步竞态：搜索、分页和路由切换不得让旧请求覆盖新状态。
+- SHOULD 使用 `isLoading`、`hasPermission` 等状态语义命名；事件处理器使用 `handleXxx`，异步动作使用明确动词。
+- SHOULD 避免深度 watch 大对象；优先监听最小依赖或调整状态模型。
+
+## 样式
+
+- MUST 将组件局部样式隔离为 `scoped` 或 CSS Modules；第三方组件覆盖限制在组件根节点下并使用 `:deep()`。
+- MUST 将全局主题、Reset、字体和设计 Token 放在专用全局样式入口，不在业务 SFC 中创建隐式全局样式。
+- SHOULD 使用语义化 Token 表达颜色、间距和层级。品牌图形、数据可视化或一次性计算值可使用局部值，但需避免散落复制。
+- SHOULD 优先使用自然布局、Flex 或 Grid；只有需求明确固定尺寸时才写死高度。
+
+## 模块导入
+
+- MUST 遵循 `ctc-fe-structure` 的模块边界。
+- MUST 在模块内部使用相对路径，禁止通过本模块 `index.ts` 绕回内部实现。
+- MUST 通过其他模块或 `shared/biz` 子域的公开 `index.ts` 跨边界使用能力，禁止深层穿透。
+- SHOULD 使用 `import type` 标记纯类型依赖，并通过静态分析检测循环依赖；相对导入本身不能保证零循环依赖。
+
+## ESLint flat config 规则片段
+
+将以下片段合并进项目现有 `eslint.config.js` 或 `eslint.config.ts`。启用 `vue/enforce-style-attribute` 需要 `eslint-plugin-vue >= 9.20.0`。
+
+```ts
+export default [
+  {
+    files: ['**/*.vue'],
+    rules: {
+      'vue/block-order': ['error', { order: ['script', 'template', 'style'] }],
+      'vue/define-macros-order': [
+        'error',
+        {
+          order: ['defineOptions', 'defineModel', 'defineProps', 'defineEmits', 'defineSlots'],
+          defineExposeLast: true
+        }
+      ],
+      'vue/enforce-style-attribute': [
+        'error',
+        { allow: ['scoped', 'module'] }
+      ],
+      'vue/multi-word-component-names': [
+        'error',
+        { ignores: ['index', 'page', 'layout'] }
+      ]
+    }
+  },
+  {
+    files: ['**/*.{ts,tsx,vue}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/consistent-type-imports': 'error'
+    }
+  }
+]
 ```
+
+`no-explicit-any` 在迁移期使用 warn，但 CI 必须将新增 warning 视为不可增长债务；新代码只能通过带原因的局部豁免使用 `any`。
+
+## 验证清单
+
+按项目实际脚本执行：
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Review 额外检查无法自动化的部分：异步竞态、错误反馈、组件 API、业务边界、可访问性和关键交互测试。

@@ -7,6 +7,7 @@
 - **模块私有资源就近**：模块专属的配图、Excel 导入下载模板、局部定制样式，一律放入模块内部对应的 `assets/` 或 `styles/` 下。
 - **全局公共资产上移**：只有全局通用的系统 Logo、通用的 Empty 空状态插画，才可以放入全局 `src/shared/assets/`。
 - **全局主题治理**：全局主题变量、Reset 样式、Tailwind 配置统一放入 `shared/styles/` 或项目既有样式包中。
+- **公共业务资产分区**：`UserSelector`、`DictTag` 等稳定跨模块业务能力放入 `shared/biz/<domain>`；页面流程、权限过滤和模块特有默认值仍留在调用模块。
 
 ## 国际化 (i18n) 就近治理
 

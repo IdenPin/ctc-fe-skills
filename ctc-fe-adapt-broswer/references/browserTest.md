@@ -1,161 +1,66 @@
-# 浏览器兼容性测试页面设计与配置
+# 浏览器诊断页面设计
 
-为了能够快速且免登录在客户现场的老浏览器上验证兼容性，推荐在项目中添加一个测试页。
+## 使用边界
 
-### 1. 路由配置 (无需登录)
+诊断页用于客户现场采集兼容性事实，不是永久公开的系统功能。默认只在测试、预发或显式开启的诊断环境注册路由；生产环境需要短期启用时，应配置访问控制和关闭时间。
 
-在路由器中注册为公开页面（跳过登录拦截）：
+禁止展示或上传 Cookie、Token、localStorage 内容、设备唯一标识和业务数据。User-Agent、浏览器能力和测试结果默认只在当前页面展示，由现场人员主动复制。
+
+## 路由开关
 
 ```ts
-// src/app/router/index.ts
-{
-  path: '/browser-test',
-  name: 'BrowserTest',
-  component: () => import('@/views/browser-test/index.vue'),
-  meta: { public: true, title: '浏览器兼容性测试' },
-}
+const diagnosticRoutes = import.meta.env.VITE_ENABLE_BROWSER_DIAGNOSTICS === 'true'
+  ? [
+      {
+        path: '/browser-test',
+        name: 'BrowserTest',
+        component: () => import('@/views/browser-test/index.vue'),
+        meta: { public: true, title: '浏览器兼容性测试' }
+      }
+    ]
+  : []
 ```
 
-### 2. 测试页面组件 index.vue 模板
+公开路由只表示不依赖业务登录态，不表示允许长期暴露到公网。项目应结合网关白名单、临时口令或内部环境限制访问。
 
-页面用于全方位检测：User Agent、Cookie、localStorage/sessionStorage、CSS 变量、Canvas/WebGL、Promise、Fetch、WebRTC 等。
+## 建议采集内容
 
-重点是对 **`gap (flexbox)`** 属性采用同等的高精度 DOM 动态测量来避免误判：
+- User-Agent、操作系统和浏览器显示版本。
+- `CSS.supports` 对项目实际使用特性的检测结果。
+- Promise、Fetch、URL、AbortController 等关键运行时 API 是否存在。
+- Canvas、WebGL、文件下载、上传、WebSocket 等项目实际需要的能力。
+- 页面加载错误和资源请求失败摘要，不记录请求凭证或响应正文。
 
-```vue
-<!-- src/views/browser-test/index.vue -->
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
+浏览器名称只能作为辅助信息，兼容结论必须绑定实际内核和完整版本。国产双核浏览器需要分别记录当前使用的极速/兼容模式。
 
-interface TestItem {
-  label: string
-  value: string
-  pass?: boolean
-}
+## Flex gap 实测
 
-interface Section {
-  title: string
-  items: TestItem[]
-}
+不要只使用 `CSS.supports('gap', '1px')` 判断 Flex gap；旧浏览器可能支持 Grid gap 但不支持 Flex gap。使用 DOM 尺寸实测，并确保元素在检测结束后清理：
 
-const sections = ref<Section[]>([])
+```ts
+function supportsFlexGap(): boolean {
+  const flex = document.createElement('div')
+  flex.style.cssText = [
+    'position:absolute',
+    'visibility:hidden',
+    'display:flex',
+    'flex-direction:column',
+    'row-gap:1px'
+  ].join(';')
 
-function detectBrowser(): string {
-  const ua = navigator.userAgent
-  if (/Edg\//.test(ua)) return 'Edge'
-  if (/OPR\//.test(ua) || /Opera/.test(ua)) return 'Opera'
-  if (/Chrome/.test(ua) && /Safari/.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua))
-    return 'Chrome'
-  if (/Firefox/.test(ua)) return 'Firefox'
-  if (/Safari/.test(ua) && !/Chrome/.test(ua)) return 'Safari'
-  return '未知'
-}
+  flex.append(document.createElement('div'), document.createElement('div'))
+  document.body.appendChild(flex)
 
-function detectOS(): string {
-  const ua = navigator.userAgent
-  if (/Windows NT 10/.test(ua)) return 'Windows 10/11'
-  if (/Windows NT 6\.1/.test(ua)) return 'Windows 7'
-  if (/Mac OS X/.test(ua)) return 'macOS'
-  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS'
-  if (/Android/.test(ua)) return 'Android'
-  return '未知'
-}
-
-/**
- * 精准特征检测：当前浏览器是否真实支持 Flexbox Gap
- */
-function checkActualFlexGap(): boolean {
-  if (typeof window === 'undefined') return false
   try {
-    const flex = document.createElement('div')
-    flex.style.display = 'flex'
-    flex.style.flexDirection = 'column'
-    flex.style.rowGap = '1px'
-    flex.style.height = 'auto'
-    flex.style.padding = '0px'
-    flex.style.margin = '0px'
-    flex.style.border = 'none'
-
-    const child1 = document.createElement('div')
-    child1.style.height = '0px'
-    child1.style.padding = '0px'
-    child1.style.margin = '0px'
-    child1.style.border = 'none'
-
-    const child2 = document.createElement('div')
-    child2.style.height = '0px'
-    child2.style.padding = '0px'
-    child2.style.margin = '0px'
-    child2.style.border = 'none'
-
-    flex.appendChild(child1)
-    flex.appendChild(child2)
-    document.body.appendChild(flex)
-    const isSupported = flex.scrollHeight === 1
-    document.body.removeChild(flex)
-    return isSupported
-  } catch {
-    return false
+    return flex.scrollHeight === 1
+  } finally {
+    flex.remove()
   }
 }
-
-function runTests(): void {
-  const result: Section[] = []
-
-  // 1. 基本信息
-  result.push({
-    title: '设备与浏览器信息',
-    items: [
-      { label: 'User Agent', value: navigator.userAgent },
-      { label: '浏览器', value: detectBrowser() },
-      { label: '操作系统', value: detectOS() },
-    ],
-  })
-
-  // 2. CSS 特性支持
-  result.push({
-    title: 'CSS 特性支持',
-    items: [
-      {
-        label: 'CSS Grid',
-        value: CSS.supports('display', 'grid') ? '支持' : '不支持',
-        pass: CSS.supports('display', 'grid'),
-      },
-      {
-        label: 'CSS 变量',
-        value: CSS.supports('--test', '0') ? '支持' : '不支持',
-        pass: CSS.supports('--test', '0'),
-      },
-      {
-        label: 'gap (flexbox)',
-        value: checkActualFlexGap() ? '支持' : '不支持',
-        pass: checkActualFlexGap(),
-      },
-    ],
-  })
-
-  sections.value = result
-}
-
-onMounted(() => {
-  runTests()
-})
-</script>
-
-<template>
-  <div class="browser-test">
-    <h1>浏览器兼容性测试</h1>
-    <section v-for="section in sections" :key="section.title" class="test-section">
-      <h2>{{ section.title }}</h2>
-      <table>
-        <tbody>
-          <tr v-for="item in section.items" :key="item.label">
-            <td>{{ item.label }}</td>
-            <td :class="[item.pass === false ? 'fail' : 'pass']">{{ item.value }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </div>
-</template>
 ```
+
+不要在渲染同一结果时重复执行检测；先计算一次，再展示结果。
+
+## 验收输出
+
+诊断页最终输出应包含：测试时间、环境名称、浏览器/内核信息、每项能力的 pass/fail、项目版本和构建版本。诊断结果只能帮助定位问题，最终兼容结论仍以关键业务流程和视觉验收为准。

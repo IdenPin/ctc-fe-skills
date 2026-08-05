@@ -1,99 +1,78 @@
-# CTC FE Skills - 团队前端开发规范
+# CTC FE Skills
 
-这是一个专为 `ctcfront` 团队定制的前端开发规范 Skill 仓库。该规范通过 `skills` 客户端进行分发，可直接供团队成员或 AI 编码助手（如 Cursor、Gemini 等）在开发中进行静态约束与规范调用。
+`ctcfront` 团队的前端开发规范 Skill 仓库，供团队成员和 AI 编码助手在架构设计、Vue 3 开发和浏览器兼容性评估时按需加载。
 
 [![skills.sh](https://skills.sh/b/IdenPin/ctc-fe-skills)](https://skills.sh/IdenPin/ctc-fe-skills)
 
----
+## 安装
 
-## 🛠️ 安装说明
+安装全部 skills：
 
-团队成员或外部贡献者可以通过 `skills` 客户端，从 GitHub 公网一键导入这些规范到本地：
-
-### 1. 一键安装本仓库的所有规范 (推荐)
 ```bash
 npx skills add IdenPin/ctc-fe-skills -y
 ```
 
-### 2. 精准按需安装单个规范
-* **只安装目录架构与依赖治理规范 (`ctc-fe-structure`)**：
-  ```bash
-  npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-structure -y
-  ```
-* **只安装 Vue 3 + TS 编码风格规范 (`ctc-fe-vue3`)**：
-  ```bash
-  npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-vue3 -y
-  ```
-* **只安装 PostgreSQL 数据库同步规范 (`postgres-sync`)**：
-  ```bash
-  npx skills add IdenPin/ctc-fe-skills --skill postgres-sync -y
-  ```
-* **只安装浏览器兼容性适配规范 (`ctc-fe-adapt-broswer`)**：
-  ```bash
-  npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
-  ```
+按需安装：
 
----
+```bash
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-structure -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-vue3 -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
+```
 
-## 📌 Skills 规范概览
+> `ctc-fe-adapt-broswer` 是已发布的历史拼写。为避免破坏现有安装路径暂时保留，后续破坏性版本迁移为 `ctc-fe-adapt-browser`。
 
-### 1. [ctc-fe-structure](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/SKILL.md) — 目录拓扑与依赖治理规范
-* **核心职责**：规范大型项目、中后台系统的物理层级架构（`app / features / shared / services`），定义物理级业务模块的“就近闭环”边界，严防循环依赖和模块越界穿透。
-* **主要分册**：
-  * [structure.md](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/references/structure.md) (拓扑与共享接口)
-  * [boundaries.md](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/references/boundaries.md) (单向依赖与 Router/Store 边界)
-  * [naming.md](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/references/naming.md) (去冗余目录简化原则及命名规范)
-  * [migration.md](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/references/migration.md) (老项目就近闭环迁移方案)
-  * [governance.md](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-structure/references/governance.md) (测试、i18n、配置就近治理)
+## Skills
 
-### 2. [ctc-fe-vue3](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-vue3/SKILL.md) — Vue 3 & TS 编码风格规范
-* **核心职责**：规范 SFC `<script setup>` 组件内部的 **8段式逻辑书写顺序**。针对 TypeScript 类型安全实施 **`any` 警告降级与局部逃生通道（`eslint-disable-next-line`）** 的平滑过渡策略，强制 scoped 样式隔离，并配有 ESLint/Prettier 的"无分号"标准配置模板。
+### [ctc-fe-structure](./ctc-fe-structure/SKILL.md)
 
-### 3. [postgres-sync](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/SKILL.md) — PostgreSQL 数据库同步规范
-* **核心职责**：把远程 PostgreSQL 数据库（测试/预发服）整库同步到本地实例。封装了完整的 **删库 → 重建 → dump → restore → 校验** 流程，提供一键脚本 `sync.sh` 与手动命令两种方式，覆盖 macOS `libpq` 安装、权限角色缺失、会话占用等常见坑。
-* **主要文件**：
-  * [SKILL.md](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/SKILL.md) (规范文档：前置条件、参数、流程、常见坑)
-  * [sync.sh](file:///Users/pdeng/ctc/ctc-fe-skills/postgres-sync/scripts/sync.sh) (一键同步脚本)
+用于目录拓扑、业务模块边界、依赖方向和老项目渐进迁移。主要约定：
 
-### 4. [ctc-fe-adapt-broswer](file:///Users/pdeng/ctc/ctc-fe-skills/ctc-fe-adapt-broswer/skill.md) — 浏览器兼容性适配规范
-* **核心职责**：为 Vite + Vue 3 项目适配老旧浏览器（奇安信信创浏览器、低版本 Chrome/Edge 等），通过 `@vitejs/plugin-legacy` 生成兼容产物，解决政企信创环境下的页面白屏与语法错误问题。
+- 页面流程和易变业务规则就近放入 `features` 或 `views`。
+- 无业务语义的 UI、hooks 和工具放入 `shared/ui|lib`。
+- `UserSelector`、`DictTag` 等稳定跨模块业务能力放入 `shared/biz`。
+- 网络请求、WebSocket 等传输基础设施放入 `services`。
 
----
+分册：[目录结构](./ctc-fe-structure/references/structure.md)、[依赖边界](./ctc-fe-structure/references/boundaries.md)、[命名](./ctc-fe-structure/references/naming.md)、[迁移](./ctc-fe-structure/references/migration.md)、[治理](./ctc-fe-structure/references/governance.md)。
 
-## 📋 更新日志
+### [ctc-fe-vue3](./ctc-fe-vue3/SKILL.md)
 
-### v1.0.2 (2026-06-30)
+用于 Vue 3 SFC、TypeScript 类型边界、Composition API、副作用、样式隔离、模块导入和 ESLint 配置。规范区分 MUST、SHOULD、MAY：可机械检查的要求交给工具，涉及上下文判断的要求进入 Code Review。
 
-- **新增**：ctc-fe-adapt-broswer — 浏览器兼容性适配规范，解决 Vite + Vue 3 在政企信创环境下的老旧浏览器兼容问题
+### [ctc-fe-adapt-broswer](./ctc-fe-adapt-broswer/SKILL.md)
 
-### v1.0.1 (2026-06-30)
+用于 Vite/Vue 3 项目的生产构建兼容性诊断。该 skill 明确 Tailwind CSS 4 的现代浏览器基线；对老内核的 CSS 改写属于项目专项实验，必须经过 fixture、视觉回归、关键流程和真实设备验证。
 
-- **重构**：`fe-structure` 重命名为 `ctc-fe-structure`，统一命名空间
-- **新增**：ctc-fe-vue3 — Vue 3 + TS 编码风格规范（SFC 8段式逻辑顺序、类型安全策略、scoped 样式隔离）
-- **新增**：postgres-sync — PostgreSQL 数据库同步规范（一键 sync.sh 脚本）
-- **新增**：依赖越界治理分册（boundaries.md），含 eslint-plugin-import-x 硬拦截 + 三层逃生通道机制
-- **完善**：文件命名规范（naming.md），明确普通 TS/JS 小驼峰、样式 kebab-case、E2E 测试小驼峰
-- **元数据**：添加 package.json 配置，设置仓库地址和版本号
+## 规范等级
 
-### v1.0.0 (初始版本)
+- **MUST**：影响正确性、安全、边界或长期维护，必须由工具或明确 Review 门禁执行。
+- **SHOULD**：团队默认做法；可以在说明理由后偏离。
+- **MAY**：可选建议，由项目上下文决定。
 
-- 初始化 ctc-fe-skills 仓库
-- 建立 ctc-fe-structure 目录拓扑与依赖治理规范
-  - 目录简化原则（5 条核心原则）
-  - 命名规范（目录、组件、局部文件）
-  - 单向依赖与 Router/Store 边界
-  - 老项目就近闭环迁移方案
-  - 测试、i18n、配置就近治理规则
+规范不能替代 Code Review、测试和真实环境验收。AI 生成结果同样必须经过项目现有质量门禁。
 
----
+## 仓库验证
 
-## 🤖 配合 AI 协同开发 (AI-Friendly)
+```bash
+npm test
+```
 
-这些规范在设计之初就深度考虑了 **AI 协同编码（RAG 检索）**。本地安装完成后，你可以在与 AI 助手聊天时直接引用：
+验证内容包括：Skill frontmatter、skill 名称与目录一致性，以及仓库内 Markdown 相对链接。
 
-> **Prompts 引用示例**：
-> * "*请参照本地 `ctc-fe-structure` 规范，为我现有的 views 进行就近闭环重构，说明移动步骤。*"
-> * "*根据本地 `ctc-fe-vue3` 规范，帮我写一个列表筛选组件，注意 script setup 内部的逻辑书写顺序，不需要写分号。*"
-> * "*参照本地 `postgres-sync` 规范，把测试服的数据库同步到本地，帮我执行一键脚本。*"
+发布或更新 skill 前还应在目标项目执行对应的 lint、typecheck、test、build 和业务验收。
 
-AI 会自动根据安装好的规范，产出结构一致、完美合规的代码，省去了大量人工修改和 Code Review 的心智成本。
+## 维护约定
+
+- `SKILL.md` 只保留触发条件、决策流程和核心规则，详细资料按需放入 `references/`。
+- 新增 MUST 规则时，同时说明自动化工具或人工 Review 的执行方式。
+- 工具、框架和浏览器版本相关结论必须注明支持范围，并在升级后重新验证。
+- 修改 skill 时先用真实任务建立失败基线，再验证调整后的输出；不能只检查 Markdown 格式。
+- 仓库版本只在准备发布时更新，发布记录以 Git tag 和 release notes 为准。
+
+## 使用示例
+
+```text
+参照 ctc-fe-structure 判断 UserSelector 应放在哪一层，并说明依赖边界。
+参照 ctc-fe-vue3 评审这个组件的类型、异步副作用和样式隔离问题。
+参照 ctc-fe-adapt-broswer 制定奇安信浏览器的生产构建兼容验收方案。
+```

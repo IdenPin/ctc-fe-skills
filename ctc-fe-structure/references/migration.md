@@ -45,6 +45,16 @@ pnpm build
 - **优先迁移**：标准单表 CRUD 模块、文件数少、无交叉外部依赖的叶子业务模块、权限简单的模块。
 - **后置迁移**：多弹窗/多路由/多状态联动模块、多业务共享 API 模块、表单复杂子组件极多的模块、框架底层基础设施（router 核心总线、request 核心适配器）。
 
+## shared/biz 渐进迁移
+
+老项目已有 `src/components/UserSelector`、`src/components/DictTag` 时，不要求一次性移动全部调用方：
+
+1. 先确认组件是否满足跨模块复用、API 稳定、无页面反向依赖等准入条件。
+2. 在 `src/shared/biz/<domain>/` 建立新实现和公开 `index.ts`。
+3. 原路径保留短期 re-export 兼容层，并登记清理期限和维护人。
+4. 新代码只允许使用新公开出口，旧调用方按业务模块逐步迁移。
+5. 特定业务条件改为调用方 wrapper，禁止继续向公共组件追加页面专属 props。
+
 ## 架构合规度检查清单 (Checklist)
 
 在代码评审 (Code Review) 或 AI 交付合规审计时，必须逐条勾选：
@@ -53,7 +63,9 @@ pnpm build
 - [ ] app/ 基础设施是否足够纯净，未被任何具体业务逻辑污染？
 - [ ] services/ 目录内是否只包含通用请求骨架，未混入具体业务接口定义？
 - [ ] 业务接口与业务类型是否没有在全局 api/ 或 types/index.ts 中堆放？
-- [ ] 全局 shared/components 中是否成功杜绝了业务组件（如 UserForm）的混入？
+- [ ] `shared/ui|lib` 是否保持无业务语义，未混入 UserForm、OrderTable 等业务组件？
+- [ ] `shared/biz` 中的能力是否跨模块稳定复用、有明确维护方且不承载具体页面流程？
+- [ ] UserSelector、DictTag 等公共业务组件的模块特有规则是否由调用方 wrapper 承担？
 - [ ] 模块间是否存在直接穿透私有文件的越界引用行为？
 - [ ] shared 和 services 底层基础设施是否存在反向依赖业务层代码的现象？
 - [ ] 模块公开出口 (index.ts) 是否做到了精准按需导出，未滥用 export \*？

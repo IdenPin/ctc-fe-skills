@@ -16,10 +16,49 @@
 
 ### shared
 
-无业务耦合的共享能力。
+跨模块共享能力必须按语义分区，禁止把所有公共代码堆进一个 `components/` 或 `utils/`：
 
-- 放：基础 UI 组件（Button、Input、Dialog wrapper）、通用高复用业务组件（`UserSelector`、`DictTag`）、通用 hooks（`useDebounce`）、原子 utils（`storage`、`tree`）。
-- 不放：特定业务表单（`UserForm`）、特定业务表格（`OrderTable`）。
+- `shared/ui`：Button、Input、Dialog、ValueTag 等不理解用户、订单、字典等业务概念的基础 UI。
+- `shared/lib`：`useDebounce`、storage、tree 等无业务语义的 hooks 和工具。
+- `shared/styles`：全局主题、Reset 和设计 Token。
+- `shared/biz`：理解公司稳定业务概念、被多个独立模块长期复用的公共能力，例如用户选择和平台字典展示。
+
+`shared/biz` 不是第二个全局大仓库。能力进入该目录必须同时满足：
+
+1. 被多个独立业务模块长期使用，或明确属于平台级公共业务能力。
+2. 对外 API 和核心交互已相对稳定，有明确维护方。
+3. 不依赖 `features`、`views`、页面路由或某个模块的私有状态。
+4. 不承载审批、订单、营销等具体页面流程；调用方特有规则由调用方包装。
+5. 通过业务子域根目录的 `index.ts` 精确暴露公共 API。
+
+```text
+src/shared/
+├── ui/
+│   ├── Select/
+│   └── ValueTag/
+├── lib/
+└── biz/
+    ├── user/
+    │   ├── UserSelector.vue
+    │   ├── types.ts
+    │   └── index.ts
+    └── dictionary/
+        ├── DictTag.vue
+        ├── types.ts
+        └── index.ts
+```
+
+例如订单审批只能选择本部门人员时，限制条件和包装组件应留在订单模块：
+
+```text
+features/order/components/ApproverSelector.vue
+                         ↓
+shared/biz/user/UserSelector.vue
+                         ↓
+shared/ui/Select.vue
+```
+
+若组件只负责根据传入的 `value + options` 显示文本和颜色，它没有字典业务语义，应命名为 `ValueTag` 并放入 `shared/ui`；只有读取公司字典编码、缓存或接口的组件才放入 `shared/biz/dictionary`。
 
 ### services
 
@@ -58,4 +97,5 @@ src/features/post/
 
 - 只给一个二级模块用 → 放入当前二级模块内部 `api.ts` / `types.ts`。
 - 给同属一个一级模块的多个二级模块共用 → 放入一级模块的 `shared/api/` 或 `shared/types/` 中（例如 system 下共用部门、角色、岗位下拉接口）。
-- 跨越多个一级模块大范围共用 → 放入全局 `src/shared/business-api/` 或 `src/services/platform/`。
+- 跨越多个一级模块且业务语义稳定 → 放入对应的 `src/shared/biz/<domain>/`。
+- 仅负责 HTTP、WebSocket、鉴权头等传输机制 → 放入 `src/services/`；具体业务接口不进入 services。
