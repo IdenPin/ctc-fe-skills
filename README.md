@@ -18,6 +18,7 @@ npx skills add IdenPin/ctc-fe-skills -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-structure -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-vue3 -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-cicd-release -y
 ```
 
 > `ctc-fe-adapt-broswer` 是已发布的历史拼写。为避免破坏现有安装路径暂时保留，后续破坏性版本迁移为 `ctc-fe-adapt-browser`。
@@ -42,6 +43,12 @@ npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
 ### [ctc-fe-adapt-broswer](./ctc-fe-adapt-broswer/SKILL.md)
 
 用于 Vite/Vue 3 项目的生产构建兼容性诊断。该 skill 明确 Tailwind CSS 4 的现代浏览器基线；对老内核的 CSS 改写属于项目专项实验，必须经过 fixture、视觉回归、关键流程和真实设备验证。
+
+### [ctc-fe-cicd-release](./ctc-fe-cicd-release/SKILL.md)
+
+用于 CTC 前端项目的 GitLab Pipeline、Runner、SSH 部署、运行时环境配置和回滚流程。规范区分已落地能力与建议目标，重点约束 Runner 凭据边界、一次构建多环境发布以及可验证的回滚路径。
+
+分册：[Pipeline 与 Runner](./ctc-fe-cicd-release/references/pipeline-runner.md)、[SSH 部署](./ctc-fe-cicd-release/references/ssh-deployment.md)、[环境配置](./ctc-fe-cicd-release/references/environment-config.md)、[回滚](./ctc-fe-cicd-release/references/rollback.md)。
 
 ## 规范等级
 
@@ -75,4 +82,5 @@ npm test
 参照 ctc-fe-structure 判断 UserSelector 应放在哪一层，并说明依赖边界。
 参照 ctc-fe-vue3 评审这个组件的类型、异步副作用和样式隔离问题。
 参照 ctc-fe-adapt-broswer 制定奇安信浏览器的生产构建兼容验收方案。
+参照 ctc-fe-cicd-release 为新前端项目设计 Pipeline、部署环境选择和回滚方案。
 ```
