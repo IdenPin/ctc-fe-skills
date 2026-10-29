@@ -35,7 +35,7 @@ metadata:
 - GitLab Runner 运行在 192.168.6.243（6.243）上的 Docker Executor。构建 job 使用 `fe-build`，部署 job 使用 `fe-deploy`。
 - 构建缓存放在 Runner 宿主机挂载卷；在清理工作区时只保留经确认可复用的依赖和构建缓存，避免缓存失效导致流水线从数分钟退化到二十多分钟。
 - 部署私钥由部署 Runner 宿主机只读挂载到 job 容器 `/run/secrets/deploy_key`；GitLab 项目只保留必要的 `WECOM_BOT_WEBHOOK` 变量。不得将私钥值写进 CI/CD 变量、代码或日志。
-- `public/config.env.js` 维护浏览器可见的环境配置；部署时按环境选出一份配置写入产物。`deploy/serviceConfig.json` 维护 SSH 主机、端口、用户、固定 host key、目标目录和访问 URL，不放前端 `runtimeConfig`。
+- `public/config.env.js` 维护浏览器可见的环境配置；部署时按环境选出一份配置写入产物。`deploy/service-config.json` 维护 SSH 主机、端口、用户、固定 host key、目标目录和访问 URL，不放前端 `runtimeConfig`。
 - 当前 `self-monitor-system` 流水线仍按 `dev`、`test`、`main` 分别构建；生产 job 是手动触发。它尚未完全切换到“一个 Artifact 部署到任意环境”的单一通用 deploy job。为其他项目制定目标方案时可采用单次构建模式，但说明并迁移这项差异。
 - 现有 `deploy/deploy.mjs` 会清空目标目录后解包，当前实现不提供版本目录或原子回滚。生产级规范应先补足可恢复发布机制，不能把 GitLab Artifact 留存误称为服务器自动回滚。
 - `scripts/deploy/README.md` 仍记录旧的 5.140 地址及 `DEV_SSH_PRIVATE_KEY`/`DEV_SSH_KNOWN_HOSTS` 变量方案；它与当前流水线、Runner 主机和部署配置不一致。修改该 README 前以当前 `.gitlab-ci.yml` 与 `deploy/` 中的实现核对，并同步更新文档。
@@ -44,5 +44,5 @@ metadata:
 
 - Pipeline 与 Runner 设计、缓存、Artifact 和规则：读 [references/pipeline-runner.md](references/pipeline-runner.md)。
 - 私钥挂载、SSH 校验和部署账号约束：读 [references/ssh-deployment.md](references/ssh-deployment.md)。
-- `config.env.js`、`serviceConfig.json` 和环境选择：读 [references/environment-config.md](references/environment-config.md)。
+- `config.env.js`、`service-config.json` 和环境选择：读 [references/environment-config.md](references/environment-config.md)。
 - 发布保留、回滚和当前能力边界：读 [references/rollback.md](references/rollback.md)。
