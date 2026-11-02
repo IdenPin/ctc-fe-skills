@@ -1,0 +1,3 @@
+interface:
+  display_name: "CTC FE Vue 3 规范"
+  short_description: "Vue 3 SFC、TypeScript 类型边界、Composition API 与 ESLint 规范"

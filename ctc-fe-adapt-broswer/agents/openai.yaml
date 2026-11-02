@@ -1,0 +1,3 @@
+interface:
+  display_name: "CTC FE 浏览器兼容性规范"
+  short_description: "国内企业级旧浏览器、Tailwind 4 现代 CSS 与 Vite legacy 构建兼容诊断"

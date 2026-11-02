@@ -18,8 +18,9 @@
 ## 上线前检查
 
 1. 确认 Runner tag 指向部署 Runner，挂载密钥路径只读且文件权限合规。
-2. 确认选中的环境存在，host/port/user/target/host key 合法；不从任意流水线变量拼接主机或 shell 命令。
+2. 确认选中的环境存在，部署目标配置统一从 `deploy/service-config.json` 读取（兼容历史项目时若未找到可回退 `serviceConfig.json` 并告警提示迁移），host/port/user/target/host key 均合法；不从任意流水线变量拼接主机或 shell 命令。
 3. SSH 使用 pinned host key 建连；远端只接收预期 Artifact，校验包结构和入口文件。
-4. 上传后检查入口文件和应用健康地址，再报告部署成功。
+4. 目标服务器 Web 服务（如 Nginx）需确认已允许跟随软链接（`disable_symlinks off;` 或允许同所有者软链），避免原子软链切换后静态资源直接返回 403 Forbidden。
+5. 上传后检查入口文件和应用健康地址，再报告部署成功。
 
 如果 SSH 连接失败，先分别检查 Runner 排队状态、容器内 ssh 客户端、密钥挂载、目标公钥授权、host key 和网络连通；不要旋转 Runner token 来解决 SSH 认证问题。

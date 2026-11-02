@@ -52,7 +52,11 @@ description: Use when writing, refactoring, reviewing, or generating Vue 3 singl
 
 ```ts
 function toError(value: unknown): Error {
-  return value instanceof Error ? value : new Error(String(value))
+  if (value instanceof Error) return value
+  if (typeof value === 'object' && value !== null && 'message' in value) {
+    return new Error(String((value as { message: unknown }).message))
+  }
+  return new Error(typeof value === 'string' ? value : JSON.stringify(value))
 }
 
 try {

@@ -3,7 +3,7 @@
 ## 配置职责
 
 - `apps/<app>/public/config.env.js`：浏览器运行时需要的公开配置，例如 API base path、公共站点路径或功能开关。按环境集中维护，通过 `DEPLOY_ENVIRONMENT` 选择一份并写入最终 Artifact。
-- `deploy/service-config.json`：部署目标元数据，例如 host、port、sshUser、固定 host key、远端 target 和访问 URL。不要在这里再复制前端 `runtimeConfig`。
+- `deploy/service-config.json`：部署目标元数据，例如 host、port、sshUser、固定 host key、远端 target 和访问 URL。团队统一使用短横线命名 `service-config.json`；存量脚手架若存在历史小驼峰 `serviceConfig.json`，部署脚本在未找到标准文件时可优雅降级兼容并输出重命名告警。不要在这里再复制前端 `runtimeConfig`。
 - GitLab CI variables：只存真正需要保密的值，如 Webhook 或不可避免的凭据。公共 API 地址不是秘密；浏览器能访问的任何值都不能作为密钥处理。
 
 当前 `self-monitor-system` 用 `window.__CTC_ENV_CONFIGS__` 保存各环境配置，部署脚本从 `public/config.env.js` 读取 map，再将所选环境的对象写入构建产物的 `config.env.js`。`index.html` 在应用模块启动前加载该文件。应用配置读取逻辑在生产环境让 `window.__CTC_ENV__` 覆盖构建时注入值；本地开发仍以 `import.meta.env` 为准。
