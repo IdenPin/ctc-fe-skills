@@ -1,7 +1,7 @@
 ---
 name: ctc-fe-structure
 description: >
-  Use when designing or reviewing frontend directory structure, module boundaries, shared code placement, routes, stores, APIs, legacy-project migration, or cross-module imports in Vue, React, Vite, TypeScript, admin systems, and feature-based applications.
+  Use when creating or expanding frontend modules, adding pages, dialogs, business variants or source files, splitting components or composables, or reviewing directory structure, module boundaries, shared code placement and legacy migration in Vue, React and TypeScript projects.
 ---
 
 # FE Structure Specification
@@ -14,6 +14,19 @@ description: >
 3. **共享能力分区且克制**：无业务语义能力与稳定跨模块业务能力分别进入 `shared/ui|lib` 和 `shared/biz`。
 4. **适合 AI 检索**：一次业务修改尽量只读取一个业务目录，降低上下文污染。
 5. **适合老项目迁移**：支持从 `views/api/store/components` 技术分层渐进演进。
+6. **控制模块膨胀**：单目录源码文件以 8 个为目标、10 个为硬上限；业务变体与独立流程按子域归拢。
+
+## 新增与拆分文件的硬门禁（MUST）
+
+- 新增文件或拆分组件前，先查看所属模块的目录树、同级源码文件数和依赖，确定文件的业务归属；复杂模块先给出简短的目标目录树，再编写代码。
+- **每个业务目录最多 10 个同级手写源码文件**，目标为 8 个以内。包含组件、脚本、样式、Mock 和测试；子目录、Markdown、图片字体及明确生成文件不计。`components/`、`composables/`、`hooks/`、`core/` 同样受限。第 9、10 个文件必须复查归属，新增第 11 个前必须先按业务职责归拢。
+- 多个业务变体各自拥有视图和专属逻辑时，**每个变体独立成目录**，将视图、composable、配置和类型就近放置；即使未满 10 个文件，也不能把这些文件拆散到公共技术目录。
+- 拥有独立表单、状态、模型或校验的子流程必须有业务子目录。根目录只保留入口、装配及确由多个子域使用的能力；单一子域私有的实现必须归入对应子域。
+- **禁止转移堆积**：不得将拆出的文件统一扔进模块根目录或公共 `components/`、`composables/`、`utils/`、`data.ts`；不得用编号目录、`part1` 文件、空目录和占位模板凑数。一个子域内部的共用能力留在该子域，跨子域稳定复用后再提升到最近共同边界。
+- 新增或本次拆分后的 `.vue` 文件最多 **250 行**，其余手写脚本和样式文件最多 **300 行**，按物理行统计，包含空行、注释以及 SFC 的模板、脚本和样式。拆分时同时满足文件大小与目录容量，不能从一个大文件拆出一个平铺大目录。
+- 存在开发联调代码时，按用途与生产业务实现分目录；正式外部接入能力建立独立的集成边界。目录移动后仍需检查实际导入与构建入口。
+
+目录模板只说明归属位置，按需创建文件。存量模块按本次涉及的子域渐进整理，已有超限目录不得继续增加同级源码文件；遗留超限必须如实列出，不能声称整个模块合规。细节与例子见 [references/structure.md](references/structure.md)。
 
 ## 先判断项目类型
 
@@ -61,6 +74,20 @@ src/views/<domain>/<module>/
 | 文件该放哪里？ | 页面流程和易变规则放业务模块；无业务语义能力放 `shared/ui|lib`；稳定的跨模块业务能力放 `shared/biz`；纯请求基础设施放 `services`；应用初始化放 `app`。 |
 | 接口与类型如何共享？ | 遵循"最近共同业务边界"原则，严禁跨模块乱引或无脑堆入全局大仓库。 |
 | 多个模块都使用就放 shared 吗？ | 不一定。复用次数只是信号，还必须评估业务语义、API 稳定性、依赖方向和维护所有权。 |
+| 单目录何时拆分二级结构？ | 目标最多 8 个、硬上限 10 个同级源码文件；新增第 11 个前先归拢。独立业务变体和子流程不等数量超限就应建子域。 |
+| 多态/异构业务如何组织？ | 在所属业务子域下为各变体建目录，视图与专属逻辑共置；父级公共位置仅容纳多个变体实际共用的能力。 |
+| 抽出的文件放哪里？ | 跟随所属实体或流程；模块级技术目录只接纳模块内真正共用的能力，并遵守相同容量限制。 |
+| 开发工具与集成能力放哪里？ | 依用途分别归入开发工具边界与正式集成边界，不能只按文件名或历史位置判断。 |
+
+## 数量与大小验证
+
+扩展或整理已有业务模块时，在开始前和交付前执行随 skill 分发的只读扫描器；新模块先规划目录容量，创建后再扫描（将路径替换为实际 skill 安装位置和业务模块）：
+
+```bash
+python3 <skill-dir>/scripts/check-structure.py <module-dir>
+```
+
+扫描器递归检查目录容量和源码行数，超限返回非零；不修改文件，也不判断业务语义或依赖是否正确。交付时报告超限目录、超长文件及本次归拢结果，并人工检查是否只是把平铺换了位置。项目未接入自动检查时，不得声称 CI 已强制这些规则。
 
 ## 规范分册索引（按需调阅）
 
