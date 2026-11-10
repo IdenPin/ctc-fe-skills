@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>业务系统标准化页面布局协议与模板清单 (Design-AI Contract)</title>
+  <link rel="stylesheet" href="layout-tokens.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1e293b;
+      --ink-secondary: #475569;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-subtle: #f1f5f9;
+      --surface: #ffffff;
+      --canvas: #eef2f6;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --accent-border: #bfdbfe;
+      --block: #f1f5f9;
+      --block-line: #cbd5e1;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --slot-bg: rgba(37, 99, 235, 0.05);
+      --slot-border: rgba(37, 99, 235, 0.35);
+      --slot-text: #1d4ed8;
+      --tag-bg: #e0f2fe;
+      --tag-text: #0369a1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+    main { max-width: 1600px; margin: 0 auto; padding: 28px 32px 56px; }
+
+    /* Header */
+    .header-section { margin-bottom: 28px; }
+    .badge-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      letter-spacing: 0.04em;
+    }
+    .badge.protocol { background: #dcfce7; color: #15803d; }
+    h1 { margin: 0 0 8px; font-size: 24px; font-weight: 700; color: var(--ink); }
+    .header-section p { margin: 0; color: var(--muted); font-size: 13px; max-width: 1000px; }
+
+    /* Contract Summary Banner */
+    .contract-banner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    }
+    .banner-item { display: flex; flex-direction: column; gap: 2px; }
+    .banner-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .banner-val { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+    /* Layout Cards */
+    .layout-grid { display: flex; flex-direction: column; gap: 24px; }
+    .layout-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .layout-card:hover {
+      box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.08), 0 3px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+    .card-top {
+      padding: 18px 24px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .card-title-group h2 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .template-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 7px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid var(--accent-border);
+      border-radius: 4px;
+    }
+    .card-desc { margin: 0; color: var(--muted); font-size: 12px; }
+    .card-meta-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .index-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 8px;
+      border-radius: 12px;
+      letter-spacing: .05em;
+    }
+    .applicable-tag { font-size: 11px; color: var(--ink-secondary); }
+
+    /* Card Main Split */
+    .card-body {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      min-height: 420px;
+    }
+
+    /* Preview Frame */
+    .preview-container {
+      padding: 20px;
+      background-color: #f8fafc;
+      background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1.2px, transparent 1.2px);
+      background-size: 16px 16px;
+      border-right: 1px solid var(--line-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .preview {
+      height: 420px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: var(--layout-workspace-bg);
+      box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Slots and Visual Placeholders */
+    .slot-label {
+      font-size: 10px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 600;
+      color: var(--slot-text);
+      background: var(--slot-bg);
+      border: 1px dashed var(--slot-border);
+      padding: 2px 6px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .placeholder {
+      min-width: 0;
+      min-height: 0;
+      border: 1px solid var(--block-line);
+      border-radius: 3px;
+      background: var(--block);
+    }
+    .control { height: var(--layout-control-height); flex: 0 0 100px; background: #ffffff; }
+    .control.short { flex-basis: 72px; }
+    .control.long { flex: 1 1 160px; }
+    .action { width: 32px; height: var(--layout-control-height); flex: 0 0 32px; border-color: var(--accent); background: var(--accent); }
+    .export { width: 56px; height: 24px; flex: 0 0 56px; border: 0; border-radius: 4px; background: var(--block); }
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 var(--layout-content-padding);
+      border-bottom: 1px solid var(--line);
+    }
+    .table-skeleton {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .table-row {
+      display: grid;
+      flex: 0 0 32px;
+      border-bottom: 1px solid var(--line);
+    }
+    .table-row.head { background: #f8fafc; }
+    .cell {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-right: 1px solid #f1f5f9;
+    }
+    .cell::after {
+      content: "";
+      width: 72%;
+      height: 7px;
+      border-radius: 4px;
+      background: #e2e8f0;
+    }
+    .head .cell::after { width: 58%; background: #cbd5e1; }
+    .cell:nth-child(3n)::after { width: 84%; }
+    .cell:nth-child(4n)::after { width: 48%; }
+    .pager {
+      height: var(--layout-footer-height);
+      flex: 0 0 var(--layout-footer-height);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 var(--layout-content-padding);
+      background: var(--layout-content-bg);
+      border-top: 1px solid var(--line-subtle);
+    }
+    .page-item { width: 22px; height: 7px; border-radius: 3px; background: #e2e8f0; }
+    .page-item.current { width: 18px; background: var(--accent); }
+
+    /* Contract Sidebar Details */
+    .contract-aside {
+      padding: 20px 22px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .aside-block { display: flex; flex-direction: column; gap: 8px; }
+    .aside-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-secondary);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-left: 3px solid var(--accent);
+      padding-left: 8px;
+    }
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .spec-table td {
+      padding: 6px 8px;
+      border: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    .spec-table td:first-child {
+      background: #f8fafc;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      color: #0f172a;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      width: 124px;
+      font-weight: 600;
+      border-right: 1px solid var(--line);
+    }
+    .prompt-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      position: relative;
+      border: 1px solid #1e293b;
+    }
+    .prompt-box code { color: #38bdf8; }
+    .prompt-box a { color: #93c5fd; }
+
+    /* Template 01 Custom */
+    .registry-preview { display: flex; flex-direction: column; background: var(--layout-workspace-bg); height: 490px; }
+    .registry-filters { min-height: var(--layout-toolbar-height); flex: 0 0 var(--layout-toolbar-height); background: var(--layout-toolbar-bg); position: relative; }
+    .view-switch { height: var(--layout-control-height); flex: 0 0 88px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--block-line); border-radius: var(--layout-radius); }
+    .view-switch span { border-radius: 2px; background: var(--block); }
+    .view-switch .active { background: var(--accent); }
+    .registry-body { display: flex; flex: 1; min-height: 0; flex-direction: column; margin: var(--layout-frame-gap); padding: var(--layout-content-padding) var(--layout-content-padding) 0; border: 1px solid var(--line); border-radius: var(--layout-radius); background: var(--layout-content-bg); box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+    .summary-row { min-height: 36px; flex: 0 0 36px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .summary-group { display: flex; flex: 1; min-width: 0; align-items: center; gap: var(--layout-control-gap); }
+    .summary-block { flex: 1; min-width: 32px; max-width: 140px; height: 28px; border-radius: 4px; background: #f1f5f9; display: flex; align-items: center; padding: 0 8px; }
+    .registry-table .table-row { grid-template-columns: 50px 14fr 8fr 8fr 11fr 13fr 6fr 10fr 18fr 6fr; }
+
+    /* T01 真实业务形态组件样式 (镜像 CtcReport 真实业务页面) */
+    .biz-tabs {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--layout-toolbar-bg);
+      font-size: 12px;
+    }
+    .biz-tab-item {
+      display: inline-flex;
+      align-items: center;
+      color: #64748b;
+      cursor: pointer;
+      position: relative;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 0 2px;
+    }
+    .biz-tab-item.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .biz-tab-item.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+    .biz-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--layout-toolbar-bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .biz-filter-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .biz-filter-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .biz-select {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 28px;
+      padding: 0 8px;
+      background: #ffffff;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #606266;
+      box-sizing: border-box;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .biz-arrow-down {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 3.5px solid transparent;
+      border-right: 3.5px solid transparent;
+      border-top: 4.5px solid #909399;
+    }
+    .biz-input-box {
+      display: inline-flex;
+      align-items: center;
+      width: 190px;
+      height: 28px;
+      padding: 0 8px;
+      background: #ffffff;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .biz-input-ph {
+      font-size: 11px;
+      color: #a8abb2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .biz-btn-search {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .biz-btn-export {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 28px;
+      padding: 0 10px;
+      background: #ffffff;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #475569;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .biz-btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 10px;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .biz-btn-confirm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 56px;
+      height: 26px;
+      padding: 0 14px;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .biz-table .cell::after { display: none; }
+    .biz-table .cell {
+      font-size: 11px;
+      color: #334155;
+      padding: 0 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .biz-table .head .cell {
+      font-weight: 600;
+      color: #1e293b;
+      background: #f8fafc;
+    }
+    .biz-radio-opt {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      color: #64748b;
+      margin-right: 6px;
+    }
+    .biz-radio-opt.checked {
+      color: #0284c7;
+      font-weight: 500;
+    }
+    .biz-circle {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid #cbd5e1;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .biz-circle.checked {
+      border-color: #0284c7;
+    }
+    .biz-circle.checked::after {
+      content: "";
+      position: absolute;
+      top: 1.5px;
+      left: 1.5px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #0284c7;
+    }
+
+    /* Template 02 Custom */
+    .parameter-preview { display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .module-tabs { height: var(--layout-tabs-height); flex: 0 0 var(--layout-tabs-height); display: flex; align-items: stretch; gap: 24px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--layout-toolbar-bg); }
+    .module-tabs > span:not(.slot-label) { width: 80px; flex: 0 0 80px; margin: 8px 0; border-radius: 4px; background: var(--block); }
+    .module-tabs > .slot-label { align-self: center; }
+    .module-tabs .active { border-bottom: 2px solid var(--accent); background: #eff6ff; }
+    .parameter-toolbar { min-height: var(--layout-toolbar-height); flex: 0 0 var(--layout-toolbar-height); background: var(--layout-toolbar-bg); }
+    .parameter-panel { display: flex; flex: 1; min-height: 0; flex-direction: column; margin: var(--layout-frame-gap); border: 1px solid var(--line); border-radius: var(--layout-radius); background: var(--layout-content-bg); }
+    .parameter-body { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: var(--layout-content-padding) var(--layout-content-padding) 0; }
+    .parameter-actions { height: 40px; flex: 0 0 40px; display: flex; align-items: center; gap: var(--layout-control-gap); }
+    .add-block { width: 76px; height: var(--layout-control-height); background: var(--accent); border-color: var(--accent); }
+    .parameter-table .table-row { grid-template-columns: 72px 18fr 12fr 10fr 14fr 14fr 10fr 10fr 6fr; flex-basis: 32px; }
+    .parameter-footer { height: var(--layout-footer-height); flex: 0 0 var(--layout-footer-height); display: flex; align-items: center; justify-content: flex-end; padding: 0 var(--layout-content-padding); background: var(--layout-content-bg); border-top: 1px solid var(--line); }
+    .confirm-block { width: 64px; height: var(--layout-control-height); background: var(--accent); border-color: var(--accent); }
+
+    /* Template 03 Custom */
+    .report-preview { display: flex; background: var(--layout-workspace-bg); }
+    .report-sidebar { width: var(--layout-sidebar-width); flex: 0 0 var(--layout-sidebar-width); border-right: 1px solid var(--line); background: var(--layout-content-bg); display: flex; flex-direction: column; }
+    .sidebar-title { height: 40px; flex: 0 0 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 12px; }
+    .sidebar-group { height: 24px; margin: 8px 12px 4px; border-radius: 4px; background: #e2e8f0; }
+    .sidebar-item { height: 24px; margin: 4px 12px 4px 24px; border-radius: 4px; background: #f1f5f9; }
+    .sidebar-item.active { background: #eff6ff; border-left: 2px solid var(--accent); }
+    .report-main { min-width: 0; flex: 1; display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .report-toolbar { min-height: var(--layout-toolbar-height); flex: 0 0 var(--layout-toolbar-height); background: var(--layout-toolbar-bg); }
+    .report-content { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: var(--layout-frame-gap); padding: var(--layout-content-padding) var(--layout-content-padding) 0; border: 1px solid var(--line); border-radius: var(--layout-radius); background: var(--layout-content-bg); }
+    .report-table .table-row { grid-template-columns: 72px 14fr 16fr 16fr 10fr 14fr 12fr 12fr; flex-basis: 36px; }
+
+    /* Template 04 Custom */
+    .dashboard-preview { height: 440px; position: relative; overflow: hidden; background: #0f172a; }
+    .dashboard-map {
+      position: absolute; inset: 0;
+      background-color: #0b1329;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 60%),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+    }
+    .dashboard-overlay { position: absolute; inset: var(--layout-frame-gap); display: flex; justify-content: space-between; gap: var(--layout-frame-gap); pointer-events: none; }
+    .dashboard-left, .dashboard-right { width: 23%; min-width: 208px; display: flex; flex-direction: column; gap: var(--layout-frame-gap); }
+    .dash-panel {
+      min-width: 0;
+      padding: var(--layout-content-padding);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      color: #fff;
+    }
+    .dash-panel-top { display: flex; align-items: center; justify-content: space-between; height: 20px; margin-bottom: 8px; }
+    .dash-heading { width: 44%; height: 8px; border-radius: 4px; background: #475569; }
+    .dash-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--layout-control-gap); }
+    .dash-kpi { height: 68px; border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; background: rgba(30, 41, 59, 0.6); padding: 8px; }
+    .dash-kpi::before { content: ""; display: block; height: 6px; width: 60%; background: #64748b; border-radius: 3px; }
+    .dash-kpi::after { content: ""; display: block; height: 12px; width: 45%; background: #38bdf8; margin-top: 8px; border-radius: 3px; }
+    .dash-module { flex: 1; min-height: 0; }
+    .dash-chart { height: calc(100% - 28px); min-height: 80px; position: relative; border-top: 1px solid rgba(255,255,255,0.08); }
+    .dash-bars { position: absolute; inset: 8px 6px 6px 15%; display: flex; flex-direction: column; justify-content: space-around; }
+    .dash-bar { height: 6px; border-radius: 4px; background: #38bdf8; }
+    .dash-bar:nth-child(2n) { width: 68%; background: #60a5fa; }
+    .dash-bar:nth-child(3n) { width: 85%; background: #34d399; }
+    .dash-summary { flex: 0 0 28%; }
+    .dash-summary-block { height: 46px; margin-top: 8px; background: linear-gradient(90deg, rgba(56,189,248,0.2) 0 30%, transparent 30% 34%, rgba(56,189,248,0.2) 34% 65%, transparent 65% 69%, rgba(56,189,248,0.2) 69%); border-radius: 3px; }
+    .dash-table { flex: 1; min-height: 0; }
+    .dash-table .table-skeleton { border: 1px solid rgba(255,255,255,0.08); }
+    .dash-table .table-row { grid-template-columns: 35% 20% 20% 25%; flex-basis: 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .dash-table .table-row.head { background: rgba(30,41,59,0.8); }
+    .dash-table .cell::after { background: #475569; }
+    .dash-table .cell { border-right-color: rgba(255,255,255,0.08); }
+    .floating-list {
+      position: absolute; z-index: 10; top: 12px; bottom: 48px; left: max(calc(23% + 24px), 232px); width: 18%; min-width: 160px;
+      display: flex; flex-direction: column; padding: var(--layout-content-padding);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
+      background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px);
+    }
+    .floating-tabs { height: 28px; flex: 0 0 28px; display: flex; gap: var(--layout-control-gap); margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .floating-tabs span { flex: 1; background: rgba(255,255,255,0.08); border-radius: 2px; }
+    .floating-tabs span:first-child { background: var(--accent); }
+    .floating-rows { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--layout-control-gap); overflow: hidden; }
+    .floating-row { height: 24px; flex: 0 0 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: linear-gradient(90deg, #475569 0 20%, transparent 20% 25%, #334155 25% 85%, transparent 85%); border-radius: 2px; }
+    .map-marker {
+      position: absolute; z-index: 5; width: 18px; height: 18px;
+      border: 3px solid #ffffff; border-radius: 50%; background: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.8);
+    }
+    .marker-a { left: 52%; top: 28%; }
+    .marker-b { left: 66%; top: 48%; }
+    .marker-c { left: 55%; top: 72%; }
+    .map-legend {
+      position: absolute; z-index: 10; left: 32%; right: 32%; bottom: 12px; height: 30px;
+      display: flex; align-items: center; justify-content: space-evenly;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 4px;
+      background: rgba(15,23,42,0.9); backdrop-filter: blur(8px);
+    }
+    .legend-mark { width: 10px; height: 10px; border-radius: 50%; background: #38bdf8; }
+    .legend-line { width: 44px; height: 6px; border-radius: 3px; background: #64748b; }
+
+    .contract-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 0; font-size: 12px; }
+    .contract-links a { color: var(--accent); text-underline-offset: 3px; }
+    .token-banner { margin: -8px 0 24px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 4px; background: #fff; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 12px; color: var(--ink-secondary); }
+    .slot-action-group { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+    .slot-label { flex-shrink: 0; }
+    .slot-cell::after { display: none; }
+    .spec-table small { display: block; font: 10px sans-serif; color: var(--muted); margin-top: 4px; }
+    .registry-table, .parameter-table, .report-table { background: var(--layout-content-bg); }
+    .registry-table .table-row.head, .parameter-table .table-row.head, .report-table .table-row.head { background: var(--layout-content-bg); }
+    .dash-panel, .floating-list, .map-legend, .map-tools { pointer-events: auto; }
+    .dashboard-preview .slot-label { color: #93c5fd; background: rgba(56,189,248,.08); border-color: rgba(125,211,252,.45); }
+    .map-tools { position: absolute; right: calc(23% + 24px); bottom: 56px; z-index: 15; display: flex; flex-direction: column; gap: 4px; }
+    .map-tools i { display: block; width: 28px; height: 28px; border: 1px solid #475569; border-radius: 4px; background: rgba(15,23,42,.9); }
+    .map-tools .slot-label { position: absolute; right: 0; bottom: calc(100% + 4px); }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /* Template 05 Custom (Sectional Anchor) */
+    .anchor-preview { display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .anchor-header { min-height: 48px; flex: 0 0 48px; background: var(--layout-content-bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--layout-content-padding); }
+    .anchor-main-wrapper { display: flex; flex: 1; min-height: 0; position: relative; }
+    .anchor-nav-rail { width: 110px; flex: 0 0 110px; padding: 12px 8px; border-right: 1px solid var(--line); background: var(--layout-content-bg); display: flex; flex-direction: column; gap: 8px; }
+    .anchor-dot-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); height: 20px; }
+    .anchor-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
+    .anchor-dot.active { background: var(--accent); box-shadow: 0 0 0 2px var(--accent-border); }
+    .anchor-scroll-area { flex: 1; min-height: 0; padding: var(--layout-frame-gap); display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+    .anchor-card-section { border: 1px solid var(--line); border-radius: var(--layout-radius); background: var(--layout-content-bg); padding: 8px 12px; }
+    .anchor-card-title { height: 12px; width: 35%; background: #94a3b8; border-radius: 3px; margin-bottom: 6px; }
+    .anchor-card-body { height: 36px; background: #f8fafc; border-radius: 3px; }
+    .anchor-sticky-footer { height: var(--layout-footer-height); flex: 0 0 var(--layout-footer-height); background: var(--layout-content-bg); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 var(--layout-content-padding); }
+
+    /* Template 06 Custom (Split Two-Pane) */
+    .split-preview { display: flex; background: var(--layout-workspace-bg); }
+    .split-left-pane { width: 36%; flex: 0 0 36%; border-right: 1px solid var(--line); background: var(--layout-content-bg); display: flex; flex-direction: column; }
+    .split-left-header { height: 40px; flex: 0 0 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+    .split-left-list { flex: 1; min-height: 0; padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+    .split-list-item { height: 38px; border: 1px solid var(--line); border-radius: 4px; background: #f8fafc; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between; }
+    .split-list-item.active { border-color: var(--accent); background: #eff6ff; }
+    .split-list-line1 { height: 8px; width: 60%; background: #94a3b8; border-radius: 2px; }
+    .split-list-line2 { height: 6px; width: 40%; background: #cbd5e1; border-radius: 2px; }
+    .split-right-pane { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .split-right-toolbar { height: 40px; flex: 0 0 40px; background: var(--layout-content-bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; }
+    .split-right-content { flex: 1; min-height: 0; margin: 10px; padding: 12px; background: var(--layout-content-bg); border: 1px solid var(--line); border-radius: var(--layout-radius); overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .split-right-footer { height: var(--layout-footer-height); flex: 0 0 var(--layout-footer-height); background: var(--layout-content-bg); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; padding: 0 12px; }
+
+    /* Template 07 Custom (Grid Dashboard) */
+    .grid-preview { display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .grid-toolbar { height: 44px; flex: 0 0 44px; background: var(--layout-content-bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; }
+    .grid-container { flex: 1; min-height: 0; padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 76px 1fr; gap: 8px; }
+    .grid-card { border: 1px solid var(--line); border-radius: 4px; background: var(--layout-content-bg); padding: 8px; display: flex; flex-direction: column; min-width: 0; }
+    .grid-card-head { height: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .grid-card-span-2 { grid-column: span 2; }
+    .grid-kpi-val { height: 18px; width: 45%; background: var(--accent); border-radius: 3px; }
+    .grid-chart-canvas { flex: 1; min-height: 60px; background: #f8fafc; border: 1px dashed var(--line); border-radius: 3px; display: flex; align-items: flex-end; padding: 6px; gap: 8px; }
+    .grid-bar-col { flex: 1; height: 35%; background: var(--accent-border); border-radius: 2px 2px 0 0; }
+    .grid-bar-col:nth-child(2) { height: 65%; background: var(--accent); }
+    .grid-bar-col:nth-child(3) { height: 45%; }
+    .grid-bar-col:nth-child(4) { height: 80%; background: var(--accent); }
+
+    /* Template 08 Custom (Step Wizard Funnel) */
+    .wizard-preview { display: flex; flex-direction: column; background: var(--layout-workspace-bg); }
+    .wizard-stepper { height: 52px; flex: 0 0 52px; background: var(--layout-content-bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: center; gap: 16px; padding: 0 20px; }
+    .wizard-step-node { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .wizard-step-node.active { color: var(--accent); font-weight: 600; }
+    .wizard-step-circle { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+    .wizard-step-node.active .wizard-step-circle { background: var(--accent); color: #fff; }
+    .wizard-step-line { width: 36px; height: 2px; background: #e2e8f0; }
+    .wizard-stage-viewport { flex: 1; min-height: 0; padding: 12px; display: flex; align-items: center; justify-content: center; }
+    .wizard-stage-card { width: 85%; height: 90%; border: 1px solid var(--line); border-radius: 4px; background: var(--layout-content-bg); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .wizard-stage-header { height: 14px; width: 40%; background: #94a3b8; border-radius: 3px; }
+    .wizard-form-field { height: 22px; background: #f8fafc; border: 1px solid var(--line); border-radius: 3px; }
+    .wizard-action-rail { height: var(--layout-footer-height); flex: 0 0 var(--layout-footer-height); background: var(--layout-content-bg); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+
+    .candidate-card { border-style: dashed; }
+    .candidate-badge { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-weight: 700; margin-left: 8px; }
+
+    @media (max-width: 1200px) {
+      .card-body { grid-template-columns: 1fr; }
+      .preview-container { border-right: none; border-bottom: 1px solid var(--line); }
+      .contract-banner { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- Header Section -->
+    <header class="header-section">
+      <div class="badge-bar">
+        <span class="badge protocol">LAYOUT CONTRACT 1.0.0</span>
+        <span class="badge">VUE 3 + TYPESCRIPT · ELEMENT PLUS（默认）</span>
+      </div>
+      <h1>业务前端系统标准化页面布局协议库</h1>
+      <p>本页展示七类标准化页面布局（T01～T07）的区域与插槽位置。统一契约定义行为边界，输入 Schema 定义页面配置；支持纯布局骨架与业务配置双模式。</p>
+      <nav class="contract-links" aria-label="规范文件">
+        <a href="../references/layout-contract.md">统一布局契约</a>
+        <a href="../references/page-spec.schema.json">输入 Schema</a>
+        <a href="../references/page-spec.examples.json">配置示例</a>
+        <a href="../templates/TablePageLayout.vue">T01 参考实现</a>
+        <a href="../SKILL.md">当前技能入口</a>
+      </nav>
+    </header>
+
+    <!-- Contract Summary Bar -->
+    <section class="contract-banner">
+      <div class="banner-item">
+        <span class="banner-label">统一布局容器</span>
+        <span class="banner-val">父级高度明确 · flex 可收缩</span>
+      </div>
+      <div class="banner-item">
+        <span class="banner-label">表格视口规范</span>
+        <span class="banner-val">占满剩余空间 · 按需虚拟化</span>
+      </div>
+      <div class="banner-item">
+        <span class="banner-label">插槽契约 (Slots)</span>
+        <span class="banner-val">按模板声明必需 / 可选插槽</span>
+      </div>
+      <div class="banner-item">
+        <span class="banner-label">配套执行技能</span>
+        <span class="banner-val">fe-design-page / fe-code-auditor</span>
+      </div>
+    </section>
+
+    <div class="token-banner">
+      <span>工作区：<code data-layout-token="--layout-workspace-bg"></code></span>
+      <span>内容卡片：<code data-layout-token="--layout-content-bg"></code></span>
+      <span>四边外间距：<code data-layout-token="--layout-frame-gap"></code></span>
+      <span>左侧栏：<code data-layout-token="--layout-sidebar-width"></code></span>
+      <span>预览高度仅用于文档展示</span>
+    </div>
+
+    <!-- Layout Grid -->
+    <section class="layout-grid" aria-label="标准化布局列表">
+
+      <!-- Template 01 -->
+      <article class="layout-card" data-template-id="T01_STANDARD_TABLE_PAGE">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>01 标准报表与通用表格 · CtcReport 原生工作区</span>
+              <span class="template-id">T01_STANDARD_TABLE_PAGE</span>
+            </h2>
+            <p class="card-desc">插槽 100% 对齐 @ctc-front/components-ui-next (CtcReport)：顶部搜索栏与工具栏，容器顶部指标卡，表格栏与前置默认自定义区，核心视口表格与追加底栏。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 01</span>
+            <span class="applicable-tag">排口台账 / 统计报表 / 规则配置 / 设备运行日志</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview registry-preview">
+              <!-- Header Region: Tabs & Filter/Action Bar (100% 镜像真实业务系统) -->
+              <div class="biz-header" style="flex:none;background:var(--layout-toolbar-bg);">
+                <!-- Slot: container-top (可选，分类页签或顶部指标指示区) -->
+                <div class="biz-tabs">
+                  <span class="slot-label" data-slot="container-top">#container-top</span>
+                  <div class="biz-tab-item active">工作参数管理</div>
+                  <div class="biz-tab-item">上传参数配置</div>
+                  <div class="biz-tab-item">测量原理</div>
+                  <div class="biz-tab-item">分析仪</div>
+                  <div class="biz-tab-item">监测单元</div>
+                </div>
+
+                <!-- 复合查询与工具栏：search-bar + tool-bar -->
+                <div class="biz-filter-bar">
+                  <!-- 左侧条件检索组：search-bar -->
+                  <div class="biz-filter-left">
+                    <span class="slot-label" data-slot="search-bar">#search-bar</span>
+                    <div class="biz-select">
+                      <span>全部类别</span>
+                      <i class="biz-arrow-down"></i>
+                    </div>
+                    <div class="biz-select">
+                      <span>全部来源</span>
+                      <i class="biz-arrow-down"></i>
+                    </div>
+                    <div class="biz-input-box">
+                      <span class="biz-input-ph">请输入工作参数编码/名称</span>
+                    </div>
+                    <div class="biz-btn-search" title="查询">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                  </div>
+
+                  <!-- 右侧操作工具组：tool-bar -->
+                  <div class="biz-filter-right">
+                    <span class="slot-label" data-slot="tool-bar">#tool-bar</span>
+                    <div class="biz-btn-export">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                      <span>导出</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main White Card Region -->
+              <div class="registry-body parameter-panel" style="gap:8px;">
+                <!-- Slot: table-bar (可选，表格标题与顶部操作) -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="slot-label" data-slot="table-bar">#table-bar</span>
+                    <div class="biz-btn-add">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      <span>新增</span>
+                    </div>
+                  </div>
+                  <div style="font-size:11px;color:#94a3b8;">共 17 项配置参数</div>
+                </div>
+
+                <!-- Slot: default (可选，表格前置自定义内容插槽) -->
+                <div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:#f0f7ff;border:1px solid #d0e2ff;border-radius:4px;font-size:11px;color:#1e40af;">
+                  <span class="slot-label" data-slot="default" style="font-size:9px;">#default</span>
+                  <span>表格前置默认自定义内容区域（警示横幅、业务说明或自定义指标组件）</span>
+                </div>
+
+                <!-- 表格视口：由 CtcReport 内嵌 CtcTable，通过 :columns 属性驱动 -->
+                <div class="table-skeleton registry-table biz-table" style="flex:1;">
+                  <div class="table-row head">
+                    <div class="cell">序号</div>
+                    <div class="cell">设备分类</div>
+                    <div class="cell">信息分类</div>
+                    <div class="cell">类别</div>
+                    <div class="cell">工作参数编码</div>
+                    <div class="cell">工作参数名称</div>
+                    <div class="cell">单位</div>
+                    <div class="cell">来源</div>
+                    <div class="cell">注册状态</div>
+                    <div class="cell">操作</div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cell">1</div>
+                    <div class="cell">自动监测现场仪器仪表</div>
+                    <div class="cell">日志</div>
+                    <div class="cell">废水</div>
+                    <div class="cell">i11001</div>
+                    <div class="cell">运行日志</div>
+                    <div class="cell">-</div>
+                    <div class="cell">HJ212-2025</div>
+                    <div class="cell"><span class="biz-radio-opt"><i class="biz-circle"></i>参与注册</span><span class="biz-radio-opt checked"><i class="biz-circle checked"></i>不参与注册</span></div>
+                    <div class="cell" style="color:#94a3b8;">/</div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cell">2</div>
+                    <div class="cell">自动监测现场仪器仪表</div>
+                    <div class="cell">日志</div>
+                    <div class="cell">废气</div>
+                    <div class="cell">i11001</div>
+                    <div class="cell">运行日志</div>
+                    <div class="cell">-</div>
+                    <div class="cell">HJ212-2025</div>
+                    <div class="cell"><span class="biz-radio-opt"><i class="biz-circle"></i>参与注册</span><span class="biz-radio-opt checked"><i class="biz-circle checked"></i>不参与注册</span></div>
+                    <div class="cell" style="color:#94a3b8;">/</div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cell">3</div>
+                    <div class="cell">自动监测现场仪器仪表</div>
+                    <div class="cell">状态</div>
+                    <div class="cell">废水</div>
+                    <div class="cell">i12001</div>
+                    <div class="cell">工作状态</div>
+                    <div class="cell">-</div>
+                    <div class="cell">HJ212-2025</div>
+                    <div class="cell"><span class="biz-radio-opt"><i class="biz-circle"></i>参与注册</span><span class="biz-radio-opt checked"><i class="biz-circle checked"></i>不参与注册</span></div>
+                    <div class="cell" style="color:#94a3b8;">/</div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cell">4</div>
+                    <div class="cell">自动监测现场仪器仪表</div>
+                    <div class="cell">参数</div>
+                    <div class="cell">废水</div>
+                    <div class="cell">i13001</div>
+                    <div class="cell">当前工作量程上限</div>
+                    <div class="cell">-</div>
+                    <div class="cell">HJ212-2025</div>
+                    <div class="cell"><span class="biz-radio-opt checked"><i class="biz-circle checked"></i>参与注册</span><span class="biz-radio-opt"><i class="biz-circle"></i>不参与注册</span></div>
+                    <div class="cell" style="color:#94a3b8;">/</div>
+                  </div>
+                </div>
+
+                <!-- Slot: append-table (可选，表格后置追加区域/批量操作底栏) -->
+                <div class="parameter-footer table-page-footer" style="display:flex;align-items:center;justify-content:space-between;padding:6px var(--layout-content-padding);border-top:1px solid var(--line);">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="slot-label" data-slot="append-table">#append-table</span>
+                    <span style="font-size:11px;color:#64748b;">批量操作下发或统计汇总区域</span>
+                  </div>
+                  <div class="biz-btn-confirm">确定</div>
+                </div>
+
+                <!-- Slot: pagination (可选，常驻分页控制区) -->
+                <div class="pager" style="margin-top:0;height:34px;padding:0 8px;">
+                  <span class="slot-label" data-slot="pagination">#pagination</span>
+                  <span style="font-size:11px;color:#94a3b8;margin-right:4px;">共 17 条</span>
+                  <span class="page-item" style="width:20px;height:20px;line-height:20px;text-align:center;font-size:10px;border:1px solid #dcdfe6;border-radius:2px;background:#fff;color:#606266;display:inline-flex;align-items:center;justify-content:center;">&lt;</span>
+                  <span class="page-item current" style="width:20px;height:20px;line-height:20px;text-align:center;font-size:10px;border-radius:2px;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;">1</span>
+                  <span class="page-item" style="width:20px;height:20px;line-height:20px;text-align:center;font-size:10px;border:1px solid #dcdfe6;border-radius:2px;background:#fff;color:#606266;display:inline-flex;align-items:center;justify-content:center;">2</span>
+                  <span class="page-item" style="width:20px;height:20px;line-height:20px;text-align:center;font-size:10px;border:1px solid #dcdfe6;border-radius:2px;background:#fff;color:#606266;display:inline-flex;align-items:center;justify-content:center;">&gt;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">CtcReport 原生插槽契约</span>
+              <table class="spec-table">
+              <tbody>
+                <tr data-slot-row="search-bar" data-required="false"><td><code>#search-bar</code><small>可选</small></td><td>条件搜索筛选栏（支持 search-bar-left/right）。</td></tr>
+                <tr data-slot-row="tool-bar" data-required="false"><td><code>#tool-bar</code><small>可选</small></td><td>操作工具栏（支持 tool-bar-left/right 左右分流）。</td></tr>
+                <tr data-slot-row="container-top" data-required="false"><td><code>#container-top</code><small>可选</small></td><td>内容容器顶部；承载统计指标概览、KPI 卡片或分类页签。</td></tr>
+                <tr data-slot-row="table-bar" data-required="false"><td><code>#table-bar</code><small>可选</small></td><td>表格顶栏；承载 table-title 标题与 table-info 状态信息。</td></tr>
+                <tr data-slot-row="default" data-required="false"><td><code>#default</code><small>可选</small></td><td>默认自定义插槽；位于表格前置区域，插入自定义内容。</td></tr>
+                <tr data-slot-row="append-table" data-required="false"><td><code>#append-table</code><small>可选</small></td><td>表格后置追加区域；承载批量勾选下发或操作确认底栏。</td></tr>
+                <tr data-slot-row="pagination" data-required="false"><td><code>#pagination</code><small>可选</small></td><td>卡片内分页区域；按配置启用并保持在布局底部。</td></tr>
+              </tbody></table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>外围工作区采用统一底色变量，白卡四边保留相同外间距。</li>
+                <li>父级高度链明确，表格通过 min-height: 0 占满剩余视口空间。</li>
+                <li>100% 对应 @ctc-front/components-ui-next 中的 CtcReport 真实结构，核心表格由内置 CtcTable 承载（通过 :columns 属性驱动，无 columns 容器插槽）。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T01_STANDARD_TABLE_PAGE</code>，<code>mode: layout</code>，启用 search-bar、tool-bar、container-top、pagination，输出区域骨架（或直接引用参考实现 <a href="../templates/TablePageLayout.vue">TablePageLayout.vue</a>）。业务页面输入见<a href="../references/page-spec.examples.json">配置示例</a>。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 02 -->
+      <article class="layout-card" data-template-id="T02_SIDEBAR_QUERY_TABLE">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>02 左侧层级树 · 顶部检索与报表宽表</span>
+              <span class="template-id">T02_SIDEBAR_QUERY_TABLE</span>
+            </h2>
+            <p class="card-desc">左侧树形结构组织行政区划/管网节点，右侧主体纵向铺开筛选表单与详尽报表。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 02</span>
+            <span class="applicable-tag">行政区域监测 / 企业管网节点 / 多级部门报表</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview report-preview">
+              <!-- Slot: sidebar -->
+              <aside class="report-sidebar">
+                <div class="sidebar-title"><span class="slot-label" data-slot="sidebar-tree">#sidebar-tree</span></div>
+                <div class="sidebar-group"></div>
+                <div class="sidebar-item"></div>
+                <div class="sidebar-item"></div>
+                <div class="sidebar-group"></div>
+                <div class="sidebar-item active"></div>
+                <div class="sidebar-item"></div>
+              </aside>
+
+              <!-- Main Region -->
+              <div class="report-main">
+                <div class="filters report-toolbar">
+                  <span class="slot-label" data-slot="toolbar">#toolbar</span>
+                  <div class="placeholder control short"></div>
+                  <div class="placeholder control"></div>
+                  <div class="placeholder control long"></div>
+                  <div class="placeholder action"></div>
+                  <div class="placeholder export"></div>
+                </div>
+                <div class="report-content">
+                  <div class="table-skeleton report-table">
+                    <div class="table-row head">
+                      <div class="cell"></div>
+                      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                    </div>
+                    <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                    <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                    <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                    <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                  </div>
+                  <div class="pager">
+                    <span class="slot-label" data-slot="pagination">#pagination</span>
+                    <span class="page-item current"></span><span class="page-item"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+              <tbody>
+                <tr data-slot-row="sidebar-tree" data-required="true"><td><code>#sidebar-tree</code><small>必需</small></td><td>左侧层级导航；过滤、折叠和联动按配置启用。</td></tr>
+                <tr data-slot-row="toolbar" data-required="true"><td><code>#toolbar</code><small>必需</small></td><td>当前上下文下的查询工具区域。</td></tr>
+                <tr data-slot-row="pagination" data-required="false"><td><code>#pagination</code><small>可选</small></td><td>卡片内分页区域；按配置启用并保持在布局底部。</td></tr>
+              </tbody></table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>侧栏宽度使用统一变量；过滤与折叠按需求启用。</li>
+                <li>右侧工作区留出完整外圈，表格内容卡片保持白色。</li>
+                <li>右侧表格由 CtcTable 承载，列由 :columns 属性驱动，无 columns 容器插槽。</li>
+                <li>树选择联动按配置启用，不强制所有点击防抖。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T02_SIDEBAR_QUERY_TABLE</code>，<code>mode: layout</code>，启用 pagination，仅输出区域骨架。业务页面输入见<a href="../references/page-spec.examples.json">配置示例</a>。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 03 -->
+      <article class="layout-card" data-template-id="T03_GIS_HUD_DASHBOARD">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>03 GIS 全屏底图 · HUD 悬浮面板与空间控制</span>
+              <span class="template-id">T03_GIS_HUD_DASHBOARD</span>
+            </h2>
+            <p class="card-desc">地图全屏绝对定位居底，左右布局半透明卡片图层，保留中心主视野、底部图例及地图工具。当前深色仅为主题示例。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 03</span>
+            <span class="applicable-tag">微站空间分布 / 流域监测一张图 / 园区全景看板</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview dashboard-preview" data-theme="dark">
+              <!-- Base Map -->
+              <div class="dashboard-map"></div>
+              <span class="slot-label" style="position:absolute;top:12px;left:55%;transform:translateX(-50%);z-index:20;" data-slot="map-canvas">#map-canvas</span>
+              <span class="map-marker marker-a"></span>
+              <span class="map-marker marker-b"></span>
+              <span class="map-marker marker-c"></span>
+
+              <!-- Overlay Layers -->
+              <div class="dashboard-overlay">
+                <!-- Left HUD -->
+                <div class="dashboard-left">
+                  <section class="dash-panel dash-overview">
+                    <div class="dash-panel-top">
+                      <span class="slot-label" style="font-size:9px;" data-slot="left-kpi">#left-kpi</span>
+                      <div class="dash-heading"></div>
+                    </div>
+                    <div class="dash-cards"><div class="dash-kpi"></div><div class="dash-kpi"></div><div class="dash-kpi"></div></div>
+                  </section>
+                  <section class="dash-panel dash-module">
+                    <div class="dash-panel-top">
+                      <span class="slot-label" style="font-size:9px;" data-slot="left-chart">#left-chart</span>
+                      <div class="dash-heading"></div>
+                    </div>
+                    <div class="dash-chart"><div class="dash-bars"><i class="dash-bar"></i><i class="dash-bar"></i><i class="dash-bar"></i></div></div>
+                  </section>
+                </div>
+
+                <!-- Right HUD -->
+                <div class="dashboard-right">
+                  <section class="dash-panel dash-summary">
+                    <div class="dash-panel-top">
+                      <span class="slot-label" style="font-size:9px;" data-slot="right-kpi">#right-kpi</span>
+                      <div class="dash-heading"></div>
+                    </div>
+                    <div class="dash-summary-block"></div>
+                  </section>
+                  <section class="dash-panel dash-table">
+                    <div class="dash-panel-top">
+                      <span class="slot-label" style="font-size:9px;" data-slot="right-alarm">#right-alarm</span>
+                      <div class="dash-heading"></div>
+                    </div>
+                    <div class="table-skeleton">
+                      <div class="table-row head"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                      <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                      <div class="table-row"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+
+              <!-- Floating Site Drawer -->
+              <section class="floating-list">
+                <div class="dash-panel-top">
+                  <span class="slot-label" style="font-size:9px;" data-slot="site-list">#site-list</span>
+                </div>
+                <div class="floating-tabs"><span></span><span></span></div>
+                <div class="floating-rows">
+                  <div class="floating-row"></div><div class="floating-row"></div><div class="floating-row"></div><div class="floating-row"></div>
+                </div>
+              </section>
+
+              <div class="map-tools"><span class="slot-label" data-slot="map-tools">#map-tools</span><i></i><i></i></div>
+
+              <!-- Legend -->
+              <div class="map-legend">
+                <span class="slot-label" style="font-size:9px;" data-slot="legend">#legend</span>
+                <span class="legend-line"></span><span class="legend-mark"></span>
+                <span class="legend-line"></span><span class="legend-mark"></span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+              <tbody>
+                <tr data-slot-row="map-canvas" data-required="true"><td><code>#map-canvas</code><small>必需</small></td><td>底层地图挂载区，由调用方插槽或已存在的适配器接入。</td></tr>
+                <tr data-slot-row="left-kpi" data-required="false"><td><code>#left-kpi</code><small>可选</small></td><td>左侧摘要区域。</td></tr>
+                <tr data-slot-row="left-chart" data-required="false"><td><code>#left-chart</code><small>可选</small></td><td>左侧图表区域。</td></tr>
+                <tr data-slot-row="right-kpi" data-required="false"><td><code>#right-kpi</code><small>可选</small></td><td>右侧摘要区域。</td></tr>
+                <tr data-slot-row="right-alarm" data-required="false"><td><code>#right-alarm</code><small>可选</small></td><td>右侧列表或表格区域，业务含义由配置决定。</td></tr>
+                <tr data-slot-row="site-list" data-required="false"><td><code>#site-list</code><small>可选</small></td><td>浮动列表区域，按需启用查询与定位。</td></tr>
+                <tr data-slot-row="legend" data-required="false"><td><code>#legend</code><small>可选</small></td><td>底部图例区域。</td></tr>
+                <tr data-slot-row="map-tools" data-required="false"><td><code>#map-tools</code><small>可选</small></td><td>地图工具区域。</td></tr>
+              </tbody></table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>覆盖层可穿透，交互面板必须恢复 pointer-events: auto。</li>
+                <li>只渲染启用的面板，图例和工具不相互遮挡。</li>
+                <li>深色仅为预览主题；布局不强制项目切换主题。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T03_GIS_HUD_DASHBOARD</code>，<code>mode: layout</code>，启用 left-kpi、left-chart、right-kpi、right-alarm、site-list、legend、map-tools，仅输出区域骨架。业务页面输入见<a href="../references/page-spec.examples.json">配置示例</a>。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 04 -->
+      <article class="layout-card" data-template-id="T04_SECTION_ANCHOR_FLOW">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>04 分段长卷 · 锚点导航与吸底操作</span>
+              <span class="template-id">T04_SECTION_ANCHOR_FLOW</span>
+            </h2>
+            <p class="card-desc">顶部概览摘要区，主体为纵向多卡片长卷，侧边/顶部浮动锚点轨联动视口高亮，底部常驻吸底操作栏。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 04</span>
+            <span class="applicable-tag">全量长表单 / 综合对象档案 / 多区块聚合总览</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview anchor-preview">
+              <!-- Slot: header-summary -->
+              <div class="anchor-header">
+                <span class="slot-label" data-slot="header-summary">#header-summary</span>
+                <div class="placeholder control long"></div>
+                <div class="placeholder action"></div>
+              </div>
+
+              <!-- Main scroll & anchor rail -->
+              <div class="anchor-main-wrapper">
+                <!-- Slot: anchor-nav -->
+                <div class="anchor-nav-rail">
+                  <span class="slot-label" data-slot="anchor-nav" style="font-size:9px;">#anchor-nav</span>
+                  <div class="anchor-dot-item"><span class="anchor-dot active"></span><span>区块一</span></div>
+                  <div class="anchor-dot-item"><span class="anchor-dot"></span><span>区块二</span></div>
+                  <div class="anchor-dot-item"><span class="anchor-dot"></span><span>区块三</span></div>
+                </div>
+
+                <!-- Slot: sections -->
+                <div class="anchor-scroll-area">
+                  <span class="slot-label" data-slot="sections" style="align-self:flex-start;">#sections</span>
+                  <div class="anchor-card-section">
+                    <div class="anchor-card-title"></div>
+                    <div class="anchor-card-body"></div>
+                  </div>
+                  <div class="anchor-card-section">
+                    <div class="anchor-card-title"></div>
+                    <div class="anchor-card-body"></div>
+                  </div>
+                  <div class="anchor-card-section">
+                    <div class="anchor-card-title"></div>
+                    <div class="anchor-card-body"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slot: actions-footer -->
+              <div class="anchor-sticky-footer">
+                <span class="slot-label" data-slot="actions-footer" style="margin-right:auto;">#actions-footer</span>
+                <div class="placeholder control short"></div>
+                <div class="placeholder action" style="width:64px;background:var(--accent);border-color:var(--accent);"></div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+                <tbody>
+                  <tr data-slot-row="sections" data-required="true"><td><code>#sections</code><small>必需</small></td><td>纵向分段内容卡片集合容器，支持自由组合。</td></tr>
+                  <tr data-slot-row="header-summary" data-required="false"><td><code>#header-summary</code><small>可选</small></td><td>顶部吸顶摘要区（对象标识、关键状态、统计卡）。</td></tr>
+                  <tr data-slot-row="anchor-nav" data-required="false"><td><code>#anchor-nav</code><small>可选</small></td><td>浮动锚点导航轨（点击平滑滚动、视口跟随高亮）。</td></tr>
+                  <tr data-slot-row="actions-footer" data-required="false"><td><code>#actions-footer</code><small>可选</small></td><td>视口吸底操作栏（暂存、提交、审批动作）。</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>操作底栏必须吸底，不随长内容滚动消失或遮挡内容。</li>
+                <li>锚点滚动监听必须防抖（Debounce），并支持双向联动。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T04_SECTION_ANCHOR_FLOW</code>，<code>mode: layout</code>，启用 header-summary、anchor-nav、sections、actions-footer，生成长卷骨架。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 05 -->
+      <article class="layout-card" data-template-id="T05_SPLIT_TWO_PANE">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>05 全高双栏 · 主从独立滚动工作台</span>
+              <span class="template-id">T05_SPLIT_TWO_PANE</span>
+            </h2>
+            <p class="card-desc">垂直分割为左右两栏，两栏高度 100% 填满视口，各自拥有独立纵向滚动条，互不拖拽、主从联动。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 05</span>
+            <span class="applicable-tag">目录正文工作台 / 主从联动配置 / 规则穿梭分配</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview split-preview">
+              <!-- Left Master Pane -->
+              <div class="split-left-pane">
+                <div class="split-left-header">
+                  <span class="slot-label" data-slot="master-header" style="font-size:9px;">#master-header</span>
+                  <div class="placeholder control long" style="height:26px;"></div>
+                </div>
+                <div class="split-left-list">
+                  <span class="slot-label" data-slot="master-list" style="font-size:9px;align-self:flex-start;">#master-list</span>
+                  <div class="split-list-item active">
+                    <div class="split-list-line1"></div>
+                    <div class="split-list-line2"></div>
+                  </div>
+                  <div class="split-list-item">
+                    <div class="split-list-line1"></div>
+                    <div class="split-list-line2"></div>
+                  </div>
+                  <div class="split-list-item">
+                    <div class="split-list-line1"></div>
+                    <div class="split-list-line2"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Slave Pane -->
+              <div class="split-right-pane">
+                <div class="split-right-toolbar">
+                  <span class="slot-label" data-slot="slave-toolbar" style="font-size:9px;">#slave-toolbar</span>
+                  <div class="placeholder control short" style="height:26px;"></div>
+                </div>
+                <div class="split-right-content">
+                  <span class="slot-label" data-slot="slave-body" style="font-size:9px;align-self:flex-start;">#slave-body</span>
+                  <div class="placeholder" style="height:50px;"></div>
+                  <div class="placeholder" style="height:120px;"></div>
+                </div>
+                <div class="split-right-footer">
+                  <span class="slot-label" data-slot="slave-footer" style="font-size:9px;margin-right:auto;">#slave-footer</span>
+                  <div class="placeholder action" style="width:60px;height:26px;background:var(--accent);border-color:var(--accent);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+                <tbody>
+                  <tr data-slot-row="master-list" data-required="true"><td><code>#master-list</code><small>必需</small></td><td>左侧主清单容器（支持独立纵向滚动与当前项高亮）。</td></tr>
+                  <tr data-slot-row="slave-body" data-required="true"><td><code>#slave-body</code><small>必需</small></td><td>右侧从属详情或编辑区（独立纵向滚动）。</td></tr>
+                  <tr data-slot-row="master-header" data-required="false"><td><code>#master-header</code><small>可选</small></td><td>左侧主项筛选/检索栏。</td></tr>
+                  <tr data-slot-row="slave-toolbar" data-required="false"><td><code>#slave-toolbar</code><small>可选</small></td><td>右侧从属工具栏（快捷动作、批量同步）。</td></tr>
+                  <tr data-slot-row="slave-footer" data-required="false"><td><code>#slave-footer</code><small>可选</small></td><td>右侧从属保存底栏。</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>左右两栏必须各自设置 <code>overflow-y: auto</code>，严禁外层整体滚动拖带。</li>
+                <li>切换左侧主项时，若右侧存在未保存数据须触发脏检查。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T05_SPLIT_TWO_PANE</code>，<code>mode: layout</code>，左栏为 master-list，右栏为 slave-body 与 slave-footer。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 06 -->
+      <article class="layout-card" data-template-id="T06_GRID_DASHBOARD">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>06 响应式平铺 · 二维多卡片网格看板</span>
+              <span class="template-id">T06_GRID_DASHBOARD</span>
+            </h2>
+            <p class="card-desc">无全景底图的纯二维网格排版系统，多行多列白卡拼装自适应视口，内部图表随容器响应式缩放。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 06</span>
+            <span class="applicable-tag">统计分析看板 / 监控指标驾驶舱 / 工作台首页</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview grid-preview">
+              <!-- Top Toolbar -->
+              <div class="grid-toolbar">
+                <span class="slot-label" data-slot="dashboard-toolbar">#dashboard-toolbar</span>
+                <div class="placeholder control" style="height:28px;"></div>
+              </div>
+
+              <!-- Grid Container -->
+              <div class="grid-container">
+                <div class="grid-card">
+                  <div class="grid-card-head"><span class="slot-label" data-slot="metric-cards" style="font-size:9px;">#metric-cards</span></div>
+                  <div class="grid-kpi-val"></div>
+                </div>
+                <div class="grid-card">
+                  <div class="grid-card-head"><span class="slot-label" style="font-size:9px;">#metric-card</span></div>
+                  <div class="grid-kpi-val"></div>
+                </div>
+                <div class="grid-card">
+                  <div class="grid-card-head"><span class="slot-label" style="font-size:9px;">#metric-card</span></div>
+                  <div class="grid-kpi-val"></div>
+                </div>
+
+                <div class="grid-card grid-card-span-2">
+                  <div class="grid-card-head"><span class="slot-label" data-slot="charts-grid" style="font-size:9px;">#charts-grid</span></div>
+                  <div class="grid-chart-canvas">
+                    <div class="grid-bar-col"></div>
+                    <div class="grid-bar-col"></div>
+                    <div class="grid-bar-col"></div>
+                    <div class="grid-bar-col"></div>
+                  </div>
+                </div>
+                <div class="grid-card">
+                  <div class="grid-card-head"><span class="slot-label" data-slot="ranking-board" style="font-size:9px;">#ranking-board</span></div>
+                  <div class="placeholder" style="flex:1;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+                <tbody>
+                  <tr data-slot-row="charts-grid" data-required="true"><td><code>#charts-grid</code><small>必需</small></td><td>二维响应式图表与小部件主网格容器。</td></tr>
+                  <tr data-slot-row="dashboard-toolbar" data-required="false"><td><code>#dashboard-toolbar</code><small>可选</small></td><td>全局时间维度与层级范围控制栏。</td></tr>
+                  <tr data-slot-row="metric-cards" data-required="false"><td><code>#metric-cards</code><small>可选</small></td><td>核心 KPI 汇总小卡片网格组。</td></tr>
+                  <tr data-slot-row="ranking-board" data-required="false"><td><code>#ranking-board</code><small>可选</small></td><td>排名榜单或简要列表侧卡。</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>禁止整体横向滚动条，各卡片必须遵循网格自适应收缩。</li>
+                <li>所有图表必须绑定 ResizeObserver 监听容器尺寸。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T06_GRID_DASHBOARD</code>，<code>mode: layout</code>，启用 dashboard-toolbar、metric-cards、charts-grid，生成 2x3 网格看板。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+      <!-- Template 07 -->
+      <article class="layout-card" data-template-id="T07_STEP_WIZARD_FUNNEL">
+        <div class="card-top">
+          <div class="card-title-group">
+            <h2>
+              <span>07 步骤推进 · 向导流转单视口漏斗</span>
+              <span class="template-id">T07_STEP_WIZARD_FUNNEL</span>
+            </h2>
+            <p class="card-desc">步骤轨迹驱动单视口受控切换，顶部引导阶段指示，中间独立工作台聚焦当前步骤，底部导航动作轨道。</p>
+          </div>
+          <div class="card-meta-right">
+            <span class="index-pill">TEMPLATE 07</span>
+            <span class="applicable-tag">新建开户向导 / 数据导入多步校验 / 复杂办理漏斗</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="preview-container">
+            <div class="preview wizard-preview">
+              <!-- Stepper Header -->
+              <div class="wizard-stepper">
+                <span class="slot-label" data-slot="step-tracker" style="font-size:9px;margin-right:8px;">#step-tracker</span>
+                <div class="wizard-step-node"><span class="wizard-step-circle">✓</span><span>1. 初始信息</span></div>
+                <div class="wizard-step-line"></div>
+                <div class="wizard-step-node active"><span class="wizard-step-circle">2</span><span>2. 配置规则</span></div>
+                <div class="wizard-step-line"></div>
+                <div class="wizard-step-node"><span class="wizard-step-circle">3</span><span>3. 确认提交</span></div>
+              </div>
+
+              <!-- Main Stage Viewport -->
+              <div class="wizard-stage-viewport">
+                <div class="wizard-stage-card">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div class="wizard-stage-header"></div>
+                    <span class="slot-label" data-slot="step-summary" style="font-size:9px;">#step-summary</span>
+                    <span class="slot-label" data-slot="stage-viewport" style="font-size:9px;">#stage-viewport</span>
+                  </div>
+                  <div class="wizard-form-field"></div>
+                  <div class="wizard-form-field"></div>
+                  <div class="placeholder" style="flex:1;"></div>
+                </div>
+              </div>
+
+              <!-- Action Rail -->
+              <div class="wizard-action-rail">
+                <span class="slot-label" data-slot="action-rail" style="font-size:9px;">#action-rail</span>
+                <div style="display:flex;gap:8px;">
+                  <div class="placeholder control short"></div>
+                  <div class="placeholder action" style="width:68px;background:var(--accent);border-color:var(--accent);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-aside">
+            <div class="aside-block">
+              <span class="aside-title">插槽契约 (Slot Schema)</span>
+              <table class="spec-table">
+                <tbody>
+                  <tr data-slot-row="step-tracker" data-required="true"><td><code>#step-tracker</code><small>必需</small></td><td>顶部或左侧阶段指示轨（显示已完成、当前、待完成步骤）。</td></tr>
+                  <tr data-slot-row="stage-viewport" data-required="true"><td><code>#stage-viewport</code><small>必需</small></td><td>当前阶段专属工作台视口（单视口受控切换）。</td></tr>
+                  <tr data-slot-row="action-rail" data-required="true"><td><code>#action-rail</code><small>必需</small></td><td>底部流转动作轨道（上一步、暂存、下一步、完成）。</td></tr>
+                  <tr data-slot-row="step-summary" data-required="false"><td><code>#step-summary</code><small>可选</small></td><td>当前步骤的状态提示或校验摘要。</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">布局硬性规则</span>
+              <ul style="margin:0;padding-left:16px;color:var(--ink-secondary);">
+                <li>视口必须受控于当前步骤，禁止多步骤内容平铺展开。</li>
+                <li>点击下一步必须先通过当前视口校验方可推进。</li>
+              </ul>
+            </div>
+
+            <div class="aside-block">
+              <span class="aside-title">纯布局调用示例</span>
+              <div class="prompt-box">
+                使用 <code>T07_STEP_WIZARD_FUNNEL</code>，<code>mode: layout</code>，启用 step-tracker、stage-viewport、action-rail。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+
+  <script>
+    // 标注读取实际 CSS 变量；数值只维护在 layout-tokens.css。
+    const layoutStyles = getComputedStyle(document.documentElement);
+    document.querySelectorAll('[data-layout-token]').forEach((node) => {
+      node.textContent = layoutStyles.getPropertyValue(node.dataset.layoutToken).trim();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+[
+  {
+    "name": "仅布局：不输入业务 Schema",
+    "spec": {
+      "mode": "layout",
+      "templateId": "T01_STANDARD_TABLE_PAGE",
+      "enabledSlots": [
+        "search-bar",
+        "container-top",
+        "pagination"
+      ]
+    }
+  },
+  {
+    "name": "T01：标准通用表格（页签、筛选、汇总、操作与底栏）",
+    "spec": {
+      "mode": "page",
+      "templateId": "T01_STANDARD_TABLE_PAGE",
+      "pageTitle": "排口台账综合管理",
+      "entityName": "OutletRecord",
+      "tabs": {
+        "items": [
+          {
+            "key": "water",
+            "label": "废水排口"
+          },
+          {
+            "key": "air",
+            "label": "废气排口"
+          }
+        ],
+        "defaultKey": "water"
+      },
+      "filters": [
+        {
+          "key": "keyword",
+          "label": "关键字",
+          "control": "input"
+        }
+      ],
+      "actions": [
+        {
+          "key": "export",
+          "label": "批量导出",
+          "intent": "download"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "label": "排口名称",
+          "type": "string"
+        },
+        {
+          "key": "updatedAt",
+          "label": "更新时间",
+          "type": "datetime"
+        }
+      ],
+      "summary": [
+        {
+          "key": "total",
+          "label": "记录总数",
+          "valueRef": "summary.total"
+        }
+      ],
+      "pagination": {
+        "enabled": true,
+        "pageSize": 20,
+        "pageSizes": [
+          20,
+          50,
+          100
+        ]
+      },
+      "footer": [
+        {
+          "key": "batchSubmit",
+          "label": "批量提交核查",
+          "intent": "mutate",
+          "destructive": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "T02：层级导航和查询",
+    "spec": {
+      "mode": "page",
+      "templateId": "T02_SIDEBAR_QUERY_TABLE",
+      "pageTitle": "区域报表",
+      "entityName": "ReportRow",
+      "sidebar": {
+        "nodes": [
+          {
+            "key": "all",
+            "label": "全部",
+            "children": [
+              {
+                "key": "region-a",
+                "label": "区域 A"
+              }
+            ]
+          }
+        ],
+        "filterable": true,
+        "collapsible": true,
+        "selectionQueryKey": "regionId"
+      },
+      "toolbar": [
+        {
+          "key": "period",
+          "label": "统计时间",
+          "control": "date-range"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "label": "名称",
+          "type": "string"
+        },
+        {
+          "key": "value",
+          "label": "统计值",
+          "type": "number"
+        }
+      ],
+      "pagination": {
+        "enabled": true,
+        "pageSize": 20,
+        "pageSizes": [
+          20,
+          50
+        ]
+      }
+    }
+  },
+  {
+    "name": "T03：地图由调用方插槽接入，业务面板按需启用",
+    "spec": {
+      "mode": "page",
+      "templateId": "T03_GIS_HUD_DASHBOARD",
+      "pageTitle": "空间总览",
+      "appearance": {
+        "theme": "inherit"
+      },
+      "map": {
+        "integration": "slot"
+      },
+      "panels": [
+        {
+          "slot": "left-kpi",
+          "kind": "summary"
+        },
+        {
+          "slot": "site-list",
+          "kind": "list"
+        },
+        {
+          "slot": "right-alarm",
+          "kind": "table",
+          "columns": [
+            {
+              "key": "name",
+              "label": "名称",
+              "type": "string"
+            },
+            {
+              "key": "status",
+              "label": "状态",
+              "type": "status"
+            }
+          ]
+        }
+      ],
+      "legend": {
+        "enabled": true
+      },
+      "mapTools": {
+        "enabled": true
+      }
+    }
+  },
+  {
+    "name": "T04：分段长卷与锚点导航",
+    "spec": {
+      "mode": "page",
+      "templateId": "T04_SECTION_ANCHOR_FLOW",
+      "pageTitle": "对象全量综合档案",
+      "sections": [
+        {
+          "key": "basic",
+          "title": "基础属性"
+        },
+        {
+          "key": "params",
+          "title": "运行参数"
+        }
+      ]
+    }
+  },
+  {
+    "name": "T05：全高双栏主从独立滚动",
+    "spec": {
+      "mode": "page",
+      "templateId": "T05_SPLIT_TWO_PANE",
+      "pageTitle": "配置映射工作台",
+      "master": {
+        "title": "主项清单"
+      },
+      "slave": {
+        "title": "从属详情"
+      }
+    }
+  },
+  {
+    "name": "T06：响应式多卡片网格看板",
+    "spec": {
+      "mode": "page",
+      "templateId": "T06_GRID_DASHBOARD",
+      "pageTitle": "综合监控指标驾驶舱",
+      "widgets": [
+        {
+          "key": "overview",
+          "title": "总览",
+          "span": 12
+        },
+        {
+          "key": "trend",
+          "title": "趋势",
+          "span": 12
+        }
+      ]
+    }
+  },
+  {
+    "name": "T07：步骤向导推进单视口",
+    "spec": {
+      "mode": "page",
+      "templateId": "T07_STEP_WIZARD_FUNNEL",
+      "pageTitle": "业务数据导入与校验向导",
+      "steps": [
+        {
+          "key": "upload",
+          "title": "上传文件"
+        },
+        {
+          "key": "validate",
+          "title": "规则校验"
+        },
+        {
+          "key": "confirm",
+          "title": "确认提交"
+        }
+      ]
+    }
+  }
+]

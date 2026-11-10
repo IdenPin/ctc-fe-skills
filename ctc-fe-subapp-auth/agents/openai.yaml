@@ -1,0 +1,3 @@
+interface:
+  display_name: "CTC FE 子应用鉴权与静默续租规范"
+  short_description: "微前端与 iframe 子应用接入基座鉴权、401 并发挂起重试队列及 Token 双向同步规范"

@@ -1,0 +1,15 @@
+/* 页面布局变量的唯一取值来源。预览尺寸和注释样式不属于业务页面规范。 */
+:root {
+  --layout-workspace-bg: #f5f7fc;
+  --layout-content-bg: #ffffff;
+  --layout-toolbar-bg: #ffffff;
+  --layout-frame-gap: 12px;
+  --layout-content-padding: 12px;
+  --layout-control-gap: 8px;
+  --layout-sidebar-width: 208px;
+  --layout-toolbar-height: 48px;
+  --layout-tabs-height: 40px;
+  --layout-footer-height: 40px;
+  --layout-control-height: 32px;
+  --layout-radius: 4px;
+}

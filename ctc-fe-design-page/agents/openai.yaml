@@ -1,0 +1,3 @@
+interface:
+  display_name: "CTC FE 页面布局生成规范"
+  short_description: "根据 T01~T04 统一契约生成或调整 Vue 3 页面骨架、中后台表格与 GIS HUD 看板"

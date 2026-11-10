@@ -1,23 +1,23 @@
 # CTC FE Skills
 
-`ctcfront` 团队的前端开发规范 Skill 仓库，供团队成员和 AI 编码助手在架构设计、Vue 3 开发和浏览器兼容性评估时按需加载。
+`ctcfront` 团队的开发规范 Skill 仓库，以前端规范为主，并纳入 GF 多业务系统的全栈协作手册，供团队成员和 AI 编码助手按需加载。
 
 [![skills.sh](https://skills.sh/b/IdenPin/ctc-fe-skills)](https://skills.sh/IdenPin/ctc-fe-skills)
 
-当前正式版本：**v1.1.0**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
+当前正式版本：**v1.2.0**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ## 安装
 
 团队项目建议通过 tag 安装固定版本：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.1.0 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.0 -y
 ```
 
 使用 Vue 规范时，建议同时安装结构规范，以便获取文件归属、目录容量和体积检查规则：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.1.0 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.0 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
 ```
 
 需要体验主分支最新修改时安装全部 skills：
@@ -33,6 +33,10 @@ npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-structure -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-vue3 -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-adapt-broswer -y
 npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-cicd-release -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-subapp-auth -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-design-page -y
+npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-code-auditor -y
+npx skills add IdenPin/ctc-fe-skills --skill gf-fullstack-dev -y
 ```
 
 上述简写来源跟随默认分支，安装时取得当时内容；已安装的副本不会因仓库更新而自动变更。主分支安装可通过 `npx skills check` 检查更新，再执行 `npx skills update`；固定版本升级时，使用新的 tag URL 重新安装，并核对项目的 `skills-lock.json` 与变更。
@@ -71,6 +75,28 @@ npx skills add IdenPin/ctc-fe-skills --skill ctc-fe-cicd-release -y
 用于 CTC 前端项目的 GitLab Pipeline、Runner、SSH 部署、运行时环境配置和回滚流程。规范区分已落地能力与建议目标，重点约束 Runner 凭据边界、一次构建多环境发布以及可验证的回滚路径。
 
 分册：[Pipeline 与 Runner](./ctc-fe-cicd-release/references/pipeline-runner.md)、[SSH 部署](./ctc-fe-cicd-release/references/ssh-deployment.md)、[环境配置](./ctc-fe-cicd-release/references/environment-config.md)、[回滚](./ctc-fe-cicd-release/references/rollback.md)。
+
+### [ctc-fe-subapp-auth](./ctc-fe-subapp-auth/SKILL.md)
+
+用于微前端或 iframe 子应用接入基座鉴权与 Token 静默续租。规范涵盖 `@ctc-front/gf-framework-auth` 与 `@ctc-front/bridge-next`，适配 `gf-monitor` 和 `gf-law` 基座平台，指导 401 并发挂起、通知基座续租、重试队列、Pinia/Vuex 状态双向同步及防白屏死锁等核心规范。
+
+分册：[基座平台与接入矩阵](./ctc-fe-subapp-auth/references/platforms.md)、[踩坑避雷与防御性指南](./ctc-fe-subapp-auth/references/troubleshooting.md)。
+
+### [ctc-fe-design-page](./ctc-fe-design-page/SKILL.md)
+
+用于根据团队标准化 T01～T07 布局契约创建或调整 Vue 3 页面。涵盖纯布局骨架（layout 模式）与业务页面（page 模式），支持标准通用表格/报表页（整合页签与筛选）、左树右查表、GIS HUD 大屏、分段长卷与锚点、双栏对比、多卡片网格看板及步骤向导等 7 类标准化空间户型。
+
+分册：[统一布局契约](./ctc-fe-design-page/references/layout-contract.md)、[输入结构 Schema](./ctc-fe-design-page/references/page-spec.schema.json)、[输入示例](./ctc-fe-design-page/references/page-spec.examples.json)。
+
+### [ctc-fe-code-auditor](./ctc-fe-code-auditor/SKILL.md)
+
+用于审查遵循 T01～T07 契约的 Vue 页面与布局实现。重点检查视觉与插槽规范、父级高度链与滚动（`min-height: 0`、表格填满视口）、按需交互（筛选/分页/加载态）及 GIS/图表资源与事件穿透清理。
+
+分册：[统一布局契约](./ctc-fe-code-auditor/references/layout-contract.md)、[输入结构 Schema](./ctc-fe-code-auditor/references/page-spec.schema.json)。
+
+### [gf-fullstack-dev](./gf-fullstack-dev/SKILL.md)
+
+用于 GF 多业务系统的全栈开发与跨仓库排查。当前清单收录“监测”体系中已提供的 `operations`（运维）和 `auto-monitor`（自动监控）相关 8 个前后端 Git 仓库，并支持后续补充其他监测子系统；监测与执法使用独立工作区，分别命名为 `gf-monitor-ai/` 和 `gf-law-ai/`，执法子应用及仓库映射待后续补齐。
 
 ## 规范等级
 
@@ -117,4 +143,8 @@ Skills 通过 GitHub 仓库及 `npx skills add` 分发。`package.json` 的 `ver
 参照 ctc-fe-vue3 评审这个组件的类型、异步副作用和样式隔离问题。
 参照 ctc-fe-adapt-broswer 制定奇安信浏览器的生产构建兼容验收方案。
 参照 ctc-fe-cicd-release 为新前端项目设计 Pipeline、部署环境选择和回滚方案。
+参照 ctc-fe-subapp-auth 为子应用接入 gf-monitor 基座鉴权并配置 401 静默续租。
+参照 ctc-fe-design-page 基于 T04 契约生成带有地图插槽与 KPI 面板的 GIS HUD 页面。
+参照 ctc-fe-code-auditor 审查当前业务表格页面的父级高度链、插槽完整度与滚动行为。
+参照 gf-fullstack-dev 在 operations 与 auto-monitor 仓库间追踪某个前端接口对应的后端实现。
 ```

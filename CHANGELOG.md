@@ -1,5 +1,35 @@
 # 版本记录
 
+## 1.2.0 — 2026-11-10
+
+### 新增与完善
+
+- 新增 GF 多业务系统全栈协作规范 `gf-fullstack-dev`：
+  - 将“监测”和“执法”定义为 GF 下的两套体系；现有清单记录“监测”体系中已提供的 8 个前后端 Git 仓库，涉及 `operations`（运维）与 `auto-monitor`（自动监控），并可继续增补其他监测子系统。
+  - 为监测与执法分别规划独立工作区 `gf-monitor-ai/` 与 `gf-law-ai/`，并为执法体系补充仓库映射模板，子应用清单待后续补齐。
+  - 增加任务领域路由：按监测/执法工作区或用户指定范围选择代码上下文，并规范多仓准备、逐仓需求分支/版本核对及前端到后端的接口追踪。
+  - 标明自动监控后端 `amdb` 仅覆盖部分企业端和管理端功能，并要求明确缺失仓库和未确认的代码归属。
+- 新增微前端子应用鉴权与静默续租规范 `ctc-fe-subapp-auth`：
+  - 适配 `gf-monitor`（`monitor-user-info`）与 `gf-law`（`law-user-info`）两大基座平台。
+  - 标准化 401/402 并发拦截挂起、通知基座续租与自动重试队列机制。
+  - 增加基座平台接入矩阵与改造备忘分册 `references/platforms.md`。
+  - 增加踩坑避雷与防御性编程指南分册 `references/troubleshooting.md`（防白屏死锁、Axios 拦截器顺序、防二次解包守卫、Vue 2/3 生命周期陷阱）。
+  - 提供 Vue 2（Options API + Vuex）与 Vue 3（Composition API + Pinia）双栈接入模板代码。
+- 新增统一页面布局生成规范 `ctc-fe-design-page`：
+  - 基于 T01～T07 统一布局契约（T01 标准通用表格/报表页、T02 左树右查表、T03 GIS HUD 大屏、T04 分段长卷与锚点、T05 全高双栏对比、T06 多卡片网格看板、T07 步骤向导）生成或调整 Vue 3 页面。
+  - 将原筛选表与页签表合并收敛为 `T01_STANDARD_TABLE_PAGE`，提供一体化超集插槽（tabs, filters, summary, toolbar, columns, pagination, footer），消除业务选型冗余。
+  - 汲取 `@ctc-front/components-ui-next` 中 `CtcReport` 的高度链与视口防溢出经验，提供 T01 标准 Vue 3 布局组件 `TablePageLayout.vue`，并明确 `CtcReport` 插槽映射与复用指引。
+- 新增统一页面布局审查规范 `ctc-fe-code-auditor`：
+  - 针对遵循 T01～T07 契约的 Vue 页面提供专项审查流程。
+  - 重点核对工作区白卡视觉分层、父级高度链与滚动（`min-height: 0` / 表格视口铺满）、插槽规范以及 GIS 图层事件穿透与资源销毁。
+  - 增加对复用 `CtcReport` 报表组件的 T01 页面审查规范（核对 `search-bar`、`container-top`、`tool-bar` 插槽映射与 `auto-height` 配置）。
+
+### 验证范围
+
+- `npm test`：校验 8 个 skill 的元数据与本地 Markdown 链接。
+- 布局生成与审查 skill：7 个模板、Schema、8 组示例、引用和插槽契约校验通过；两者共享资料一致。
+- Skills CLI：在临时项目中完整安装 8 个 skill，确认目录、分册、脚本与元数据随包安装。
+
 ## 1.1.0 — 2026-11-05
 
 ### 新增与完善

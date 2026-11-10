@@ -1,0 +1,3 @@
+interface:
+  display_name: "CTC FE 页面布局审查规范"
+  short_description: "审查遵循 T01~T04 契约的 Vue 页面视觉分层、父级高度链、滚动插槽与 GIS 资源清理"
