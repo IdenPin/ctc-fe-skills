@@ -58,8 +58,11 @@ description: 用于 GF 监测与执法体系的需求定位、全栈开发和跨
 | 自动监控 | 后端 | `auto-monitor/backend/amdb` | `http://192.168.6.139/project/backend/mointor/amdb.git` | 包含部分企业端和管理端功能，后端覆盖不完整 |
 | 自动监控 | 前端 | `auto-monitor/frontend/zdjk-system` | `http://192.168.6.139/project/front/guo-fa/public/zdjk-system.git` | 管理端 |
 | 自动监控 | 前端 | `auto-monitor/frontend/zdjk-company` | `http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-company.git` | 企业端 |
+| 自动监控 | 前端 | `auto-monitor/frontend/zdjk-company-base` | `http://192.168.6.139/project/front/guo-fa/public/zdjk-company-base.git` | 企业端框架 |
+| 自动监控 | 前端 | `auto-monitor/frontend/gov-zdjk-ministry` | `http://192.168.6.139/project/front/gov-zdjk-ministry.git` | 管理端 4.3 框架 |
+| 自动监控 | 前端 | `auto-monitor/frontend/gf-framework-system` | `http://192.168.6.139/project/front/guo-fa/public/gf-framework-system.git` | 管理端 5.0 框架 |
 
-当前共登记 10 个 Git 仓库：2 个需求仓库和以上 8 个监测代码仓库。代码仓库表中的路径相对于 `gf-monitor-ai/`；需求仓库路径分别相对于所属领域工作区。这份代码清单可随其他监测子系统继续扩展。此前移除的 SVN 地址不属于当前代码来源。“执法”使用独立的 `gf-law-ai/` 工作区，已登记 `gf-law-reqs`；子应用名称、代码仓库地址和职责尚待维护。收到相关任务时，先从用户或项目文档确认这些信息，不要根据系统名称或需求文档标题臆造仓库或代码归属。
+当前共登记 13 个 Git 仓库：2 个需求仓库和以上 11 个监测代码仓库。代码仓库表中的路径相对于 `gf-monitor-ai/`；需求仓库路径分别相对于所属领域工作区。这份代码清单可随其他监测子系统继续扩展。此前移除的 SVN 地址不属于当前代码来源。“执法”使用独立的 `gf-law-ai/` 工作区，已登记 `gf-law-reqs`；子应用名称、代码仓库地址和职责尚待维护。收到相关任务时，先从用户或项目文档确认这些信息，不要根据系统名称或需求文档标题臆造仓库或代码归属。
 
 ### 执法体系扩展模板
 
@@ -87,6 +90,9 @@ git clone http://192.168.6.139/project/front/guo-fa/public/provider-common.git o
 git clone http://192.168.6.139/project/backend/mointor/amdb.git auto-monitor/backend/amdb
 git clone http://192.168.6.139/project/front/guo-fa/public/zdjk-system.git auto-monitor/frontend/zdjk-system
 git clone http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-company.git auto-monitor/frontend/zdjk-company
+git clone http://192.168.6.139/project/front/guo-fa/public/zdjk-company-base.git auto-monitor/frontend/zdjk-company-base
+git clone http://192.168.6.139/project/front/gov-zdjk-ministry.git auto-monitor/frontend/gov-zdjk-ministry
+git clone http://192.168.6.139/project/front/guo-fa/public/gf-framework-system.git auto-monitor/frontend/gf-framework-system
 ```
 
 执法体系：单独从 `gf-law-ai/` 的父目录执行。

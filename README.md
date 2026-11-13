@@ -4,20 +4,20 @@
 
 [![skills.sh](https://skills.sh/b/IdenPin/ctc-fe-skills)](https://skills.sh/IdenPin/ctc-fe-skills)
 
-当前正式版本：**v1.2.1**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
+当前正式版本：**v1.2.2**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ## 安装
 
 团队项目建议通过 tag 安装固定版本：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.1 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.2 -y
 ```
 
 使用 Vue 规范时，建议同时安装结构规范，以便获取文件归属、目录容量和体积检查规则：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.1 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.2 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
 ```
 
 需要体验主分支最新修改时安装全部 skills：
@@ -96,7 +96,7 @@ npx skills add IdenPin/ctc-fe-skills --skill gf-fullstack-dev -y
 
 ### [gf-fullstack-dev](./gf-fullstack-dev/SKILL.md)
 
-用于 GF 多业务系统的需求定位、全栈开发与跨仓库排查。当前共登记 2 个需求仓库（`gf-monitor-reqs`、`gf-law-reqs`）和监测体系 `operations`（运维）、`auto-monitor`（自动监控）相关 8 个前后端代码仓库。监测与执法分别使用独立工作区 `gf-monitor-ai/` 和 `gf-law-ai/`，需求仓库位于各自根目录，与子业务系统或子应用平级；执法子应用代码仓库映射待后续补齐。涉及需求的任务先定位文档与验收依据，再关联实现，并记录需求与代码的差异。
+用于 GF 多业务系统的需求定位、全栈开发与跨仓库排查。当前共登记 2 个需求仓库（`gf-monitor-reqs`、`gf-law-reqs`）和监测体系 `operations`（运维）、`auto-monitor`（自动监控）相关 11 个前后端代码仓库；自动监控前端包含管理端、企业端及其对应框架仓库。监测与执法分别使用独立工作区 `gf-monitor-ai/` 和 `gf-law-ai/`，需求仓库位于各自根目录，与子业务系统或子应用平级；执法子应用代码仓库映射待后续补齐。涉及需求的任务先定位文档与验收依据，再关联实现，并记录需求与代码的差异。
 
 ## 规范等级
 

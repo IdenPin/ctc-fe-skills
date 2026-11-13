@@ -1,5 +1,23 @@
 # 版本记录
 
+## 1.2.2 — 2026-11-13
+
+### 新增与完善
+
+- 为 `gf-fullstack-dev` 的自动监控前端补充 3 个代码仓库：`zdjk-company-base`（企业端框架）、`gov-zdjk-ministry`（管理端 4.3 框架）、`gf-framework-system`（管理端 5.0 框架）；监测代码仓库由 8 个增至 11 个，总计 13 个 Git 仓库。
+- 同步更新仓库清单、工作区准备命令与 README 概览。
+- 新增本地同步脚本 `scripts/sync-skill.sh` 与 `npm run sync -- <skill-name>`，在修改 skill 后将源仓库内容同步到已安装的 Qoder、Codex、Claude 本地副本，避免只复制 `SKILL.md` 造成分叉。
+
+### 升级说明
+
+- 使用新的固定版本 tag 重新安装 `gf-fullstack-dev`，或对主分支安装执行 `npx skills update`。
+- 本地开发时可通过同步脚本更新工具副本；本地同步不等于发布。
+
+### 验证范围
+
+- `npm test`：校验 8 个 skill 的元数据与本地 Markdown 链接。
+- 3 个新增仓库地址均可访问；本地同步后源仓库与 Qoder、Codex 副本哈希一致。
+
 ## 1.2.1 — 2026-11-11
 
 ### 修正与完善
