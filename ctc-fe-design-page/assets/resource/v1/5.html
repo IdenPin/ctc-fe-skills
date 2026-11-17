@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>通用前端页面布局模板与插槽契约规范 (v5.1 定稿版)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #1f2937;
+      background: #f1f5f9;
+      padding: 16px;
+    }
+
+    /* 顶部控制栏 */
+    .top-bar {
+      border: 1px solid #cbd5e1;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .top-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .top-bar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-bar-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tab-btn {
+      padding: 6px 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { color: #2563eb; border-color: #2563eb; }
+    .tab-btn.active { background: #1e40af; color: #ffffff; border-color: #1e40af; }
+
+    /* 模板画板卡片 */
+    .template-card {
+      border: 1px solid #cbd5e1;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border-radius: 4px;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .template-card.active { display: block; }
+    body.show-all .template-card { display: block; }
+
+    /* 契约属性说明区 */
+    .template-header {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 16px;
+    }
+    .header-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .tpl-badge {
+      background: #1e40af;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .tpl-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .contract-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 8px 12px;
+      font-size: 11px;
+      border-radius: 2px;
+    }
+    .contract-item strong { color: #334155; }
+    .contract-item span { color: #64748b; }
+
+    /* 纯插槽骨架画板 */
+    .blueprint-canvas {
+      padding: 16px;
+      background: #f8fafc;
+      position: relative;
+    }
+
+    /* 插槽基础外框 */
+    .slot-box {
+      border: 2px dashed #94a3b8;
+      background: rgba(255, 255, 255, 0.9);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 10px;
+      transition: all 0.2s;
+    }
+    .slot-box:hover {
+      border-color: #2563eb;
+      background: #ffffff;
+    }
+    .slot-name {
+      font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e40af;
+      background: #dbeafe;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-bottom: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .slot-desc {
+      font-size: 11px;
+      color: #475569;
+      max-width: 92%;
+    }
+    
+    /* 规则徽章 */
+    .rule-tag-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tag-scroll {
+      font-size: 10px;
+      color: #0369a1;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+    .tag-flex {
+      font-size: 10px;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+    .tag-opt {
+      font-size: 10px;
+      color: #64748b;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    /* 物理布局容器辅助类 */
+    .layout-viewport {
+      height: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .h-full { height: 100%; }
+    .flex-row { display: flex; flex-direction: row; gap: 8px; }
+    .flex-col { display: flex; flex-direction: column; gap: 8px; }
+    .flex-1 { flex: 1; min-height: 0; min-width: 0; }
+
+    /* 栅格辅助 */
+    .grid-tree { display: grid; grid-template-columns: 240px 1fr; gap: 8px; height: 100%; }
+    .grid-split { display: grid; grid-template-columns: 300px 1fr; gap: 8px; height: 100%; }
+    .grid-anchor { display: grid; grid-template-columns: 160px 1fr; gap: 8px; height: 100%; }
+    .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+    .grid-dashboard-body { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+    .grid-modal-split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; height: 100%; }
+
+    /* GIS 特殊画布 */
+    .gis-stage {
+      position: relative;
+      height: 380px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      overflow: hidden;
+    }
+    .gis-bg-canvas {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #94a3b8;
+    }
+    .gis-hud-grid {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 260px 1fr 260px;
+      grid-template-rows: 44px 1fr 36px;
+      gap: 8px;
+    }
+    .hud-slot {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px dashed #0284c7;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <header class="top-bar">
+    <div class="top-bar-header">
+      <div class="top-bar-title">
+        通用前端页面布局模板与插槽契约规范 (v5.1 定稿版)
+        <span class="top-bar-tag">已合并 Codex 架构复审意见 · 零契约漂移 · 宿主高度链防御</span>
+      </div>
+      <div class="flex-row">
+        <button type="button" class="tab-btn active" id="btnSingle">单页切换模式</button>
+        <button type="button" class="tab-btn" id="btnAll">全部平铺检视</button>
+      </div>
+    </div>
+    <nav class="nav-tabs" id="navTabs">
+      <button type="button" class="tab-btn active" data-target="tpl-l01">L01. 标准工作台检索布局 (Filter-Viewport-Page)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l02">L02. 侧栏联动主从布局 (Tree-Content-Split)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l03">L03. 双栏流转协同布局 (Master-Detail-Pane)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l04">L04. 全景空间底图 + HUD 浮层布局 (GIS-HUD-Overlay)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l05">L05. 复合模态浮层外壳 (Dual-Pane-Modal/Drawer)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l06">L06. 响应式网格看板布局 (Dashboard-Grid)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l07">L07. 锚点分段长卷档案布局 (Anchor-Section-Scroll)</button>
+      <button type="button" class="tab-btn" data-target="tpl-l08">L08. 步骤向导受控流转布局 (Step-Wizard-Funnel)</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- =========================================================================
+         L01: 标准工作台检索布局 (Filter-Viewport-Page)
+    ========================================================================= -->
+    <section class="template-card active" id="tpl-l01">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L01</span>
+            <span class="tpl-title">标准工作台检索布局（Standard Filter-Viewport-Page）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：台账检索、时序数据监测(表/图双态)、日志审计、标准增删改查</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>纵向单列流 (筛选区 ➔ 操作工具栏 ➔ 自适应主视口 ➔ 分页/底栏)</span></div>
+          <div class="contract-item"><strong>高度契约：</strong><span>宿主提供可用高度 ➔ 布局 <code>height: 100%</code> 填满；收缩链保持 <code>min-height: 0; min-width: 0;</code></span></div>
+          <div class="contract-item"><strong>滚动归属：</strong><span>外层 <code>overflow: hidden;</code> 严禁外层双滚动；<code>#main-viewport</code> 内部或由子组件(如 el-table)自负责滚动</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#filter-bar</code>, <code>#toolbar</code>, <code>#main-viewport</code> (必需), <code>#footer-bar</code> (可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport">
+          <!-- 筛选插槽 -->
+          <div class="slot-box" style="height: 52px;">
+            <div class="slot-name">#filter-bar</div>
+            <div class="slot-desc">多维表单查询、时间范围、级联下拉、查询/重置按钮组 (支持展开/折叠)</div>
+            <div class="rule-tag-group">
+              <span class="tag-opt">[可选插槽 · 缺省不占位]</span>
+              <span class="tag-scroll">[无滚动 · 紧凑排布]</span>
+            </div>
+          </div>
+          <!-- 工具操作栏插槽 -->
+          <div class="slot-box" style="height: 38px;">
+            <div class="slot-name">#toolbar</div>
+            <div class="slot-desc">新增、批量导出/下发、列设置、视图形态切换 (表格态 ⇄ 趋势图态)</div>
+            <div class="rule-tag-group">
+              <span class="tag-opt">[可选插槽 · 缺省不占位]</span>
+              <span class="tag-scroll">[无滚动 · 工具条]</span>
+            </div>
+          </div>
+          <!-- 核心视口插槽 -->
+          <div class="slot-box flex-1">
+            <div class="slot-name">#main-viewport</div>
+            <div class="slot-desc">占满剩余可用视口高度 (flex: 1; min-height: 0; min-width: 0;)</div>
+            <div class="rule-tag-group">
+              <span class="tag-scroll">[必需插槽 · 滚动归属：内部表格/列表子组件自负责滚动]</span>
+              <span class="tag-flex">[可接入：高密度表格 / 虚拟列表 / 时序对数趋势图 / 复杂表头矩阵]</span>
+            </div>
+          </div>
+          <!-- 底部分页插槽 -->
+          <div class="slot-box" style="height: 38px;">
+            <div class="slot-name">#footer-bar</div>
+            <div class="slot-desc">状态图例说明 (正常/超标/异常)、总条数统计、分页控制器 (PageSize / Jumper)</div>
+            <div class="rule-tag-group">
+              <span class="tag-opt">[可选插槽 · 缺省不占位]</span>
+              <span class="tag-flex">[不被内容挤压 · 贴底可见]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L02: 侧栏联动主从布局 (Tree-Content-Split)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l02">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L02</span>
+            <span class="tpl-title">侧栏联动主从布局（Sidebar Tree/Nav Split）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：组织树/排口树查表、设备视频监控通道、流媒体巡检、分类目录台账</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>横向双栏：左固定宽侧栏 (240~280px) + 右自适应工作区 (1fr)；可与 L03 共享双栏底层实现</span></div>
+          <div class="contract-item"><strong>高度契约：</strong><span>容器 <code>height: 100%</code>；左右两栏均为 <code>height: 100%</code></span></div>
+          <div class="contract-item"><strong>滚动归属：</strong><span>双轨独立滚动：左侧侧栏容器独立纵向滚动 (<code>overflow-y: auto</code>)；右侧工作区滚动权归属其装配内容</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#sidebar-nav</code> (必需), <code>#content-header</code> (可选), <code>#content-body</code> (必需), <code>#content-footer</code> (可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport">
+          <div class="grid-tree">
+            <!-- 左侧边栏插槽 -->
+            <div class="slot-box h-full">
+              <div class="slot-name">#sidebar-nav</div>
+              <div class="slot-desc">固定宽 240~280px | 承载树形导航/分类目录</div>
+              <div class="rule-tag-group">
+                <span class="tag-scroll">[必需插槽 · 滚动归属：布局侧栏容器独立滚动 overflow-y: auto]</span>
+                <span class="tag-flex">[可接入：行政区划树 / 排口设备树 / 目录索引]</span>
+              </div>
+            </div>
+            <!-- 右侧联动工作区 -->
+            <div class="flex-col flex-1 h-full">
+              <div class="slot-box" style="height: 48px;">
+                <div class="slot-name">#content-header</div>
+                <div class="slot-desc">当前节点上下文摘要、业务维度 Tab (如视频查看/日志/联网趋势)、轻量筛选</div>
+                <div class="rule-tag-group">
+                  <span class="tag-opt">[可选插槽 · 缺省不占位]</span>
+                </div>
+              </div>
+              <div class="slot-box flex-1">
+                <div class="slot-name">#content-body</div>
+                <div class="slot-desc">占满剩余视口 (min-height: 0;) | 随左侧选中节点动态联动</div>
+                <div class="rule-tag-group">
+                  <span class="tag-scroll">[必需插槽 · 滚动归属：由装配内容负责滚动]</span>
+                  <span class="tag-flex">[可接入：音视频流媒体视口 / 关联数据表格 / 因子对比分析图]</span>
+                </div>
+              </div>
+              <div class="slot-box" style="height: 38px;">
+                <div class="slot-name">#content-footer</div>
+                <div class="slot-desc">底部分页器、诊断状态说明、操作控制栏</div>
+                <div class="rule-tag-group">
+                  <span class="tag-opt">[可选插槽 · 缺省不占位]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L03: 双栏流转协同布局 (Master-Detail-Pane)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l03">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L03</span>
+            <span class="tpl-title">双栏流转协同布局（Master-Detail Split Pane）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：应急轮次管理、现场排查任务协同、待办工单流转、即席流转审批</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>横向双栏：左侧主清单流 (280~360px) + 右侧详情与处理面板 (1fr)</span></div>
+          <div class="contract-item"><strong>高度契约：</strong><span>双栏 100% 满高；两栏各自持有独立纵向高度链</span></div>
+          <div class="contract-item"><strong>滚动归属：</strong><span>左侧清单容器独立滚动；右侧正文区独立滚动；右侧操作栏常驻吸底可见</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#master-filter</code> (可选), <code>#master-list</code> (必需), <code>#detail-head</code> (可选), <code>#detail-body</code> (必需), <code>#detail-actions</code> (可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport">
+          <div class="grid-split">
+            <!-- 左侧主列表流 -->
+            <div class="flex-col h-full">
+              <div class="slot-box" style="height: 48px;">
+                <div class="slot-name">#master-filter</div>
+                <div class="slot-desc">主列表过滤项 (年份/批次下拉、状态切换)</div>
+                <div class="rule-tag-group"><span class="tag-opt">[可选插槽]</span></div>
+              </div>
+              <div class="slot-box flex-1">
+                <div class="slot-name">#master-list</div>
+                <div class="slot-desc">承载主卡片流或紧凑列表项 (支持选中态高亮)</div>
+                <div class="rule-tag-group">
+                  <span class="tag-scroll">[必需插槽 · 滚动归属：左侧清单容器独立纵向滚动]</span>
+                </div>
+              </div>
+            </div>
+            <!-- 右侧详情与处理面板 -->
+            <div class="flex-col flex-1 h-full">
+              <div class="slot-box" style="height: 48px;">
+                <div class="slot-name">#detail-head</div>
+                <div class="slot-desc">选中对象标题、状态徽章、操作按钮组</div>
+                <div class="rule-tag-group"><span class="tag-opt">[可选插槽]</span></div>
+              </div>
+              <div class="slot-box flex-1">
+                <div class="slot-name">#detail-body</div>
+                <div class="slot-desc">从属核心处理工作区 (现场证据链、整改填报表单、联动城市管理表格)</div>
+                <div class="rule-tag-group">
+                  <span class="tag-scroll">[必需插槽 · 滚动归属：右侧内容容器纵向滚动]</span>
+                </div>
+              </div>
+              <div class="slot-box" style="height: 44px;">
+                <div class="slot-name">#detail-actions</div>
+                <div class="slot-desc">常驻吸底操作栏 (退回、转交、保存草稿、审批销号)</div>
+                <div class="rule-tag-group">
+                  <span class="tag-flex">[行为契约：始终贴底可见，不随正文滚出视口]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L04: 全景空间底图 + HUD 浮层布局 (GIS-HUD-Overlay)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l04">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L04</span>
+            <span class="tpl-title">全景空间底图 + HUD 浮层布局（GIS-HUD-Overlay）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：生态环境一张图、流域水质大盘、污染源监管大屏、3D 数字孪生</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>底层全景画布 (100% 视口) + 上层 HUD 悬浮面板栅格 (顶/左/右/底)</span></div>
+          <div class="contract-item"><strong>高度契约：</strong><span>填充宿主或全屏外壳可用空间；地图画布保证最小可用尺寸 (默认 min 320px)</span></div>
+          <div class="contract-item"><strong>交互与穿透：</strong><span>HUD 浮层外框 <code>pointer-events: none</code> 穿透底图；内部卡片面板恢复 <code>pointer-events: auto</code></span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#canvas-bg</code> (必需), <code>#hud-top</code>, <code>#hud-left</code>, <code>#hud-right</code>, <code>#hud-bottom-left</code>, <code>#hud-bottom-right</code> (均可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas" style="padding:0;">
+        <div class="gis-stage">
+          <!-- 底层画布插槽 -->
+          <div class="gis-bg-canvas">
+            <div class="slot-name">#canvas-bg</div>
+            <div class="slot-desc" style="color:#cbd5e1;">底层全景画布视口 (响应鼠标原生拖拽、缩放、点位悬浮高亮、空间框选)</div>
+            <div class="rule-tag-group">
+              <span class="tag-scroll" style="background:#1e293b; color:#93c5fd; border-color:#334155;">[必需插槽 · 滚动归属：无滚动 · 组件响应 Resize]</span>
+              <span class="tag-flex" style="background:#1e293b; color:#fdba74; border-color:#334155;">[接入：天地图 / 高德 / Mapbox / 3D 孪生]</span>
+            </div>
+          </div>
+          <!-- 上层 HUD 浮动栅格 (命名已严格对齐契约) -->
+          <div class="gis-hud-grid">
+            <div class="hud-slot" style="grid-column: 1 / 4; display:flex; align-items:center; justify-content:center;">
+              <span class="slot-name">#hud-top</span>
+              <span class="slot-desc" style="margin-left:8px;">顶部统揽指标栏 (联网企业数、今日报警数、优良水体占比、区域切换器)</span>
+            </div>
+            <div class="hud-slot" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <span class="slot-name">#hud-left</span>
+              <span class="slot-desc">左侧态势分析 (工作进展卡、分类图层树、达标率排行)</span>
+            </div>
+            <!-- 中间核心视野留白 (事件穿透至底图) -->
+            <div></div>
+            <div class="hud-slot" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <span class="slot-name">#hud-right</span>
+              <span class="slot-desc">右侧实时事件 (实时异常线索流、任务办理进度、预警处置卡)</span>
+            </div>
+            <div class="hud-slot" style="grid-column: 1 / 4; display:flex; align-items:center; justify-content:space-between; padding:0 12px;">
+              <span class="slot-name">#hud-bottom-left [图例插槽]</span>
+              <span class="slot-name">#hud-bottom-right [空间工具：测距/框选/图层开关]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L05: 复合双栏核查工作台 (Dual-Pane Review Workbench)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l05">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L05</span>
+            <span class="tpl-title">复合双栏核查工作台（Dual-Pane Review Workbench）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：公文派发+审批流程比对、涉案证据核验、深度两段式案卷核实</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>定位与解耦：</strong><span>**纯双栏内容布局**；浮层外壳直接使用 CtcDialog / CtcDrawer（原生 48px Header 与 Footer），L05 专注双栏核查</span></div>
+          <div class="contract-item"><strong>空间形态：</strong><span>装配在开启 contentFill 的 CtcDialog (居中) 或 CtcDrawer (宽幅抽屉 68%~75%) 中</span></div>
+          <div class="contract-item"><strong>滚动与禁滚：</strong><span>宿主外壳 overflow:hidden 抑制嵌套滚动；左栏与右栏各自持有独立纵向滚动条</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#pane-left</code> (必需), <code>#pane-right</code> (必需)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div style="background:#475569; padding:16px; border-radius:4px;">
+          <!-- 模拟浮层外壳容器 (由 CtcDialog / CtcDrawer 提供) -->
+          <div class="layout-viewport" style="background:#ffffff; height:340px; border-radius:4px; box-shadow:0 10px 25px rgba(0,0,0,0.3); border:2px solid #2563eb;">
+            <!-- 外壳原生 48px 头部说明 -->
+            <div class="slot-box" style="height:46px; border-bottom:1px solid #cbd5e1; justify-content:space-between; flex-direction:row; background:#f8fafc;">
+              <span class="slot-desc" style="font-weight:600; color:#334155;">[外壳原生 Header: CtcDialog / CtcDrawer 管控 48px 标题与关闭/全屏控件]</span>
+              <span class="tag-opt">[外壳原生]</span>
+            </div>
+            <!-- L05 纯双栏工作台布局 -->
+            <div class="flex-1" style="padding:8px;">
+              <div class="grid-modal-split">
+                <!-- 左栏：静态公文/证据 -->
+                <div class="slot-box h-full">
+                  <div class="slot-name">#pane-left [证据/公文/静态审阅]</div>
+                  <div class="slot-desc">部委红头函件正文 / 算法时序异常图表 / 现场照片瀑布流 / 企业基础档案</div>
+                  <div class="rule-tag-group">
+                    <span class="tag-scroll">[必需插槽 · 滚动归属：左栏独立纵向滚动]</span>
+                  </div>
+                </div>
+                <!-- 右栏：动态流转/审批 -->
+                <div class="slot-box h-full">
+                  <div class="slot-name">#pane-right [流转/审批/动态填报]</div>
+                  <div class="slot-desc">四级审批流转步骤条 / 现场勘验结论录入 / 责任人签名 / 附件上传</div>
+                  <div class="rule-tag-group">
+                    <span class="tag-scroll">[必需插槽 · 滚动归属：右栏独立纵向滚动]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 外壳原生 Footer 说明 -->
+            <div class="slot-box" style="height:44px; justify-content:space-between; flex-direction:row; background:#f8fafc; border-top:1px solid #cbd5e1;">
+              <span class="slot-desc">[外壳原生 Footer: 确定 / 取消 / 审批流转操作区]</span>
+              <span class="tag-opt">[外壳原生]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L06: 响应式网格看板布局 (Dashboard-Grid)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l06">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L06</span>
+            <span class="tpl-title">响应式网格看板布局（Dashboard Grid Analytics）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：整改情况统计、运维质量分析、设备注册总览、领导驾驶舱</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>全局维度筛选 ➔ 指标卡自适应行 (CSS Grid repeat) ➔ 通用自适应图表网格</span></div>
+          <div class="contract-item"><strong>解耦说明：</strong><span>已移除特型化图表命名，采用开放栅格插槽契约，防止向复杂拖拽系统退化</span></div>
+          <div class="contract-item"><strong>滚动与响应：</strong><span>视口整体或网格区自适应纵向滚动；各图表卡片必须监听 ResizeObserver 触发尺寸更新</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#dashboard-filter</code> (可选), <code>#metric-cards</code> (可选), <code>#dashboard-grid</code> (必需)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport" style="height:auto; min-height:360px;">
+          <!-- 筛选 -->
+          <div class="slot-box" style="height:42px;">
+            <div class="slot-name">#dashboard-filter</div>
+            <div class="slot-desc">统计维度筛选 (时间范围、区划下钻、线索类别、按月/按日单选)</div>
+            <div class="rule-tag-group"><span class="tag-opt">[可选插槽]</span></div>
+          </div>
+          <!-- 指标卡插槽矩阵 (自适应网格) -->
+          <div class="slot-box" style="padding:6px;">
+            <div class="slot-name">#metric-cards</div>
+            <div class="slot-desc">指标卡容器 (采用 repeat(auto-fit, minmax(180px, 1fr))，自动均分 3~5 个大数字卡)</div>
+            <div class="rule-tag-group"><span class="tag-opt">[可选插槽 · 容器自适应排列]</span></div>
+          </div>
+          <!-- 主体开放网格插槽 (统一命名契约) -->
+          <div class="slot-box flex-1" style="min-height:220px;">
+            <div class="slot-name">#dashboard-grid</div>
+            <div class="slot-desc">开放响应式图表网格容器 (支持 2:1、2x2、3列 等通用布局，装配柱状图/折线图/环形图/排行榜)</div>
+            <div class="rule-tag-group">
+              <span class="tag-scroll">[必需插槽 · 滚动归属：视口或网格纵向滚动]</span>
+              <span class="tag-flex">[响应契约：图表组件内部必须监听 ResizeObserver]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L07: 锚点分段长卷档案布局 (Anchor-Section-Scroll)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l07">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L07</span>
+            <span class="tpl-title">锚点分段长卷档案布局（Anchor-Section Profile & Form）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：排污许可申报与核发全流程、排污单位一企一档全量画像、站房建设标准化台账</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>顶部摘要 + (侧边浮动锚点轨 160px + 纵向多分段长卷 1fr) + 吸底操作栏</span></div>
+          <div class="contract-item"><strong>滚动与锚点：</strong><span>**正文容器为唯一滚动根节点**；侧边锚点菜单悬浮跟随并高亮联动；操作栏位于正文滚动区外，自然可见</span></div>
+          <div class="contract-item"><strong>命名对齐：</strong><span>长卷内容插槽严格命名为 <code>#sections-stream</code>（消除之前的数字槽位歧义）</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#profile-header</code> (可选), <code>#anchor-nav</code> (必需), <code>#sections-stream</code> (必需), <code>#sticky-actions</code> (可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport" style="height:380px;">
+          <!-- 顶部摘要 -->
+          <div class="slot-box" style="height:48px;">
+            <div class="slot-name">#profile-header</div>
+            <div class="slot-desc">实体核心概要 (企业名称、统一社会信用代码、排污许可证号、环保信用等级徽标)</div>
+            <div class="rule-tag-group"><span class="tag-opt">[可选插槽]</span></div>
+          </div>
+          <!-- 锚点与长卷主体 -->
+          <div class="flex-1" style="overflow-y:auto; border:1px solid #cbd5e1; padding:8px; background:#fff;">
+            <div class="grid-anchor">
+              <!-- 侧边锚点插槽 -->
+              <div class="slot-box" style="position:sticky; top:0; height:180px;">
+                <div class="slot-name">#anchor-nav</div>
+                <div class="slot-desc">锚点导航索引轨 (跟随右侧唯一的滚动根节点实时计算偏移与高亮)</div>
+                <div class="rule-tag-group">
+                  <span class="tag-scroll">[必需插槽 · 滚动根节点必须为统一的父级容器]</span>
+                </div>
+              </div>
+              <!-- 多分段长卷内容插槽 (统一命名) -->
+              <div class="slot-box h-full">
+                <div class="slot-name">#sections-stream</div>
+                <div class="slot-desc">多分段内容流容器 (按业务填入 Section 1 基本概况、Section 2 治理设施、Section 3 限值等)</div>
+                <div class="rule-tag-group">
+                  <span class="tag-scroll">[必需插槽 · 统一长卷滚动 · 不在子区块内嵌套局部滚动条]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 吸底操作条 -->
+          <div class="slot-box" style="height:44px; border-top:2px solid #1e40af;">
+            <div class="slot-name">#sticky-actions</div>
+            <div class="slot-desc">常驻操作动作条 (存为草稿、自动合规性比对校验、提交主管部门审核)</div>
+            <div class="rule-tag-group">
+              <span class="tag-flex">[行为契约：位于滚动区外，始终贴底可见]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         L08: 步骤向导受控流转布局 (Step-Wizard-Funnel)
+    ========================================================================= -->
+    <section class="template-card" id="tpl-l08">
+      <div class="template-header">
+        <div class="header-main-row">
+          <div class="flex-row" style="align-items:center;">
+            <span class="tpl-badge">L08</span>
+            <span class="tpl-title">步骤向导受控流转布局（Step Wizard Funnel）</span>
+          </div>
+          <span style="color:#64748b; font-size:11px;">适用场景：数采仪设备注册入网向导、新企业环境档案初始化、重大环境事件立案分步流程</span>
+        </div>
+        <div class="contract-grid">
+          <div class="contract-item"><strong>空间拓扑：</strong><span>顶部步骤轨迹指示 (Step Tracker) + 中间当前步骤工作区 + 底部动作导航轨</span></div>
+          <div class="contract-item"><strong>责任边界：</strong><span>布局负责几何空间与当前视口装配；业务层负责步骤校验、草稿暂存、上下步状态判定</span></div>
+          <div class="contract-item"><strong>滚动规则：</strong><span>单视口受控切换；当前步骤工作区根据内容自负责纵向滚动</span></div>
+          <div class="contract-item"><strong>公开插槽：</strong><span><code>#step-tracker</code> (必需), <code>#stage-viewport</code> (必需), <code>#action-rail</code> (必需), <code>#step-summary</code> (可选)</span></div>
+        </div>
+      </div>
+      <div class="blueprint-canvas">
+        <div class="layout-viewport">
+          <!-- 步骤条插槽 -->
+          <div class="slot-box" style="height:56px;">
+            <div class="slot-name">#step-tracker</div>
+            <div class="slot-desc">步骤指示轨 (阶段 1: 厂商认证 ─── 阶段 2: 协议与点位绑定 ─── 阶段 3: 联调测试 ─── 阶段 4: 完成)</div>
+            <div class="rule-tag-group"><span class="tag-scroll">[必需插槽 · 步骤指示]</span></div>
+          </div>
+          <!-- 当前步骤聚焦视口 -->
+          <div class="slot-box flex-1">
+            <div class="slot-name">#stage-viewport</div>
+            <div class="slot-desc">当前激活阶段工作台 (仅聚焦当前步骤表单或配置，min-height: 0; 内部自适应)</div>
+            <div class="rule-tag-group">
+              <span class="tag-scroll">[必需插槽 · 滚动归属：当前阶段容器内部滚动]</span>
+            </div>
+          </div>
+          <!-- 导航动作轨 -->
+          <div class="slot-box" style="height:44px; justify-content:space-between; flex-direction:row;">
+            <span class="slot-desc">阶段验证状态反馈</span>
+            <div class="flex-row">
+              <div class="slot-name">#action-rail</div>
+              <span class="slot-desc">(上一步 / 保存草稿 / 下一步 / 最终提交)</span>
+            </div>
+            <div class="rule-tag-group"><span class="tag-flex">[必需插槽 · 导航动作]</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      const navTabs = document.getElementById('navTabs');
+      const tabBtns = navTabs.querySelectorAll('.tab-btn');
+      const cards = document.querySelectorAll('.template-card');
+      const btnSingle = document.getElementById('btnSingle');
+      const btnAll = document.getElementById('btnAll');
+
+      btnSingle.addEventListener('click', () => {
+        document.body.classList.remove('show-all');
+        btnSingle.classList.add('active');
+        btnAll.classList.remove('active');
+      });
+      btnAll.addEventListener('click', () => {
+        document.body.classList.add('show-all');
+        btnAll.classList.add('active');
+        btnSingle.classList.remove('active');
+      });
+
+      navTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        document.body.classList.remove('show-all');
+        btnSingle.classList.add('active');
+        btnAll.classList.remove('active');
+
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const targetId = btn.dataset.target;
+        cards.forEach(c => c.classList.toggle('active', c.id === targetId));
+      });
+    })();
+  </script>
+</body>
+</html>

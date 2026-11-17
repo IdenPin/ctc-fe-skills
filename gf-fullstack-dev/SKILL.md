@@ -56,13 +56,14 @@ description: 用于 GF 监测与执法体系的需求定位、全栈开发和跨
 | 运维 | 前端 | `operations/frontend/zdjk-provider-filing` | `http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-provider-filing.git` | 运维 PC 端 |
 | 运维 | 前端 | `operations/frontend/provider-common` | `http://192.168.6.139/project/front/guo-fa/public/provider-common.git` | 运维记录详情公共组件 |
 | 自动监控 | 后端 | `auto-monitor/backend/amdb` | `http://192.168.6.139/project/backend/mointor/amdb.git` | 包含部分企业端和管理端功能，后端覆盖不完整 |
+| 自动监控 | 后端 | `auto-monitor/backend/automonitor-cloud` | `http://192.168.6.139/project/backend/mointor/automonitor/automonitor-cloud.git` | 自动监控微服务版后端 |
 | 自动监控 | 前端 | `auto-monitor/frontend/zdjk-system` | `http://192.168.6.139/project/front/guo-fa/public/zdjk-system.git` | 管理端 |
 | 自动监控 | 前端 | `auto-monitor/frontend/zdjk-company` | `http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-company.git` | 企业端 |
 | 自动监控 | 前端 | `auto-monitor/frontend/zdjk-company-base` | `http://192.168.6.139/project/front/guo-fa/public/zdjk-company-base.git` | 企业端框架 |
 | 自动监控 | 前端 | `auto-monitor/frontend/gov-zdjk-ministry` | `http://192.168.6.139/project/front/gov-zdjk-ministry.git` | 管理端 4.3 框架 |
 | 自动监控 | 前端 | `auto-monitor/frontend/gf-framework-system` | `http://192.168.6.139/project/front/guo-fa/public/gf-framework-system.git` | 管理端 5.0 框架 |
 
-当前共登记 13 个 Git 仓库：2 个需求仓库和以上 11 个监测代码仓库。代码仓库表中的路径相对于 `gf-monitor-ai/`；需求仓库路径分别相对于所属领域工作区。这份代码清单可随其他监测子系统继续扩展。此前移除的 SVN 地址不属于当前代码来源。“执法”使用独立的 `gf-law-ai/` 工作区，已登记 `gf-law-reqs`；子应用名称、代码仓库地址和职责尚待维护。收到相关任务时，先从用户或项目文档确认这些信息，不要根据系统名称或需求文档标题臆造仓库或代码归属。
+当前共登记 14 个 Git 仓库：2 个需求仓库和以上 12 个监测代码仓库。代码仓库表中的路径相对于 `gf-monitor-ai/`；需求仓库路径分别相对于所属领域工作区。这份代码清单可随其他监测子系统继续扩展。此前移除的 SVN 地址不属于当前代码来源。“执法”使用独立的 `gf-law-ai/` 工作区，已登记 `gf-law-reqs`；子应用名称、代码仓库地址和职责尚待维护。收到相关任务时，先从用户或项目文档确认这些信息，不要根据系统名称或需求文档标题臆造仓库或代码归属。
 
 ### 执法体系扩展模板
 
@@ -88,6 +89,7 @@ git clone http://192.168.6.139/project/front/guo-fa/public/zdjk-provider-mobile.
 git clone http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-provider-filing.git operations/frontend/zdjk-provider-filing
 git clone http://192.168.6.139/project/front/guo-fa/public/provider-common.git operations/frontend/provider-common
 git clone http://192.168.6.139/project/backend/mointor/amdb.git auto-monitor/backend/amdb
+git clone http://192.168.6.139/project/backend/mointor/automonitor/automonitor-cloud.git auto-monitor/backend/automonitor-cloud
 git clone http://192.168.6.139/project/front/guo-fa/public/zdjk-system.git auto-monitor/frontend/zdjk-system
 git clone http://1.85.6.157:6139/project/front/guo-fa/public/zdjk-company.git auto-monitor/frontend/zdjk-company
 git clone http://192.168.6.139/project/front/guo-fa/public/zdjk-company-base.git auto-monitor/frontend/zdjk-company-base
@@ -129,7 +131,7 @@ git clone http://192.168.6.139/project/ai-ready/gf-law-reqs.git gf-law-ai/gf-law
 - 动手前先确定功能属于“监测”还是“执法”体系，再确定子业务系统、用户端、相关公共组件和后端仓库。执法子应用代码仓库映射尚未补齐时，先确认任务涉及的代码仓库和职责。
 - 对前后端功能，沿实际页面或路由、组件、请求封装和接口路径，继续追踪到后端路由/控制器、服务及相关数据处理。接口路径、参数和返回值都要从所选版本的源码确认，不根据仓库名称推断。
 - 运维记录详情相关功能要检查 `provider-common`，并查看其调用方，评估公共改动的影响。
-- `amdb` 只包含部分企业端和管理端后端功能。需要确认它实际实现了哪些接口；如果对应实现不在现有代码中，明确指出，不要默认由 `amdb-yw` 或其他仓库负责。
+- 自动监控后端同时存在 `amdb` 和微服务版 `automonitor-cloud`。`amdb` 只包含部分企业端和管理端后端功能；`automonitor-cloud` 的接口归属需按需求版本在实际源码中确认。不得仅凭仓库名称假定某个接口由哪个后端实现；如果对应实现不在现有代码中，明确指出，不要默认由 `amdb-yw` 或其他仓库负责。
 - 仓库存在 `.codegraph/` 时，先用 CodeGraph 理解代码，再使用 grep/find 或大范围读取。若有 CodeGraph MCP 工具则使用该工具；否则从对应仓库执行 `codegraph explore "<符号或问题>"`。没有 `.codegraph/` 时再使用常规代码搜索。
 - 遵循各仓库自己的约定。不要假设不同仓库使用相同的框架、依赖版本、命令、接口归属或分支规则。
 

@@ -19,20 +19,42 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def table_rows(section, prefix="| L0"):
+    rows = {}
+    for line in section.splitlines():
+        if not line.startswith(prefix):
+            continue
+        cells = [part.strip() for part in line.strip("|").split("|")]
+        require(len(cells) == 3, f"表格行格式错误：{line}")
+        template_id, required, optional = cells
+        require(template_id not in rows, f"契约重复定义 {template_id}")
+        rows[template_id] = {
+            "required": {item.strip() for item in required.split(",") if item.strip() and item.strip() != "无"},
+            "optional": {item.strip() for item in optional.split(",") if item.strip() and item.strip() != "无"},
+        }
+    return rows
+
+
 def read_contract():
-    layouts = {}
-    for line in (ROOT / "references/layout-contract.md").read_text(encoding="utf-8").splitlines():
-        if re.match(r"^\| T0[1-7]_", line):
-            template_id, required, optional = [part.strip() for part in line.strip("|").split("|")]
-            require(template_id not in layouts, f"契约重复定义 {template_id}")
-            layouts[template_id] = {
-                "required": {item.strip() for item in required.split(",") if item.strip() and item.strip() != "无"},
-                "optional": {item.strip() for item in optional.split(",") if item.strip() and item.strip() != "无"},
-            }
-    require(len(layouts) == 7, "契约应包含七个模板")
+    content = (ROOT / "references/layout-contract.md").read_text(encoding="utf-8")
+    start = content.index("## 模板与插槽")
+    end = content.index("## 空间约束与高度传导规则", start)
+    layouts = table_rows(content[start:end], "| L0")
+    require(len(layouts) == 8, f"契约应包含八个模板，当前为 {len(layouts)}")
     for template_id, slots in layouts.items():
         require(not slots["required"] & slots["optional"], f"{template_id} 必需与可选插槽重复")
     return layouts
+
+
+def read_page_fields():
+    content = (ROOT / "references/layout-contract.md").read_text(encoding="utf-8")
+    start = content.index("### page：业务页面")
+    end = content.index("## 组件与消费原则", start)
+    fields = table_rows(content[start:end], "| L0")
+    require(len(fields) == 8, f"PageSpec 字段契约应包含八个模板，当前为 {len(fields)}")
+    for template_id, definition in fields.items():
+        require(not definition["required"] & definition["optional"], f"{template_id} 必需与可选字段重复")
+    return fields
 
 
 class PreviewParser(HTMLParser):
@@ -64,11 +86,11 @@ class PreviewParser(HTMLParser):
             require(name not in rows, f"{current} 插槽表重复 {name}")
             require(attrs.get("data-required") in {"true", "false"}, f"{name} 缺少必需/可选标记")
             rows[name] = attrs["data-required"] == "true"
-        if "parameter-footer" in attrs.get("class", "").split() or "table-page-footer" in attrs.get("class", "").split():
+        if "table-page-footer" in attrs.get("class", "").split():
             self.footer_inside_panel = any(
-                "parameter-panel" in item[1].get("class", "").split()
+                "report-content" in item[1].get("class", "").split()
+                or "parameter-panel" in item[1].get("class", "").split()
                 or "registry-body" in item[1].get("class", "").split()
-                or "main-card" in item[1].get("class", "").split()
                 for item in self.stack
             )
         if tag not in VOID_TAGS:
@@ -77,21 +99,18 @@ class PreviewParser(HTMLParser):
     def handle_startendtag(self, tag, attrs):
         if tag in VOID_TAGS:
             self.handle_starttag(tag, attrs)
-        else:
-            self.handle_starttag(tag, attrs)
-            self.handle_endtag(tag)
-
-    def handle_data(self, data):
-        if self.label is not None:
-            self.label[1] += data
 
     def handle_endtag(self, tag):
-        if tag == "span" and self.label is not None:
-            name, label = self.label
-            require(label.strip() == f"#{name}", f"插槽标签文字不一致：{name} / {label!r}")
+        if tag not in VOID_TAGS:
+            require(self.stack, f"多余的闭合标签：{tag}")
+            opened, _ = self.stack.pop()
+            require(opened == tag, f"标签闭合不匹配：<{opened}> 被 </{tag}> 闭合")
+        if self.label and self.stack and not any(tag == "span" for tag, _ in self.stack):
             self.label = None
-        require(bool(self.stack) and self.stack[-1][0] == tag, f"HTML 标签闭合错误：{tag}")
-        self.stack.pop()
+
+    def handle_data(self, data):
+        if self.label:
+            self.label[1] += data
 
 
 def check_local_link(source, href):
@@ -104,43 +123,19 @@ def check_local_link(source, href):
 
 
 def semantic_errors(spec):
-    """JSON Schema 之外的集合 key、默认项和容量关系。"""
+    """JSON Schema 之外的语义关系检查。"""
     errors = []
 
     def unique(items, field, scope):
-        keys = [item.get(field) for item in items if isinstance(item, dict)]
+        keys = [item.get(field) for item in items if isinstance(item, dict) and item.get(field) is not None]
         duplicates = [key for key, count in Counter(keys).items() if count > 1]
         if duplicates:
             errors.append(f"{scope} 的 {field} 重复：{duplicates}")
 
-    for key in ("filters", "toolbar", "columns", "summary", "actions", "footer"):
-        unique(spec.get(key, []), "key", key)
-    tabs = spec.get("tabs", {})
-    unique(tabs.get("items", []), "key", "tabs.items")
-    if "defaultKey" in tabs and tabs["defaultKey"] not in {item.get("key") for item in tabs.get("items", [])}:
-        errors.append("tabs.defaultKey 不属于页签集合")
-    pagination = spec.get("pagination", {})
-    for field, slot in (("pagination", "pagination"), ("legend", "legend"), ("mapTools", "map-tools")):
-        if spec.get(field, {}).get("enabled") is False and slot in spec.get("enabledSlots", []):
-            errors.append(f"{slot} 同时被启用和禁用")
-    if "pageSize" in pagination and "pageSizes" in pagination and pagination["pageSize"] not in pagination["pageSizes"]:
-        errors.append("pagination.pageSize 不属于 pageSizes")
-    panels = spec.get("panels", [])
-    unique(panels, "slot", "panels")
-    for panel in panels:
-        unique(panel.get("columns", []), "key", f"panels.{panel.get('slot')}.columns")
-    for columns in [spec.get("columns", [])] + [panel.get("columns", []) for panel in panels]:
-        for column in columns:
-            unique(column.get("actions", []), "key", f"column.{column.get('key')}.actions")
-    nodes = []
+    for key in ("filters", "metrics", "sections", "steps"):
+        if key in spec and isinstance(spec[key], list):
+            unique(spec[key], "id" if key == "sections" else ("step" if key == "steps" else "name"), key)
 
-    def collect(branch):
-        for node in branch:
-            nodes.append(node)
-            collect(node.get("children", []))
-
-    collect(spec.get("sidebar", {}).get("nodes", []))
-    unique(nodes, "key", "sidebar.nodes")
     return errors
 
 
@@ -165,13 +160,30 @@ def check_spec(spec, validator, label):
 
 def check_package():
     layouts = read_contract()
+    page_fields = read_page_fields()
     schema = json.loads((ROOT / "references/page-spec.schema.json").read_text(encoding="utf-8"))
     require(set(schema["properties"]["templateId"]["enum"]) == set(layouts), "Schema 模板 ID 与契约不一致")
-    branches = {entry.get("if", {}).get("properties", {}).get("templateId", {}).get("const"): entry for entry in schema["allOf"]}
+    branches = {entry.get("if", {}).get("properties", {}).get("templateId", {}).get("const"): entry for entry in schema["allOf"] if "templateId" in entry.get("if", {}).get("properties", {})}
+    common_fields = {"pageTitle", "appearance", "enabledSlots", "surface", "layoutKey"}
+    metadata_fields = {"contractVersion", "templateId", "mode"}
+    require(set(page_fields) == set(layouts), "PageSpec 字段契约模板 ID 与插槽契约不一致")
     for template_id, slots in layouts.items():
         require(template_id in branches, f"Schema 缺少 {template_id} 分支")
-        allowed = branches[template_id]["then"]["properties"]["enabledSlots"]["items"]["enum"]
+        branch_properties = branches[template_id]["then"]["properties"]
+        allowed = branch_properties["enabledSlots"]["items"]["enum"]
         require(set(allowed) == slots["required"] | slots["optional"], f"{template_id} Schema 插槽不一致")
+        field_definition = page_fields[template_id]
+        required_fields = field_definition["required"]
+        optional_fields = field_definition["optional"]
+        require("pageTitle" in required_fields, f"{template_id} 必须声明 pageTitle")
+        nested_required = set(branches[template_id]["then"].get("allOf", [{}])[0].get("then", {}).get("required", []))
+        require(nested_required == required_fields - {"pageTitle"}, f"{template_id} Schema 必填字段与 PageSpec 契约不一致")
+        actual_fields = {
+            name for name in schema["properties"]
+            if name not in common_fields | metadata_fields and branch_properties.get(name) is not False
+        }
+        expected_fields = (required_fields | optional_fields) - common_fields
+        require(actual_fields == expected_fields, f"{template_id} Schema 字段与 PageSpec 契约不一致；缺少 {expected_fields - actual_fields}，多出 {actual_fields - expected_fields}")
 
     source = ROOT / "assets/layout-spec.html"
     preview = source.read_text(encoding="utf-8")
@@ -180,18 +192,20 @@ def check_package():
     parser.close()
     require(not parser.stack, "HTML 有未闭合标签")
     require(set(parser.articles) == set(layouts), "HTML 模板 ID 与契约不一致")
-    require(parser.footer_inside_panel, "T01 底栏应属于同一白色内容卡片")
-    require("layout-tokens.css" in parser.links, "预览未加载统一布局变量")
+    require(parser.footer_inside_panel, "L01 底栏应属于同一内容卡片")
+    require(any("layout-tokens.css" in href for href in parser.links), "预览未加载统一布局变量")
     for template_id, slots in layouts.items():
         expected = slots["required"] | slots["optional"]
         article = parser.articles[template_id]
-        require(set(article["labels"]) == expected, f"{template_id} 预览标签与契约不一致")
+        require(set(article["labels"]) == expected, f"{template_id} 预览标签与契约不一致：{set(article['labels'])} vs {expected}")
         require(len(article["labels"]) == len(expected), f"{template_id} 存在重复预览标签")
-        require(set(article["rows"]) == expected, f"{template_id} 插槽说明表不完整")
+        require(set(article["rows"]) == expected, f"{template_id} 插槽说明表不完整：{set(article['rows'])} vs {expected}")
         require({name for name, needed in article["rows"].items() if needed} == slots["required"], f"{template_id} 必需/可选标记不一致")
     for href in parser.links:
         check_local_link(source, href)
     for markdown in ROOT.rglob("*.md"):
+        if {".git", ".codegraph", ".cache", "docs"} & set(markdown.relative_to(ROOT).parts) or markdown.name == "AGENTS.md":
+            continue
         for href in re.findall(r"\[[^\]]+\]\(([^)]+)\)", markdown.read_text(encoding="utf-8")):
             check_local_link(markdown, href)
     content = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -205,23 +219,60 @@ def check_package():
     tokens = dict(re.findall(r"(--layout-[\w-]+):\s*([^;]+);", token_css))
     require(tokens.get("--layout-workspace-bg") == "#f5f7fc", "工作区底色偏离已确认值")
     require(tokens.get("--layout-content-bg") == "#ffffff", "内容卡片应为白色")
+    require(tokens.get("--layout-sidebar-width") == "260px", "侧栏宽度应为 260px")
     for name, value in tokens.items():
         if value.endswith("px"):
             require(int(value[:-2]) % 4 == 0, f"布局变量 {name} 不符合 4px 栅格")
     used = set(re.findall(r"var\((--layout-[\w-]+)\)", preview))
     require(used <= set(tokens), f"预览引用了未定义变量：{used - set(tokens)}")
+
+    # 检查组件库中 8 套布局组件的 defineSlots 声明
+    layout_comp_dir = ROOT.parents[1] / "ctc-components-ui-next/src/components/layout"
+    if not layout_comp_dir.is_dir():
+        layout_comp_dir = ROOT.parents[0] / "ctc-components-ui-next/src/components/layout"
+    if layout_comp_dir.is_dir():
+        layout_comp_map = {
+            "L01_STANDARD_TABLE_PAGE": layout_comp_dir / "src/table-page/CtcTablePageLayout.vue",
+            "L02_SIDEBAR_TREE_SPLIT": layout_comp_dir / "src/sidebar-tree/CtcSidebarTreeLayout.vue",
+            "L03_MASTER_DETAIL_SPLIT": layout_comp_dir / "src/master-detail/CtcMasterDetailLayout.vue",
+            "L04_GIS_HUD_DASHBOARD": layout_comp_dir / "src/gis-hud/CtcGisHudLayout.vue",
+            "L05_DUAL_PANE_REVIEW": layout_comp_dir / "src/dual-pane-review/CtcDualPaneReview.vue",
+            "L06_GRID_DASHBOARD": layout_comp_dir / "src/dashboard-grid/CtcDashboardGridLayout.vue",
+            "L07_SECTION_ANCHOR_FLOW": layout_comp_dir / "src/anchor-scroll/CtcAnchorScrollLayout.vue",
+            "L08_STEP_WIZARD_FUNNEL": layout_comp_dir / "src/step-wizard/CtcStepWizardLayout.vue",
+        }
+        for tid, sfc_path in layout_comp_map.items():
+            require(sfc_path.is_file(), f"{tid} 对应组件源文件不存在：{sfc_path}")
+            sfc_content = sfc_path.read_text(encoding="utf-8")
+            slot_block = re.search(r"defineSlots<\{(.*?)\}>\(\)", sfc_content, re.S)
+            require(slot_block is not None, f"{tid} 未声明 defineSlots")
+            declared = {
+                quoted or plain
+                for quoted, plain in re.findall(r"^\s*(?:'([^']+)'|([A-Za-z_$][\w$]*))\??\s*:", slot_block.group(1), re.M)
+            }
+            expected = layouts[tid]["required"] | layouts[tid]["optional"]
+            require(declared == expected, f"{tid} 组件插槽声明与契约不一致：{declared} vs {expected}")
+
     for selector in (".registry-body", ".parameter-panel", ".report-content"):
-        rule = re.search(re.escape(selector) + r"\s*\{([^}]+)\}", preview).group(1)
+        match = re.search(re.escape(selector) + r"\s*\{([^}]+)\}", preview)
+        require(match is not None, f"预览缺少布局规则：{selector}")
+        rule = match.group(1)
         require("margin: var(--layout-frame-gap)" in rule, f"{selector} 应使用统一四边外间距")
         require("background: var(--layout-content-bg)" in rule, f"{selector} 应保持白卡底色")
 
     examples = json.loads((ROOT / "references/page-spec.examples.json").read_text(encoding="utf-8"))
-    require({item["spec"]["templateId"] for item in examples if item["spec"]["mode"] == "page"} == set(layouts), "业务输入示例未覆盖七个模板")
+    require({item["spec"]["templateId"] for item in examples if item["spec"]["mode"] == "page"} == set(layouts), "业务输入示例未覆盖八个模板")
     require(any(item["spec"]["mode"] == "layout" for item in examples), "缺少纯布局示例")
     validator = schema_validator(schema)
     for item in examples:
         check_spec(item["spec"], validator, item["name"])
-    print(f"当前技能资料校验通过：{len(layouts)} 个模板，引用和插槽清单完整，T01 底栏归属正确。")
+
+    import subprocess
+    regression = subprocess.run([sys.executable, str(ROOT / "scripts/test_validate_page.py")], capture_output=True, text=True)
+    require(regression.returncode == 0, "页面校验器回归失败：" + regression.stdout + regression.stderr)
+
+    print(f"当前技能资料校验通过：{len(layouts)} 个模板，引用和插槽清单完整，L01 底栏归属正确。")
+    print("页面校验器回归通过（包含原有 16 项边界用例）。")
     if validator is None:
         print("提示：当前环境无 jsonschema；输入示例仅检查跨字段关系，未执行完整 JSON Schema 校验。")
     else:

@@ -14,8 +14,14 @@ SHARED = (
     "references/page-spec.examples.json",
     "assets/layout-tokens.css",
     "assets/layout-spec.html",
-    "templates/TablePageLayout.vue",
     "scripts/check-package.py",
+    "scripts/validate-page.py",
+    "scripts/layout_template.py",
+    "scripts/layout_rules.py",
+    "scripts/test_validate_page.py",
+)
+OBSOLETE = (
+    "templates/TablePageLayout.vue",
 )
 
 
@@ -42,15 +48,26 @@ def main():
                 raise ValueError(f"目标路径越界或为符号链接：{relative}")
             if not destination.exists() or source.read_bytes() != destination.read_bytes():
                 changed.append(relative)
-        if not changed:
+
+        # 检查需要清理的废弃文件
+        obsolete_in_target = [rel for rel in OBSOLETE if (target / rel).exists()]
+
+        if not changed and not obsolete_in_target:
             print("两份技能的配套资料一致。")
             return 0
+
         for relative in changed:
             print(("同步：" if args.apply else "待同步：") + relative)
             if args.apply:
                 destination = target / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(SOURCE / relative, destination)
+
+        for relative in obsolete_in_target:
+            print(("清理淘汰文件：" if args.apply else "待清理淘汰文件：") + relative)
+            if args.apply:
+                (target / relative).unlink(missing_ok=True)
+
         return 0 if args.apply else 1
     except (OSError, ValueError) as error:
         print(f"同步失败：{error}", file=sys.stderr)

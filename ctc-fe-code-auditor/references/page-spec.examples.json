@@ -1,259 +1,199 @@
 [
   {
-    "name": "仅布局：不输入业务 Schema",
+    "name": "L01 纯布局骨架",
     "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L01_STANDARD_TABLE_PAGE",
       "mode": "layout",
-      "templateId": "T01_STANDARD_TABLE_PAGE",
-      "enabledSlots": [
-        "search-bar",
-        "container-top",
-        "pagination"
-      ]
+      "enabledSlots": ["main-viewport", "filter-bar", "toolbar", "footer-bar"]
     }
   },
   {
-    "name": "T01：标准通用表格（页签、筛选、汇总、操作与底栏）",
+    "name": "L01 检索工作台 (业务页面)",
     "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L01_STANDARD_TABLE_PAGE",
       "mode": "page",
-      "templateId": "T01_STANDARD_TABLE_PAGE",
-      "pageTitle": "排口台账综合管理",
-      "entityName": "OutletRecord",
-      "tabs": {
-        "items": [
-          {
-            "key": "water",
-            "label": "废水排口"
-          },
-          {
-            "key": "air",
-            "label": "废气排口"
-          }
-        ],
-        "defaultKey": "water"
+      "pageTitle": "重点排污单位异常线索核查台账",
+      "enabledSlots": ["main-viewport", "filter-bar", "toolbar", "footer-bar"],
+      "viewport": {
+        "component": "CtcTable",
+        "autoHeight": true
       },
       "filters": [
-        {
-          "key": "keyword",
-          "label": "关键字",
-          "control": "input"
-        }
+        { "name": "region", "label": "行政区划", "type": "cascader" },
+        { "name": "alarmType", "label": "异常类型", "type": "select" }
       ],
-      "actions": [
-        {
-          "key": "export",
-          "label": "批量导出",
-          "intent": "download"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "label": "排口名称",
-          "type": "string"
-        },
-        {
-          "key": "updatedAt",
-          "label": "更新时间",
-          "type": "datetime"
-        }
-      ],
-      "summary": [
-        {
-          "key": "total",
-          "label": "记录总数",
-          "valueRef": "summary.total"
-        }
-      ],
-      "pagination": {
-        "enabled": true,
-        "pageSize": 20,
-        "pageSizes": [
-          20,
-          50,
-          100
-        ]
+      "toolbar": {
+        "actions": ["export", "batchDispatch"]
       },
-      "footer": [
-        {
-          "key": "batchSubmit",
-          "label": "批量提交核查",
-          "intent": "mutate",
-          "destructive": false
-        }
-      ]
-    }
-  },
-  {
-    "name": "T02：层级导航和查询",
-    "spec": {
-      "mode": "page",
-      "templateId": "T02_SIDEBAR_QUERY_TABLE",
-      "pageTitle": "区域报表",
-      "entityName": "ReportRow",
-      "sidebar": {
-        "nodes": [
-          {
-            "key": "all",
-            "label": "全部",
-            "children": [
-              {
-                "key": "region-a",
-                "label": "区域 A"
-              }
-            ]
-          }
-        ],
-        "filterable": true,
-        "collapsible": true,
-        "selectionQueryKey": "regionId"
-      },
-      "toolbar": [
-        {
-          "key": "period",
-          "label": "统计时间",
-          "control": "date-range"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "label": "名称",
-          "type": "string"
-        },
-        {
-          "key": "value",
-          "label": "统计值",
-          "type": "number"
-        }
-      ],
-      "pagination": {
-        "enabled": true,
-        "pageSize": 20,
-        "pageSizes": [
-          20,
-          50
-        ]
+      "footer": {
+        "type": "pagination",
+        "pageSize": 20
       }
     }
   },
   {
-    "name": "T03：地图由调用方插槽接入，业务面板按需启用",
+    "name": "L02 侧栏树联动 (业务页面)",
     "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L02_SIDEBAR_TREE_SPLIT",
       "mode": "page",
-      "templateId": "T03_GIS_HUD_DASHBOARD",
-      "pageTitle": "空间总览",
-      "appearance": {
-        "theme": "inherit"
+      "pageTitle": "区域站点设备层级巡检工作台",
+      "enabledSlots": ["sidebar-nav", "content-body", "content-header", "content-footer"],
+      "sidebar": {
+        "title": "行政区划与站点树",
+        "dataSource": "siteTreeApi"
       },
+      "content": {
+        "component": "CtcTable",
+        "dataSource": "stationInspectionApi"
+      },
+      "toolbar": {
+        "actions": ["refresh", "export"]
+      },
+      "pagination": {
+        "pageSize": 20
+      }
+    }
+  },
+  {
+    "name": "L03 主从协同 (业务页面)",
+    "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L03_MASTER_DETAIL_SPLIT",
+      "mode": "page",
+      "pageTitle": "涉案线索主从协同核查",
+      "enabledSlots": ["master-list", "detail-body", "master-filter", "detail-head", "detail-actions"],
+      "master": {
+        "itemKey": "clueId",
+        "dataSource": "clueListApi"
+      },
+      "detail": {
+        "formKey": "clueDetail",
+        "editable": true
+      },
+      "masterFilter": {
+        "searchPlaceholder": "输入线索编号搜索"
+      },
+      "detailActions": {
+        "buttons": ["saveDraft", "submitApproval"]
+      }
+    }
+  },
+  {
+    "name": "L04 地图 HUD (业务页面)",
+    "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L04_GIS_HUD_DASHBOARD",
+      "mode": "page",
+      "pageTitle": "流域水环境一张图全景监管",
+      "appearance": { "theme": "dark" },
+      "enabledSlots": ["canvas-bg", "hud-top", "hud-left", "hud-right", "hud-bottom-left", "hud-bottom-right"],
       "map": {
-        "integration": "slot"
+        "center": [116.4074, 39.9042],
+        "zoom": 10
       },
       "panels": [
-        {
-          "slot": "left-kpi",
-          "kind": "summary"
-        },
-        {
-          "slot": "site-list",
-          "kind": "list"
-        },
-        {
-          "slot": "right-alarm",
-          "kind": "table",
-          "columns": [
-            {
-              "key": "name",
-              "label": "名称",
-              "type": "string"
-            },
-            {
-              "key": "status",
-              "label": "状态",
-              "type": "status"
-            }
-          ]
-        }
+        { "slot": "hud-top", "title": "全流域核心水质指标" },
+        { "slot": "hud-left", "title": "水系断面图层控制" },
+        { "slot": "hud-right", "title": "实时超标事件动态流" }
       ],
-      "legend": {
-        "enabled": true
+      "legend": { "type": "waterQualityGrading" },
+      "mapTools": { "tools": ["measure", "layerSwitch", "zoom"] }
+    }
+  },
+  {
+    "name": "L05 复合双栏核查 (业务页面)",
+    "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L05_DUAL_PANE_REVIEW",
+      "surface": "dialog",
+      "mode": "page",
+      "pageTitle": "部委交办问题线索两段式核查",
+      "enabledSlots": ["pane-left", "pane-right"],
+      "leftPane": {
+        "title": "公文与现场核查证据链",
+        "sections": ["officialDocument", "timelineChart", "photoStream"]
       },
-      "mapTools": {
-        "enabled": true
+      "rightPane": {
+        "title": "现场勘验核实与审批流转",
+        "formType": "investigationReview"
+      },
+      "actions": {
+        "buttons": ["reject", "requireSupplement", "approveResolve"]
       }
     }
   },
   {
-    "name": "T04：分段长卷与锚点导航",
+    "name": "L06 响应式网格看板 (业务页面)",
     "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L06_GRID_DASHBOARD",
       "mode": "page",
-      "templateId": "T04_SECTION_ANCHOR_FLOW",
-      "pageTitle": "对象全量综合档案",
+      "pageTitle": "重点排污单位运维质效分析看板",
+      "enabledSlots": ["dashboard-grid", "metric-cards", "dashboard-toolbar"],
+      "grid": {
+        "cards": [
+          { "title": "运维达标率月度走势", "span": 8 },
+          { "title": "各区县告警处置排行榜", "span": 4 },
+          { "title": "异常类型分布构成", "span": 6 },
+          { "title": "高频故障设备溯源", "span": 6 }
+        ]
+      },
+      "metrics": [
+        { "name": "totalEnterprises", "label": "本月接入总企业数", "value": 1420 },
+        { "name": "totalClues", "label": "异常线索总数", "value": 86 },
+        { "name": "resolveRate", "label": "闭环销号率", "value": "98.2%" }
+      ],
+      "toolbar": {
+        "timeRange": "month"
+      }
+    }
+  },
+  {
+    "name": "L07 锚点分段长卷档案 (业务页面)",
+    "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L07_SECTION_ANCHOR_FLOW",
+      "mode": "page",
+      "pageTitle": "排污许可证申报与全量档案录入",
+      "enabledSlots": ["anchor-nav", "sections-stream", "profile-header", "sticky-actions"],
       "sections": [
-        {
-          "key": "basic",
-          "title": "基础属性"
-        },
-        {
-          "key": "params",
-          "title": "运行参数"
-        }
-      ]
-    }
-  },
-  {
-    "name": "T05：全高双栏主从独立滚动",
-    "spec": {
-      "mode": "page",
-      "templateId": "T05_SPLIT_TWO_PANE",
-      "pageTitle": "配置映射工作台",
-      "master": {
-        "title": "主项清单"
+        { "id": "basic", "title": "企业基本情况" },
+        { "id": "facilities", "title": "主要生产与污染治理设施" },
+        { "id": "emission", "title": "大气与水污染物排放限值" },
+        { "id": "monitoring", "title": "自行监测与环境管理台账要求" }
+      ],
+      "profileHeader": {
+        "corpName": "生态环境产业示范园区热电有限公司",
+        "licenseNo": "91110108MA00000000"
       },
-      "slave": {
-        "title": "从属详情"
+      "stickyActions": {
+        "buttons": ["saveDraft", "validateCompliance", "submitApproval"]
       }
     }
   },
   {
-    "name": "T06：响应式多卡片网格看板",
+    "name": "L08 步骤向导 (业务页面)",
     "spec": {
+      "contractVersion": "2.0.0",
+      "templateId": "L08_STEP_WIZARD_FUNNEL",
       "mode": "page",
-      "templateId": "T06_GRID_DASHBOARD",
-      "pageTitle": "综合监控指标驾驶舱",
-      "widgets": [
-        {
-          "key": "overview",
-          "title": "总览",
-          "span": 12
-        },
-        {
-          "key": "trend",
-          "title": "趋势",
-          "span": 12
-        }
-      ]
-    }
-  },
-  {
-    "name": "T07：步骤向导推进单视口",
-    "spec": {
-      "mode": "page",
-      "templateId": "T07_STEP_WIZARD_FUNNEL",
-      "pageTitle": "业务数据导入与校验向导",
+      "pageTitle": "数采仪设备注册与协议联网联调",
+      "enabledSlots": ["step-tracker", "stage-viewport", "action-rail", "step-summary"],
       "steps": [
-        {
-          "key": "upload",
-          "title": "上传文件"
-        },
-        {
-          "key": "validate",
-          "title": "规则校验"
-        },
-        {
-          "key": "confirm",
-          "title": "确认提交"
-        }
-      ]
+        { "step": 1, "title": "厂商与设备认证" },
+        { "step": 2, "title": "通信协议与测点配置" },
+        { "step": 3, "title": "现场数采联调测试" },
+        { "step": 4, "title": "入网核验完成" }
+      ],
+      "stepSummary": {
+        "currentPhaseDesc": "当前正在进行测点编码与污染因子阈值映射"
+      },
+      "actionRail": {
+        "buttons": ["prev", "saveDraft", "next", "finish"]
+      }
     }
   }
 ]

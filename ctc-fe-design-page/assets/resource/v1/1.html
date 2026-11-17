@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>B端高频通用页面布局线框图</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f0f0;
+      color: #333;
+      padding: 24px;
+    }
+    h1 { font-size: 20px; margin-bottom: 24px; text-align: center; }
+    .layout-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+    }
+    .layout-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .layout-card h2 {
+      font-size: 15px;
+      margin-bottom: 8px;
+      color: #111;
+    }
+    .layout-desc {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    /* 线框画板公用容器（模拟固定视口高度 320px） */
+    .viewport {
+      height: 320px;
+      border: 2px dashed #999;
+      background: #fafafa;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 线框基础元素 */
+    .wire-box {
+      border: 1px solid #777;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #555;
+      text-align: center;
+      padding: 4px 8px;
+    }
+
+    /* 1. 标准表格页 */
+    .t1-container { padding: 12px; gap: 8px; height: 100%; display: flex; flex-direction: column; }
+    .t1-filter { height: 42px; }
+    .t1-toolbar { height: 32px; justify-content: space-between; }
+    .t1-table-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 6px;
+      padding: 8px;
+    }
+    .t1-table { flex: 1; border-style: dashed; }
+    .t1-pagination { height: 28px; }
+
+    /* 2. 左树右表 */
+    .t2-container { padding: 12px; gap: 8px; height: 100%; display: flex; flex-direction: row; }
+    .t2-tree { width: 120px; height: 100%; }
+    .t2-main { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .t2-filter { height: 36px; }
+    .t2-table { flex: 1; min-height: 0; border-style: dashed; }
+    .t2-page { height: 28px; }
+
+    /* 3. 左右双栏 */
+    .t3-container { padding: 12px; gap: 8px; height: 100%; display: flex; flex-direction: row; }
+    .t3-left { width: 38%; height: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .t3-left-head { height: 30px; }
+    .t3-left-list { flex: 1; min-height: 0; border-style: dashed; }
+    .t3-right { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .t3-right-head { height: 36px; }
+    .t3-right-body { flex: 1; min-height: 0; border-style: dashed; }
+    .t3-right-foot { height: 32px; }
+
+    /* 4. 锚点长卷 */
+    .t4-container { padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+    .t4-summary { height: 40px; }
+    .t4-body-row { flex: 1; min-height: 0; display: flex; gap: 8px; }
+    .t4-scroll-content { flex: 1; display: flex; flex-direction: column; gap: 8px; border-style: dashed; padding: 6px; }
+    .t4-section { height: 50px; background: #eee; }
+    .t4-anchor-nav { width: 80px; height: 100%; }
+    .t4-footer-action { height: 34px; border-top: 2px solid #555; }
+
+    /* 5. 指标网格看板 */
+    .t5-container { padding: 12px; gap: 8px; height: 100%; display: flex; flex-direction: column; }
+    .t5-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 48px; }
+    .t5-grid-row { flex: 1; min-height: 0; display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+    .t5-chart-left { display: flex; flex-direction: column; gap: 8px; }
+    .t5-chart-box { flex: 1; border-style: dashed; }
+    .t5-rank-box { height: 100%; border-style: dashed; }
+
+    /* 6. 分步向导 */
+    .t6-container { padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+    .t6-step-bar { height: 40px; }
+    .t6-viewport { flex: 1; min-height: 0; border-style: dashed; margin: 0 24px; }
+    .t6-action-rail { height: 36px; justify-content: flex-end; gap: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>高频通用页面布局线框图规范</h1>
+
+  <div class="layout-grid">
+
+    <!-- 1. 标准表格检索页 -->
+    <div class="layout-card">
+      <h2>01. 标准筛选表格页 (Search & Table)</h2>
+      <div class="layout-desc">高频场景：基础数据台账、日志审计、工单报表查询</div>
+      <div class="viewport">
+        <div class="t1-container">
+          <div class="wire-box t1-filter">[ 顶部多维搜索条件区 (表单折叠/展开) ]</div>
+          <div class="wire-box t1-toolbar">
+            <span>[ 批量操作/新增按钮 ]</span>
+            <span>[ 刷新 / 列设置 / 导出 ]</span>
+          </div>
+          <div class="wire-box t1-table-card">
+            <div class="wire-box t1-table">[ 数据表格视口 (占据剩余高度 / 内部独立滚动) ]</div>
+            <div class="wire-box t1-pagination">[ 底部分页器 (页码、容量切换) ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 左树右表联动页 -->
+    <div class="layout-card">
+      <h2>02. 左树右表联动页 (Tree & Table)</h2>
+      <div class="layout-desc">高频场景：部门组织架构、商品分类类目、区域网格管理</div>
+      <div class="viewport">
+        <div class="t2-container">
+          <div class="wire-box t2-tree">[ 左侧树形目录<br>(独立纵向滚动) ]</div>
+          <div class="t2-main">
+            <div class="wire-box t2-filter">[ 右侧顶部轻量筛选条 ]</div>
+            <div class="wire-box t2-table">[ 联动数据表格 (视口填满) ]</div>
+            <div class="wire-box t2-page">[ 分页控制 ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 左右双栏主从联动页 -->
+    <div class="layout-card">
+      <h2>03. 左右双栏主从联动 (Master-Detail Split)</h2>
+      <div class="layout-desc">高频场景：即席审批流、工单处理、邮件/消息中心</div>
+      <div class="viewport">
+        <div class="t3-container">
+          <div class="t3-left">
+            <div class="wire-box t3-left-head">[ 主列表检索/排序 ]</div>
+            <div class="wire-box t3-left-list">[ 任务卡片清单<br>(独立滚动) ]</div>
+          </div>
+          <div class="t3-right">
+            <div class="wire-box t3-right-head">[ 选中项标题与快捷状态 ]</div>
+            <div class="wire-box t3-right-body">[ 从属详情/编辑表单<br>(独立滚动区) ]</div>
+            <div class="wire-box t3-right-foot">[ 审批/保存底部操作栏 ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 锚点分段长卷详情页 -->
+    <div class="layout-card">
+      <h2>04. 锚点分段长卷详情 (Anchor Scroll Detail)</h2>
+      <div class="layout-desc">高频场景：企业/用户全景档案、长表单录入、配置综合视图</div>
+      <div class="viewport">
+        <div class="t4-container">
+          <div class="wire-box t4-summary">[ 顶部核心指标/基本信息摘要卡 ]</div>
+          <div class="t4-body-row">
+            <div class="wire-box t4-scroll-content">
+              <div class="wire-box t4-section">区块 1: 基本资料 (Section 1)</div>
+              <div class="wire-box t4-section">区块 2: 资质证照 (Section 2)</div>
+              <div class="wire-box t4-section">区块 3: 变更历史 (Section 3)</div>
+            </div>
+            <div class="wire-box t4-anchor-nav">[ 侧边/顶部<br>锚点导航轨 ]</div>
+          </div>
+          <div class="wire-box t4-footer-action">[ 底部常驻吸底操作栏 (保存/提交/返回) ]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 指标与图表网格看板 -->
+    <div class="layout-card">
+      <h2>05. 指标与图表综合看板 (Metrics & Grid)</h2>
+      <div class="layout-desc">高频场景：业务监控大盘、经营分析简报、运维总览</div>
+      <div class="viewport">
+        <div class="t5-container">
+          <div class="t5-kpi-row">
+            <div class="wire-box">KPI 1</div>
+            <div class="wire-box">KPI 2</div>
+            <div class="wire-box">KPI 3</div>
+            <div class="wire-box">KPI 4</div>
+          </div>
+          <div class="t5-grid-row">
+            <div class="t5-chart-left">
+              <div class="wire-box t5-chart-box">[ 折线趋势图 (自适应) ]</div>
+              <div class="wire-box t5-chart-box">[ 柱状对比图 (自适应) ]</div>
+            </div>
+            <div class="wire-box t5-rank-box">[ 侧栏排行/实时事件流 ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 分步向导表单页 -->
+    <div class="layout-card">
+      <h2>06. 分步向导漏斗 (Step Wizard)</h2>
+      <div class="layout-desc">高频场景：开通向导、环境初始化配置、多步骤申请流程</div>
+      <div class="viewport">
+        <div class="t6-container">
+          <div class="wire-box t6-step-bar">[ Step 1 基础配置 ——— Step 2 规则定义 ——— Step 3 确认生效 ]</div>
+          <div class="wire-box t6-viewport">[ 当前步骤表单/操作工作区 (受控视口切换) ]</div>
+          <div class="wire-box t6-action-rail">
+            <span class="wire-box">[ 上一步 ]</span>
+            <span class="wire-box">[ 保存草稿 ]</span>
+            <span class="wire-box">[ 下一步 / 提交 ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

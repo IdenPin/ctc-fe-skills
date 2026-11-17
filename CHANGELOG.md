@@ -1,5 +1,29 @@
 # 版本记录
 
+## 1.2.3 — 2026-11-13
+
+### 新增与完善
+
+- 为 `gf-fullstack-dev` 的自动监控后端补充微服务版仓库 `automonitor-cloud`（`auto-monitor/backend/automonitor-cloud`）；监测代码仓库由 11 个增至 12 个，总计 14 个 Git 仓库。
+- 同步更新仓库清单、工作区准备命令与 README 概览。
+- 明确自动监控后端同时存在 `amdb` 与 `automonitor-cloud`，接口归属需按需求版本在实际源码中确认，并继续禁止仅凭仓库名称推断实现归属。
+- 为 `ctc-fe-design-page` 与 `ctc-fe-code-auditor` 升级统一布局契约：模板体系由 T01～T07 调整为 L01～L08，新增宿主高度链、滚动责任、浮层挂载与受控装配工作流。
+- 新增页面校验器 `scripts/validate-page.py`，配套 `layout_rules.py`、`layout_template.py` 与边界回归用例；`check-package.py` 同步覆盖契约、Schema、示例与 HTML 预览一致性检查。
+- 补充布局原型与架构评审资料 `ctc-fe-design-page/assets/resource/`，更新布局 Schema、输入示例、HTML 预览与共享资料同步脚本。
+- 完善 `ctc-fe-subapp-auth` 私服认证、目录结构适配与通知适配器说明，`ctc-fe-adapt-broswer` 包管理器命令说明，`ctc-fe-structure` 扫描命令路径说明；`scripts/validate-skills.py` 跳过 `.git`、`.codegraph`、`.cache`、`docs` 及软链接目录。
+
+### 升级说明
+
+- 使用新的固定版本 tag 重新安装 `gf-fullstack-dev`，或对主分支安装执行 `npx skills update`。
+- 布局规范涉及模板编号与资料结构调整，使用 `ctc-fe-design-page`、`ctc-fe-code-auditor` 的项目需重新安装对应 skill。
+- 本地开发时可通过 `npm run sync -- <skill-name>` 更新工具副本；本地同步不等于发布。
+
+### 验证范围
+
+- `automonitor-cloud` 远程仓库地址可访问，存在 `main`、`develop` 分支。
+- `npm test`：校验 8 个 skill 的元数据与本地 Markdown 链接。
+- `ctc-fe-design-page` 与 `ctc-fe-code-auditor` 的 `check-package.py` 通过：模板、插槽、页面校验器回归、Schema 与 9 组示例校验。
+
 ## 1.2.2 — 2026-11-13
 
 ### 新增与完善

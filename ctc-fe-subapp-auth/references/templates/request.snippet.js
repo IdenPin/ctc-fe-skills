@@ -22,6 +22,7 @@ frameworkAuth.attachAxios(service, {
 })
 
 // 2. 响应拦截器调整
+// Notification 需由项目 UI 库导入或适配；不依赖浏览器同名全局对象。
 service.interceptors.response.use(
 	res => {
 		// 防御已解包的业务数据对象再次进入拦截器（重发请求防重解包）
@@ -37,8 +38,11 @@ service.interceptors.response.use(
 			return res
 		}
 
-		let data = res.data
-		data.code = Number(data?.code)
+		const data = res?.data
+		if (!data || typeof data !== 'object' || Array.isArray(data)) {
+			return Promise.reject(new Error('Unexpected response payload'))
+		}
+		data.code = Number(data.code)
 
 		// 成功业务码判断
 		if (['200', 200, 201, 202, 'SYS000', 1311].includes(data.code)) {

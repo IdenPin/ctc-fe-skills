@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高频页面布局模板 - 抽象模块线框图</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #222;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .top-bar {
+      border: 1px solid #333;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: #f9f9f9;
+    }
+
+    .top-bar-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .top-bar-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .view-mode-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      padding: 6px 10px;
+      border: 1px solid #666;
+      background: #fff;
+      color: #222;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .tab-btn.active {
+      background: #222;
+      color: #fff;
+      border-color: #222;
+    }
+
+    .template-card {
+      border: 2px solid #222;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .template-card.active {
+      display: block;
+    }
+
+    body.show-all .template-card {
+      display: block;
+    }
+
+    .template-meta {
+      border-bottom: 1px solid #333;
+      background: #eee;
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .template-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .template-desc {
+      color: #444;
+      font-size: 12px;
+    }
+
+    .wireframe-canvas {
+      padding: 12px;
+      background: #fff;
+    }
+
+    /* 抽象模块线框容器 */
+    .wf-module {
+      border: 1px solid #444;
+      background: #fafafa;
+      padding: 10px;
+    }
+
+    .wf-sub-module {
+      border: 1px dashed #777;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .wf-title {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .wf-sub {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .wf-placeholder-bar {
+      height: 16px;
+      background: #e6e6e6;
+      border: 1px solid #bbb;
+      margin-top: 8px;
+    }
+
+    .wf-placeholder-block {
+      border: 1px dashed #999;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      color: #444;
+    }
+
+    .wf-flex-between {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wf-flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .wf-slot {
+      border: 1px solid #888;
+      background: #fff;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .gap-8 { gap: 8px; }
+    .mt-8 { margin-top: 8px; }
+    .mb-8 { margin-bottom: 8px; }
+
+    /* 栅格骨架 */
+    .grid-2-tree {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 10px;
+    }
+
+    .grid-2-split {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 10px;
+    }
+
+    .grid-2-anchor {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px;
+    }
+
+    .grid-4-kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .grid-2-chart {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-3-kv {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .grid-2-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .grid-2-tree,
+      .grid-2-split,
+      .grid-2-anchor,
+      .grid-4-kpi,
+      .grid-2-chart,
+      .grid-3-kv,
+      .grid-2-form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="top-bar-header">
+      <div class="top-bar-title">高频页面布局模板（抽象模块线框图）</div>
+      <div class="view-mode-group">
+        <button type="button" class="tab-btn active" id="modeSingleBtn">单页切换</button>
+        <button type="button" class="tab-btn" id="modeAllBtn">全部平铺</button>
+      </div>
+    </div>
+    <nav class="nav-tabs" id="templateNav">
+      <button type="button" class="tab-btn active" data-target="tpl-1">1. 检索列表页</button>
+      <button type="button" class="tab-btn" data-target="tpl-2">2. 左树右表页</button>
+      <button type="button" class="tab-btn" data-target="tpl-3">3. 主从分栏页</button>
+      <button type="button" class="tab-btn" data-target="tpl-4">4. 分组长表单页</button>
+      <button type="button" class="tab-btn" data-target="tpl-5">5. 数据工作台</button>
+      <button type="button" class="tab-btn" data-target="tpl-6">6. 对象详情页</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 模板 1：检索列表页 -->
+    <section class="template-card active" id="tpl-1">
+      <div class="template-meta">
+        <span class="template-name">1. 经典检索列表页</span>
+        <span class="template-desc">结构：条件筛选区 + 工具操作栏 + 数据表格区 + 分页栏</span>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module">
+          <div class="wf-flex-between">
+            <div>
+              <div class="wf-title">[模块 1] 条件筛选区</div>
+              <div class="wf-sub">流式/栅格排布筛选控件，右侧或行尾放置查询/重置按钮</div>
+            </div>
+            <div class="wf-flex-row">
+              <div class="wf-slot">筛选项 ×N</div>
+              <div class="wf-slot">操作按钮组</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wf-module stack-col">
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-title">[模块 2] 列表工具栏（左：标题/统计，右：新增/批量/导出）</div>
+            <div class="wf-slot">全局操作组</div>
+          </div>
+
+          <div class="wf-placeholder-block" style="min-height: 180px;">
+            <div class="wf-title">[模块 3] 主数据表格区</div>
+            <div class="wf-sub">表头列 + 多行数据 + 行内操作列（支持横向滚动 / 固定操作列）</div>
+          </div>
+
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-title">[模块 4] 分页区</div>
+            <div class="wf-slot">总数 + 页码器 + 每页条数</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模板 2：左树右表页 -->
+    <section class="template-card" id="tpl-2">
+      <div class="template-meta">
+        <span class="template-name">2. 左树右表页</span>
+        <span class="template-desc">结构：左侧固定树导航（220~260px）+ 右侧自适应内容区（1fr）</span>
+      </div>
+      <div class="wireframe-canvas">
+        <div class="grid-2-tree">
+          <aside class="wf-module stack-col" style="min-height: 280px;">
+            <div class="wf-title">[模块 1] 左侧树形导航</div>
+            <div class="wf-sub-module">树节点搜索框</div>
+            <div class="wf-placeholder-block" style="flex: 1;">
+              <div class="wf-title">层级树结构</div>
+              <div class="wf-sub">支持展开/折叠/选中高亮</div>
+            </div>
+          </aside>
+
+          <div class="wf-module stack-col">
+            <div class="wf-title">[模块 2] 右侧联动内容区（1fr）</div>
+            <div class="wf-sub-module wf-flex-between">
+              <span>[子模块 2-1] 顶部检索与操作栏</span>
+              <span class="wf-slot">新增 / 筛选</span>
+            </div>
+            <div class="wf-placeholder-block" style="min-height: 160px;">
+              <div class="wf-title">[子模块 2-2] 关联数据列表 / 表格</div>
+              <div class="wf-sub">随左侧选中节点动态联动刷新</div>
+            </div>
+            <div class="wf-sub-module">[子模块 2-3] 分页栏</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模板 3：主从分栏页 -->
+    <section class="template-card" id="tpl-3">
+      <div class="template-meta">
+        <span class="template-name">3. 左右主从分栏页</span>
+        <span class="template-desc">结构：左侧列表流（280~360px）+ 右侧详情与处理面板（1fr）</span>
+      </div>
+      <div class="wireframe-canvas">
+        <div class="grid-2-split">
+          <div class="wf-module stack-col">
+            <div class="wf-title">[模块 1] 左侧主列表流 (Master)</div>
+            <div class="wf-sub-module">列表搜索 / 状态筛选条</div>
+            <div class="wf-sub-module" style="border: 2px solid #222; background: #eee;">卡片项 1（选中态）</div>
+            <div class="wf-sub-module">卡片项 2</div>
+            <div class="wf-sub-module">卡片项 3</div>
+          </div>
+
+          <div class="wf-module stack-col">
+            <div class="wf-title">[模块 2] 右侧详情面板 (Detail)</div>
+            <div class="wf-sub-module wf-flex-between">
+              <span>[子模块 2-1] 详情标题 + 状态 + 操作按钮</span>
+              <span class="wf-slot">主操作组</span>
+            </div>
+            <div class="wf-sub-module">
+              <div class="wf-title">[子模块 2-2] 关键属性摘要区</div>
+              <div class="wf-placeholder-bar"></div>
+            </div>
+            <div class="wf-placeholder-block" style="min-height: 110px;">
+              <div class="wf-title">[子模块 2-3] 主体内容 / 业务流转区</div>
+              <div class="wf-sub">正文详情、表单处理或时间轴记录</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模板 4：分组长表单页 -->
+    <section class="template-card" id="tpl-4">
+      <div class="template-meta">
+        <span class="template-name">4. 分组/锚点长表单页</span>
+        <span class="template-desc">结构：页头栏 + 左侧锚点目录 + 分组表单区块 + 吸底操作栏</span>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module wf-flex-between">
+          <div class="wf-title">[模块 1] 页头区（返回 / 标题 / 状态标记）</div>
+          <div class="wf-slot">辅助信息</div>
+        </div>
+
+        <div class="grid-2-anchor">
+          <aside class="wf-module stack-col">
+            <div class="wf-title">[模块 2] 锚点导航</div>
+            <div class="wf-sub-module">区块 1（激活）</div>
+            <div class="wf-sub-module">区块 2</div>
+            <div class="wf-sub-module">区块 3</div>
+          </aside>
+
+          <div class="stack-col">
+            <div class="wf-module">
+              <div class="wf-title">[模块 3-1] 表单分组一（多列栅格）</div>
+              <div class="grid-2-form mt-8">
+                <div class="wf-sub-module">字段槽位</div>
+                <div class="wf-sub-module">字段槽位</div>
+              </div>
+            </div>
+            <div class="wf-module">
+              <div class="wf-title">[模块 3-2] 表单分组二</div>
+              <div class="wf-placeholder-bar"></div>
+            </div>
+            <div class="wf-module">
+              <div class="wf-title">[模块 3-3] 表单分组三（附件 / 富文本）</div>
+              <div class="wf-placeholder-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wf-module wf-flex-between">
+          <div class="wf-title">[模块 4] 吸底操作栏 (Sticky Footer)</div>
+          <div class="wf-slot">取消 / 暂存 / 提交</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模板 5：数据工作台 -->
+    <section class="template-card" id="tpl-5">
+      <div class="template-meta">
+        <span class="template-name">5. 数据概览工作台</span>
+        <span class="template-desc">结构：全局筛选 + KPI 指标卡行 + 双栏图表区 + 底部明细区</span>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module wf-flex-between">
+          <div class="wf-title">[模块 1] 全局维度筛选栏</div>
+          <div class="wf-slot">时间 / 范围 / 刷新</div>
+        </div>
+
+        <div class="grid-4-kpi">
+          <div class="wf-module">
+            <div class="wf-title">[模块 2] KPI 卡 1</div>
+            <div class="wf-placeholder-bar"></div>
+          </div>
+          <div class="wf-module">
+            <div class="wf-title">[模块 2] KPI 卡 2</div>
+            <div class="wf-placeholder-bar"></div>
+          </div>
+          <div class="wf-module">
+            <div class="wf-title">[模块 2] KPI 卡 3</div>
+            <div class="wf-placeholder-bar"></div>
+          </div>
+          <div class="wf-module">
+            <div class="wf-title">[模块 2] KPI 卡 4</div>
+            <div class="wf-placeholder-bar"></div>
+          </div>
+        </div>
+
+        <div class="grid-2-chart">
+          <div class="wf-placeholder-block" style="min-height: 140px;">
+            <div class="wf-title">[模块 3-1] 主图表区 (2fr)</div>
+            <div class="wf-sub">核心趋势 / 对比图表</div>
+          </div>
+          <div class="wf-placeholder-block" style="min-height: 140px;">
+            <div class="wf-title">[模块 3-2] 副图表区 (1fr)</div>
+            <div class="wf-sub">占比 / 排行分布</div>
+          </div>
+        </div>
+
+        <div class="wf-module">
+          <div class="wf-title">[模块 4] 底部待办 / 异常明细列表区</div>
+          <div class="wf-placeholder-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模板 6：对象详情页 -->
+    <section class="template-card" id="tpl-6">
+      <div class="template-meta">
+        <span class="template-name">6. 对象详情页</span>
+        <span class="template-desc">结构：顶部实体摘要头 + 多列 KV 属性 + Tab 选项卡 + 下方内容区</span>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module stack-col">
+          <div class="wf-flex-between">
+            <div class="wf-title">[模块 1] 实体摘要头（名称 + 状态 + 主操作按钮）</div>
+            <div class="wf-slot">编辑 / 导出 / 更多</div>
+          </div>
+
+          <div class="grid-3-kv">
+            <div class="wf-sub-module">属性字段 K-V</div>
+            <div class="wf-sub-module">属性字段 K-V</div>
+            <div class="wf-sub-module">属性字段 K-V</div>
+          </div>
+
+          <div class="wf-sub-module">
+            <div class="wf-title">[模块 2] Tab 选项卡栏（概览 | 关联列表 | 日志）</div>
+          </div>
+        </div>
+
+        <div class="wf-placeholder-block" style="min-height: 160px;">
+          <div class="wf-title">[模块 3] Tab 内容承载区</div>
+          <div class="wf-sub">根据上方选项卡动态切换子模块（表格、卡片组或时间轴）</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const nav = document.getElementById('templateNav');
+      const tabButtons = nav.querySelectorAll('.tab-btn');
+      const cards = document.querySelectorAll('.template-card');
+      const modeSingleBtn = document.getElementById('modeSingleBtn');
+      const modeAllBtn = document.getElementById('modeAllBtn');
+
+      function selectTemplate(targetId) {
+        tabButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.target === targetId);
+        });
+        cards.forEach((card) => {
+          card.classList.toggle('active', card.id === targetId);
+        });
+      }
+
+      nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        document.body.classList.remove('show-all');
+        modeSingleBtn.classList.add('active');
+        modeAllBtn.classList.remove('active');
+        selectTemplate(btn.dataset.target);
+      });
+
+      modeSingleBtn.addEventListener('click', () => {
+        document.body.classList.remove('show-all');
+        modeSingleBtn.classList.add('active');
+        modeAllBtn.classList.remove('active');
+      });
+
+      modeAllBtn.addEventListener('click', () => {
+        document.body.classList.add('show-all');
+        modeAllBtn.classList.add('active');
+        modeSingleBtn.classList.remove('active');
+      });
+    })();
+  </script>
+</body>
+</html>

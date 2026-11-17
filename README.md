@@ -4,20 +4,20 @@
 
 [![skills.sh](https://skills.sh/b/IdenPin/ctc-fe-skills)](https://skills.sh/IdenPin/ctc-fe-skills)
 
-当前正式版本：**v1.2.2**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
+当前正式版本：**v1.2.3**。变更内容及升级说明见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ## 安装
 
 团队项目建议通过 tag 安装固定版本：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.2 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.3 -y
 ```
 
 使用 Vue 规范时，建议同时安装结构规范，以便获取文件归属、目录容量和体积检查规则：
 
 ```bash
-npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.2 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
+npx skills add https://github.com/IdenPin/ctc-fe-skills/tree/v1.2.3 --skill ctc-fe-structure --skill ctc-fe-vue3 -y
 ```
 
 需要体验主分支最新修改时安装全部 skills：
@@ -41,7 +41,7 @@ npx skills add IdenPin/ctc-fe-skills --skill gf-fullstack-dev -y
 
 上述简写来源跟随默认分支，安装时取得当时内容；已安装的副本不会因仓库更新而自动变更。主分支安装可通过 `npx skills check` 检查更新，再执行 `npx skills update`；固定版本升级时，使用新的 tag URL 重新安装，并核对项目的 `skills-lock.json` 与变更。
 
-安装器会将分册、脚本和 `agents/` 元数据一起安装；不要只复制 `SKILL.md`。使用结构扫描器需要本机 Python 3。
+安装器会将 `references/`、`scripts/`、`agents/`、`assets/` 和 `templates/` 一起安装；不要只复制 `SKILL.md`。使用结构扫描器需要 Python 3.9 或更高版本。
 
 > `ctc-fe-adapt-broswer` 是已发布的历史拼写。为避免破坏现有安装路径暂时保留，后续破坏性版本迁移为 `ctc-fe-adapt-browser`。
 
@@ -96,7 +96,7 @@ npx skills add IdenPin/ctc-fe-skills --skill gf-fullstack-dev -y
 
 ### [gf-fullstack-dev](./gf-fullstack-dev/SKILL.md)
 
-用于 GF 多业务系统的需求定位、全栈开发与跨仓库排查。当前共登记 2 个需求仓库（`gf-monitor-reqs`、`gf-law-reqs`）和监测体系 `operations`（运维）、`auto-monitor`（自动监控）相关 11 个前后端代码仓库；自动监控前端包含管理端、企业端及其对应框架仓库。监测与执法分别使用独立工作区 `gf-monitor-ai/` 和 `gf-law-ai/`，需求仓库位于各自根目录，与子业务系统或子应用平级；执法子应用代码仓库映射待后续补齐。涉及需求的任务先定位文档与验收依据，再关联实现，并记录需求与代码的差异。
+用于 GF 多业务系统的需求定位、全栈开发与跨仓库排查。当前共登记 2 个需求仓库（`gf-monitor-reqs`、`gf-law-reqs`）和监测体系 `operations`（运维）、`auto-monitor`（自动监控）相关 12 个前后端代码仓库；自动监控后端包含 `amdb` 与微服务版 `automonitor-cloud`，前端包含管理端、企业端及其对应框架仓库。监测与执法分别使用独立工作区 `gf-monitor-ai/` 和 `gf-law-ai/`，需求仓库位于各自根目录，与子业务系统或子应用平级；执法子应用代码仓库映射待后续补齐。涉及需求的任务先定位文档与验收依据，再关联实现，并记录需求与代码的差异。
 
 ## 规范等级
 
@@ -119,6 +119,25 @@ npm test
 ## 版本与发布
 
 Skills 通过 GitHub 仓库及 `npx skills add` 分发。`package.json` 的 `version`、Git tag `v<version>`、CHANGELOG 与 GitHub Release 必须对应；不需要将本仓库作为 CLI 包发布到 npm。
+
+### 发布前置条件与命令
+
+从已审查的发布提交开始；确认工作区没有待处理改动、远端为预期仓库、目标 tag 尚未发布，并已安装 GitHub CLI 且完成认证。可先检查：
+
+```bash
+git status --short
+git fetch origin --tags
+gh auth status
+npm run validate
+```
+
+`npm run validate` 是本仓库当前定义的资料校验命令；目标项目的 lint、typecheck、test、build 仍按对应项目执行。创建附注 tag、推送主分支和 tag、创建 Release 的命令骨架如下，将版本号与 Release 说明文件路径替换为本次内容：
+
+```bash
+git tag -a v<version> -m "v<version>"
+git push origin main v<version>
+gh release create v<version> --notes-file /path/to/release-notes.md
+```
 
 1. 核对远端主分支、tags 与 Releases，确定尚未发布的版本号。已写入但未发布的版本可以继续完善；已发布的 tag 不得覆盖。
 2. 更新 `package.json`、本页固定版本安装示例和 `CHANGELOG.md`，说明新增约束及升级影响。

@@ -8,6 +8,8 @@
 
 - **第二步：保留外壳兼容** 原全局大仓库中的历史文件不要删除，将其内容清空，改为 `re-export`，确保未改造的老代码、第三方动态菜单路由扫描不发生崩塌：
 
+以下仅是迁移期兼容包装：它保留旧入口原有的导出面，必须登记负责人和清理期限，并在调用方迁移后删除；长期公开的模块入口仍按 [boundaries.md](boundaries.md) 精确导出。
+
 ```ts
 // src/api/system/post/index.ts (历史老文件位置)
 export * from '#/views/system/post/api';
@@ -40,9 +42,20 @@ git mv dict-tag.tmp.vue DictTag.vue
 
 改动目录结构后，至少执行并跑通本地校验（按项目实际命令替换）：
 
+使用项目 `package.json` 中实际定义的脚本，并通过项目锁文件对应的包管理器执行。例如：
+
 ```bash
-pnpm typecheck
-pnpm build
+# npm
+npm run typecheck
+npm run build
+
+# pnpm
+pnpm run typecheck
+pnpm run build
+
+# Yarn
+yarn typecheck
+yarn build
 ```
 
 涉及路由、请求、局部 store 核心改造时，必须启动浏览器进行页面关键全流程手工验证。
@@ -88,4 +101,4 @@ pnpm build
 - [ ] 是否实际运行结构扫描器并报告遗留超限，而非仅声明“遵循目录规范”？
 - [ ] 老项目是否保留兼容路径，避免一次性大爆炸？
 - [ ] 路由和菜单扫描机制是否仍可工作？
-- [ ] 改造完成后，pnpm typecheck 与 pnpm build 是否无 error 通过？
+- [ ] 改造完成后，是否按项目包管理器执行 typecheck 与 build 脚本并记录结果？

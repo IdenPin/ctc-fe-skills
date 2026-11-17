@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PC端业务子应用高频布局原型 (纯CSS驱动)</title>
+  <style>
+    :root {
+      --bg-canvas: #f8fafc;
+      --bg-panel: #ffffff;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-dashed: #94a3b8;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #94a3b8;
+      --primary: #3b82f6;
+      --primary-light: #eff6ff;
+      --primary-dark: #2563eb;
+      --brand-border: #bfdbfe;
+      --accent-purple: #8b5cf6;
+      --accent-teal: #14b8a6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --tag-warn: #fef3c7;
+      --tag-warn-text: #b45309;
+      --tag-danger: #fee2e2;
+      --tag-danger-text: #b91c1c;
+      --tag-success: #dcfce7;
+      --tag-success-text: #15803d;
+      --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+      --shadow: 0 4px 6px -1px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+      --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04);
+      --radius-sm: 0;
+      --radius: 0;
+      --radius-lg: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      padding: 28px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 20% 0%, rgb(59 130 246 / 0.04) 0%, transparent 35%),
+        radial-gradient(circle at 80% 100%, rgb(139 92 246 / 0.04) 0%, transparent 35%),
+        linear-gradient(to bottom, transparent, transparent 49%, rgb(226 232 240 / 0.6) 50%, transparent 51%);
+      background-size: 100% 100%, 100% 100%, 24px 24px;
+    }
+
+    /* 隐藏的原生 Radio 控制器 */
+    .tab-controller {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      height: 0;
+      margin: 0;
+    }
+
+    /* 顶部导航容器 */
+    .nav-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-panel);
+      padding: 14px 18px 14px 22px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-header {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .nav-tip {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 4px;
+      background: #f1f5f9;
+      border-radius: 0;
+    }
+
+    .tab-btn {
+      padding: 7px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgb(255 255 255 / 0.6);
+    }
+
+    /* 纯 CSS 激活按钮样式 */
+    #tab-1:checked ~ .nav-wrapper label[for="tab-1"],
+    #tab-2:checked ~ .nav-wrapper label[for="tab-2"],
+    #tab-3:checked ~ .nav-wrapper label[for="tab-3"],
+    #tab-4:checked ~ .nav-wrapper label[for="tab-4"],
+    #tab-5:checked ~ .nav-wrapper label[for="tab-5"],
+    #tab-6:checked ~ .nav-wrapper label[for="tab-6"] {
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 舞台主容器 */
+    .layout-stage {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      min-height: 640px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* 默认隐藏所有面板 */
+    .view-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* 纯 CSS 显示选中的面板 */
+    #tab-1:checked ~ .layout-stage #panel-1,
+    #tab-2:checked ~ .layout-stage #panel-2,
+    #tab-3:checked ~ .layout-stage #panel-3,
+    #tab-4:checked ~ .layout-stage #panel-4,
+    #tab-5:checked ~ .layout-stage #panel-5,
+    #tab-6:checked ~ .layout-stage #panel-6 {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      animation: fadeInUp 0.35s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .layout-meta {
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .layout-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 0;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #dbeafe 100%);
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      border: 1px solid rgb(59 130 246 / 0.12);
+      flex-shrink: 0;
+    }
+
+    .layout-meta h3 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .layout-meta .en-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
+    .css-badge {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 11px;
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+      border: 1px solid var(--border-color);
+      padding: 5px 10px;
+      border-radius: 0;
+      color: var(--text-muted);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
+      flex-shrink: 0;
+    }
+
+    /* 业务视口外框 */
+    .viewport-box {
+      border: 1px solid var(--border-strong);
+      border-radius: 0;
+      background: #f8fafc;
+      height: 560px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        inset 0 1px 2px rgb(255 255 255 / 0.8),
+        0 8px 24px -6px rgb(15 23 42 / 0.08);
+    }
+
+    /* 原子骨架组件通用样式 */
+    .wb {
+      background: #ffffff;
+      border: 1px dashed var(--border-dashed);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      position: relative;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .wb::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgb(255 255 255 / 0.5) 0%, transparent 50%);
+    }
+
+    .btn-mock {
+      padding: 4px 10px;
+      border-radius: 0;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      cursor: default;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: 1px solid var(--primary);
+    }
+
+    .btn-default {
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+    }
+
+    .btn-danger {
+      background: var(--tag-danger);
+      color: var(--tag-danger-text);
+      border: 1px solid #fca5a5;
+    }
+
+    .btn-mock:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tag-mock {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 0;
+      font-weight: 600;
+    }
+
+    .tag-success { background: var(--tag-success); color: var(--tag-success-text); }
+    .tag-warn { background: var(--tag-warn); color: var(--tag-warn-text); }
+    .tag-danger { background: var(--tag-danger); color: var(--tag-danger-text); }
+
+    .input-mock {
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      border-radius: 0;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* 1. 结构化检索表格 */
+    .scene-filter-table {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .filter-panel {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .table-container {
+      flex: 1;
+      min-height: 0;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .table-header {
+      height: 38px;
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+      border-bottom: 2px solid var(--border-color);
+      display: grid;
+      grid-template-columns: 50px 140px 180px 120px 100px 1fr 120px;
+      align-items: center;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 0 10px;
+      color: var(--text-muted);
+    }
+
+    .table-body {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .table-row {
+      height: 42px;
+      border-bottom: 1px solid #f1f5f9;
+      display: grid;
+      grid-template-columns: 50px 140px 180px 120px 100px 1fr 120px;
+      align-items: center;
+      font-size: 12px;
+      padding: 0 10px;
+      transition: background 0.15s ease;
+    }
+
+    .table-row:hover {
+      background: #f8fafc;
+    }
+
+    .pagination-bar {
+      height: 42px;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 14px;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 2. 空间/分类穿透树表 */
+    .scene-tree-table {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .tree-aside {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tree-node {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      border-radius: 0;
+      font-size: 12px;
+      margin-bottom: 4px;
+      transition: background 0.15s ease;
+      cursor: default;
+    }
+
+    .tree-node:hover {
+      background: #f8fafc;
+    }
+
+    .tree-node.active {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    /* 3. 分割研判联动 */
+    .scene-split-view {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      background: #fff;
+    }
+
+    .split-left-pane {
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      background: #fafafa;
+    }
+
+    .split-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 10px;
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+
+    .split-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .split-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .split-right-pane {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+
+    /* 4. 锚点分段长表单 */
+    .scene-anchor-form {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #f8fafc;
+    }
+
+    .form-body-wrapper {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 16px;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .section-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--primary);
+      padding-left: 8px;
+      font-size: 13px;
+    }
+
+    .anchor-nav {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 12px;
+      height: fit-content;
+      position: sticky;
+      top: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 5. 指标统计看板 */
+    .scene-dashboard {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .dashboard-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .kpi-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      border-color: var(--primary);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .kpi-trend {
+      font-size: 10px;
+    }
+
+    .dashboard-charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      min-height: 220px;
+    }
+
+    /* 6. 对象档案详情画报 */
+    .scene-profile {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .profile-hero-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .profile-avatar {
+      width: 50px;
+      height: 50px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 700;
+      border: 1px dashed var(--brand-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-tabs-header {
+      display: flex;
+      gap: 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 8px;
+      background: #fff;
+    }
+
+    .profile-tab-item {
+      padding-bottom: 8px;
+      cursor: default;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+
+    .profile-tab-item.active {
+      color: var(--primary-dark);
+      border-bottom-color: var(--primary-dark);
+    }
+
+    .profile-desc-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 900px) {
+      body {
+        padding: 16px;
+      }
+
+      .nav-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-grid {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .layout-meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .viewport-box {
+        height: 480px;
+      }
+
+      .scene-tree-table,
+      .scene-split-view,
+      .form-body-wrapper,
+      .dashboard-kpi-grid,
+      .dashboard-charts-grid,
+      .profile-desc-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 隐藏 Radio 控制器 (纯 CSS 驱动) -->
+  <input type="radio" name="sub-app-tab" id="tab-1" class="tab-controller" checked>
+  <input type="radio" name="sub-app-tab" id="tab-2" class="tab-controller">
+  <input type="radio" name="sub-app-tab" id="tab-3" class="tab-controller">
+  <input type="radio" name="sub-app-tab" id="tab-4" class="tab-controller">
+  <input type="radio" name="sub-app-tab" id="tab-5" class="tab-controller">
+  <input type="radio" name="sub-app-tab" id="tab-6" class="tab-controller">
+
+  <!-- 顶部布局切换栏 -->
+  <header class="nav-wrapper">
+    <div class="nav-header">
+      <div class="nav-title">PC 端业务子应用常用布局线框原型 (Router-View Level)</div>
+      <div class="nav-tip">已剔除 GIS态势 与 泳道看板 · 纯 CSS 驱动 · 100% 免疫沙箱拦截</div>
+    </div>
+    <nav class="nav-grid">
+      <label for="tab-1" class="tab-btn">1. 结构化检索表格 (CRUD)</label>
+      <label for="tab-2" class="tab-btn">2. 空间/分类穿透树表</label>
+      <label for="tab-3" class="tab-btn">3. 主从分割研判 (Split-View)</label>
+      <label for="tab-4" class="tab-btn">4. 锚点分段长表单</label>
+      <label for="tab-5" class="tab-btn">5. 指标统计看板 (Metrics)</label>
+      <label for="tab-6" class="tab-btn">6. 对象档案详情画报</label>
+    </nav>
+  </header>
+
+  <!-- 舞台主展示区 -->
+  <main class="layout-stage">
+
+    <!-- 1. 结构化检索表格 (Filter-Action-Table) -->
+    <section id="panel-1" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">1</span>
+          <h3>结构化检索表格模式 <span class="en-name">Filter-Action-Table</span></h3>
+        </div>
+        <span class="css-badge">flex-direction: column; table: flex: 1; min-height: 0;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-filter-table">
+          <div class="filter-panel">
+            <div style="display: flex; gap: 10px;">
+              <span class="input-mock">测点编码: 全部 ▼</span>
+              <span class="input-mock">联网状态: 在线 / 超标 ▼</span>
+              <span class="input-mock">周期: 2026-11-01 ~ 2026-11-11</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span class="btn-mock btn-primary">查询</span>
+              <span class="btn-mock btn-default">重置</span>
+              <span style="font-size: 11px; color: var(--primary); align-self: center; font-weight: 500;">展开高级 ▼</span>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 8px;">
+              <span class="btn-mock btn-primary">+ 新增档案</span>
+              <span class="btn-mock btn-default">批量下发参数</span>
+              <span class="btn-mock btn-danger">批量停运</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span class="btn-mock btn-default">列配置 ⚙</span>
+              <span class="btn-mock btn-default">导出 Excel ⤓</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="table-header">
+              <div><input type="checkbox"></div>
+              <div>站点编号</div>
+              <div>站点名称</div>
+              <div>协议标准</div>
+              <div>状态</div>
+              <div>最新上报时间</div>
+              <div style="text-align: right;">操作</div>
+            </div>
+            <div class="table-body">
+              <div class="table-row">
+                <div><input type="checkbox" checked></div>
+                <div>MN-610100-01</div>
+                <div>第一热电厂外排口</div>
+                <div>HJ 212-2017</div>
+                <div><span class="tag-mock tag-success">正常传输</span></div>
+                <div>2026-11-11 18:00:12</div>
+                <div style="text-align: right; color: var(--primary);">详情 | 诊断</div>
+              </div>
+              <div class="table-row">
+                <div><input type="checkbox"></div>
+                <div>MN-610100-02</div>
+                <div>焦化车间烟气监控点</div>
+                <div>HJ 212-2017</div>
+                <div><span class="tag-mock tag-danger">超标预警</span></div>
+                <div>2026-11-11 17:59:45</div>
+                <div style="text-align: right; color: var(--primary);">详情 | 诊断</div>
+              </div>
+              <div class="table-row">
+                <div><input type="checkbox"></div>
+                <div>MN-610100-03</div>
+                <div>高新科技水务总排口</div>
+                <div>HJ 212-2005</div>
+                <div><span class="tag-mock tag-warn">离线告警</span></div>
+                <div>2026-11-11 16:30:10</div>
+                <div style="text-align: right; color: var(--primary);">详情 | 诊断</div>
+              </div>
+            </div>
+          </div>
+          <div class="pagination-bar">
+            <span>共 1,284 条记录，已选 1 项</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span>每页 20 条 ▼</span>
+              <span class="btn-mock btn-default">&lt;</span>
+              <span class="btn-mock btn-primary" style="padding: 2px 6px;">1</span>
+              <span class="btn-mock btn-default" style="padding: 2px 6px;">2</span>
+              <span class="btn-mock btn-default">&gt;</span>
+              <span>前往 1 页</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 空间/分类穿透树表 (Tree-Master-Table) -->
+    <section id="panel-2" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">2</span>
+          <h3>空间/分类穿透树表模式 <span class="en-name">Tree-Master-Table</span></h3>
+        </div>
+        <span class="css-badge">grid-template-columns: 240px 1fr;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-tree-table">
+          <aside class="tree-aside">
+            <div style="padding: 10px; border-bottom: 1px solid var(--border-color);">
+              <input type="text" class="input-mock" placeholder="搜索区域/企业名称..." style="width: 100%;">
+            </div>
+            <div style="flex: 1; padding: 8px; overflow-y: auto;">
+              <div class="tree-node">📁 陕西省生态监管库 (430)</div>
+              <div class="tree-node active" style="padding-left: 20px;">📂 西安市生态局 (128)</div>
+              <div class="tree-node" style="padding-left: 36px;">📄 长安区重点排污口 (42)</div>
+              <div class="tree-node" style="padding-left: 36px;">📄 雁塔区环境监控区 (56)</div>
+              <div class="tree-node">📁 宝鸡市生态局 (94)</div>
+            </div>
+          </aside>
+          <div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+            <div class="filter-panel" style="padding: 8px 12px;">
+              <span style="font-size: 12px; font-weight: 600;">当前层级：西安市生态局 (约束作用域)</span>
+              <span class="btn-mock btn-primary">+ 新增该级排污点</span>
+            </div>
+            <div class="table-container">
+              <div class="table-header" style="grid-template-columns: 140px 180px 100px 1fr 100px;">
+                <div>排污单位</div>
+                <div>监控因子类型</div>
+                <div>连通率</div>
+                <div>数采仪唯一识别码</div>
+                <div style="text-align: right;">穿透操作</div>
+              </div>
+              <div class="table-body">
+                <div class="table-row" style="grid-template-columns: 140px 180px 100px 1fr 100px;">
+                  <div>长天热电集团</div>
+                  <div>VOCs / 颗粒物</div>
+                  <div><span class="tag-mock tag-success">99.8%</span></div>
+                  <div>HJ6101-MN009381</div>
+                  <div style="text-align: right; color: var(--primary);">入网配置 →</div>
+                </div>
+                <div class="table-row" style="grid-template-columns: 140px 180px 100px 1fr 100px;">
+                  <div>西高新科技水务</div>
+                  <div>COD / 氨氮 / 总磷</div>
+                  <div><span class="tag-mock tag-warn">87.5%</span></div>
+                  <div>HJ6101-MN004219</div>
+                  <div style="text-align: right; color: var(--primary);">入网配置 →</div>
+                </div>
+              </div>
+            </div>
+            <div class="pagination-bar" style="height: 38px;">
+              <span>共 128 条记录</span>
+              <span>第 1 / 7 页</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 分割研判联动 (Split-View / Master-Detail) -->
+    <section id="panel-3" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">3</span>
+          <h3>主从分割研判模式 <span class="en-name">Split-View / Master-Detail</span></h3>
+        </div>
+        <span class="css-badge">grid-template-columns: 310px 1fr;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-split-view">
+          <div class="split-left-pane">
+            <div style="padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+              <span style="font-weight: 700; font-size: 12px;">实时超标告警队列</span>
+              <span class="tag-mock tag-danger">3 项未处置</span>
+            </div>
+            <div style="flex: 1; padding: 8px; overflow-y: auto;">
+              <div class="split-card active">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-weight: 600; font-size: 12px;">SO2 浓度突变告警</span>
+                  <span class="tag-mock tag-danger">严重</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">渭南华阴热电 01 烟气排口</div>
+                <div style="font-size: 10px; color: #94a3b8;">17:58:20 · 持续 15 分钟</div>
+              </div>
+              <div class="split-card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-weight: 600; font-size: 12px;">数采仪链路心跳超时</span>
+                  <span class="tag-mock tag-warn">中度</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">临潼焦化脱硫系统</div>
+                <div style="font-size: 10px; color: #94a3b8;">17:45:00 · 持续 30 分钟</div>
+              </div>
+            </div>
+          </div>
+          <div class="split-right-pane">
+            <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="font-weight: 700; font-size: 13px;">告警研判工作区 (ALM-2026-8921)</span>
+                <span style="margin-left: 8px;" class="tag-mock tag-danger">超标持续中</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span class="btn-mock btn-default">下派核查工单</span>
+                <span class="btn-mock btn-primary">标记已处置</span>
+              </div>
+            </div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;">
+              <div class="wb" style="height: 180px; flex-direction: column;">
+                <strong>[ ECharts 曲线渲染区域: 因子实时折线与阈值限值判定红线 ]</strong>
+                <span style="font-size: 11px; margin-top: 6px;">SO2 浓度当前值: 240 mg/m³ (上限阈值: 150 mg/m³)</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <div class="wb" style="height: 60px; flex-direction: column;">
+                  <span style="font-size: 11px;">风速风向</span>
+                  <strong>西北偏北 2.4 m/s</strong>
+                </div>
+                <div class="wb" style="height: 60px; flex-direction: column;">
+                  <span style="font-size: 11px;">烟气含湿量/温度</span>
+                  <strong>8.2% / 138 ℃</strong>
+                </div>
+                <div class="wb" style="height: 60px; flex-direction: column;">
+                  <span style="font-size: 11px;">责任人状态</span>
+                  <strong style="color: var(--primary);">现场核查中</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 锚点分段长表单 (Anchor Sections / Wizard Form) -->
+    <section id="panel-4" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">4</span>
+          <h3>锚点分段长表单模式 <span class="en-name">Anchor-Section Form</span></h3>
+        </div>
+        <span class="css-badge">scroll-container + sticky-anchor-nav + sticky-footer</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-anchor-form">
+          <div style="height: 44px; background: #fff; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 16px;">
+            <span style="font-weight: 700; font-size: 13px;">排污许可与数采网关申报入网向导</span>
+            <span class="tag-mock tag-warn">草稿暂存 (17:55:04)</span>
+          </div>
+          <div class="form-body-wrapper">
+            <div>
+              <div class="section-card">
+                <div class="section-title">1. 站点主体与基础参数</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div class="wb" style="height: 32px; justify-content: flex-start; padding-left: 8px;">站点名称: 渭北热电 01 排口</div>
+                  <div class="wb" style="height: 32px; justify-content: flex-start; padding-left: 8px;">经纬度: 108.9398, 34.3415</div>
+                </div>
+              </div>
+              <div class="section-card">
+                <div class="section-title">2. 监测因子与量程矩阵配置</div>
+                <div class="wb" style="height: 80px;">[ 动态因子矩阵：SO2 / NOx / 颗粒物 / 烟气流量 ]</div>
+              </div>
+              <div class="section-card">
+                <div class="section-title">3. 阈值与超标预警规则</div>
+                <div class="wb" style="height: 70px;">[ 规则引擎：日均值限值 (80% 触发预警，100% 触发告警) ]</div>
+              </div>
+            </div>
+            <div class="anchor-nav">
+              <div style="font-weight: 700; font-size: 11px; margin-bottom: 8px;">锚点目录索引</div>
+              <div style="color: var(--primary); font-size: 11px; font-weight: 600; margin-bottom: 6px;">● 1. 站点基础信息</div>
+              <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 6px;">○ 2. 监测因子矩阵</div>
+              <div style="color: var(--text-muted); font-size: 11px;">○ 3. 阈值规则定义</div>
+            </div>
+          </div>
+          <div style="height: 48px; background: #fff; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 0 16px;">
+            <span class="btn-mock btn-default">暂存草稿</span>
+            <span class="btn-mock btn-primary">校验并提交入网审核</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 指标统计看板 (Metrics Dashboard) -->
+    <section id="panel-5" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">5</span>
+          <h3>指标统计看板模式 <span class="en-name">Metrics Dashboard</span></h3>
+        </div>
+        <span class="css-badge">grid-template-columns: repeat(4, 1fr) + flex-column</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-dashboard">
+          <div class="filter-panel" style="padding: 8px 12px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 12px; font-weight: 700;">统计维度:</span>
+              <span class="input-mock">行政区划: 全市 ▼</span>
+              <span class="input-mock">时间粒度: 今日实时 ▼</span>
+            </div>
+            <span class="btn-mock btn-default">数据刷新 ⟳</span>
+          </div>
+          <div class="dashboard-kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-label">在线点位数</span>
+              <span class="kpi-value">1,142 / 1,280</span>
+              <span class="kpi-trend" style="color: var(--tag-success-text);">联网率 89.2% ↑</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">当前超标告警点位</span>
+              <span class="kpi-value" style="color: var(--tag-danger-text);">18 个</span>
+              <span class="kpi-trend" style="color: var(--tag-danger-text);">较昨日 +3 ↑</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">今日报文吞吐量</span>
+              <span class="kpi-value" style="color: var(--primary);">3,849,201</span>
+              <span class="kpi-trend" style="color: var(--text-muted);">传输成功率 99.98%</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">工单按期闭环率</span>
+              <span class="kpi-value" style="color: var(--tag-success-text);">94.5%</span>
+              <span class="kpi-trend" style="color: var(--tag-success-text);">环比上升 2.1% ↑</span>
+            </div>
+          </div>
+          <div class="dashboard-charts-grid">
+            <div class="wb" style="flex-direction: column;">
+              <strong>[ 24 小时排污浓度与流量时序折线图 (ECharts) ]</strong>
+            </div>
+            <div class="wb" style="flex-direction: column;">
+              <strong>[ 污染源类型与超标成因分布环形图 ]</strong>
+            </div>
+          </div>
+          <div class="wb" style="height: 110px;">
+            [ 实时预警事件明细与响应时效排行表 ]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 对象档案详情画报 (Entity Detail Profile) -->
+    <section id="panel-6" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">6</span>
+          <h3>对象档案详情画报模式 <span class="en-name">Entity Detail Profile</span></h3>
+        </div>
+        <span class="css-badge">header-hero-card + nav-tabs + descriptions-grid</span>
+      </div>
+      <div class="viewport-box">
+        <div class="scene-profile">
+          <div class="profile-hero-card">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <div class="profile-avatar wb">
+                测点
+              </div>
+              <div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <strong style="font-size: 15px;">西安市热电总厂 01 号脱硫烟气外排口</strong>
+                  <span class="tag-mock tag-success">在运正常</span>
+                  <span class="tag-mock tag-warn">国控重点</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                  MN 码: 6101002026110901 &nbsp;|&nbsp; 所属行政区: 陕西省西安市长安区 &nbsp;|&nbsp; 责任人: 张工 (138****0001)
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span class="btn-mock btn-default">参数反控</span>
+              <span class="btn-mock btn-primary">编辑档案</span>
+            </div>
+          </div>
+          <div class="profile-tabs-header">
+            <div class="profile-tab-item active">基本配置属性</div>
+            <div class="profile-tab-item">关联数采仪与传感器 (4)</div>
+            <div class="profile-tab-item">质控核查记录 (12)</div>
+            <div class="profile-tab-item">生命周期变更日志</div>
+          </div>
+          <div class="profile-desc-grid">
+            <div class="wb" style="height: 50px; justify-content: flex-start; padding-left: 10px;">
+              排放规律: 连续排放 · 流量稳定
+            </div>
+            <div class="wb" style="height: 50px; justify-content: flex-start; padding-left: 10px;">
+              排气筒高度: 80 米 / 直径 3.2 米
+            </div>
+            <div class="wb" style="height: 50px; justify-content: flex-start; padding-left: 10px;">
+              传输协议: HJ 212-2017 (国标)
+            </div>
+          </div>
+          <div class="table-container" style="flex: 1; min-height: 180px;">
+            <div class="table-header" style="grid-template-columns: 120px 140px 140px 1fr 100px;">
+              <div>因子编码</div>
+              <div>因子名称</div>
+              <div>量程上限</div>
+              <div>执行评价标准</div>
+              <div style="text-align: right;">状态</div>
+            </div>
+            <div class="table-body">
+              <div class="table-row" style="grid-template-columns: 120px 140px 140px 1fr 100px;">
+                <div>a21026</div>
+                <div>二氧化硫 (SO2)</div>
+                <div>0 ~ 500 mg/m³</div>
+                <div>GB 13223-2011 火电厂大气污染物排放标准</div>
+                <div style="text-align: right;"><span class="tag-mock tag-success">正常</span></div>
+              </div>
+              <div class="table-row" style="grid-template-columns: 120px 140px 140px 1fr 100px;">
+                <div>a21002</div>
+                <div>氮氧化物 (NOx)</div>
+                <div>0 ~ 400 mg/m³</div>
+                <div>GB 13223-2011 火电厂大气污染物排放标准</div>
+                <div style="text-align: right;"><span class="tag-mock tag-success">正常</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

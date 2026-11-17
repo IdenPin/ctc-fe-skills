@@ -64,9 +64,12 @@ export default defineConfig({
 ### 1. 构建验证
 
 ```bash
-pnpm build
-pnpm preview -- --host
+# 按目标项目锁文件选择对应包管理器，并使用 package.json 中的脚本名
+npm run build
+npm run preview -- --host
 ```
+
+使用 pnpm 时对应为 `pnpm run build` 与 `pnpm run preview -- --host`；使用 Yarn 时对应为 `yarn build` 与 `yarn preview --host`。若项目的脚本名称不同，以目标项目 `package.json` 为准。
 
 记录构建工具版本、targets、polyfill 列表、产物大小变化和构建 warning。
 

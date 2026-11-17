@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 README_INSTALL = re.compile(r"--skill\s+([a-z0-9-]+)")
+IGNORED_MARKDOWN_DIRS = {".git", ".codegraph", ".cache", "docs"}
 
 
 def read_frontmatter(path: Path) -> dict[str, str]:
@@ -75,6 +77,18 @@ def validate_links(markdown_file: Path) -> list[str]:
     return errors
 
 
+def iter_markdown_files():
+    for directory, subdirectories, filenames in os.walk(ROOT):
+        folder = Path(directory)
+        subdirectories[:] = sorted(
+            name for name in subdirectories
+            if name not in IGNORED_MARKDOWN_DIRS and not (folder / name).is_symlink()
+        )
+        for filename in sorted(filenames):
+            if filename.endswith(".md") and filename != "AGENTS.md":
+                yield folder / filename
+
+
 def main() -> int:
     skill_files = sorted(ROOT.glob("*/SKILL.md"))
     errors: list[str] = []
@@ -95,9 +109,8 @@ def main() -> int:
         if stale:
             errors.append(f"README.md: stale install commands for {', '.join(stale)}")
 
-    for markdown_file in sorted(ROOT.rglob("*.md")):
-        if ".git" not in markdown_file.parts and ".codegraph" not in markdown_file.parts:
-            errors.extend(validate_links(markdown_file))
+    for markdown_file in iter_markdown_files():
+        errors.extend(validate_links(markdown_file))
 
     if errors:
         print("Skill validation failed:")

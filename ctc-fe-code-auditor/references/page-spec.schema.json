@@ -1,22 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ctc:layout:page-spec:1.0.0",
-  "title": "CTC PageSpec",
-  "description": "T01～T04 页面输入。defaults 为说明，不会自动写入输入；自然语言归一化与跨字段检查见统一契约。",
+  "$id": "urn:ctc:layout:page-spec:2.0.0",
+  "title": "CTC PageSpec (L01~L08)",
+  "description": "L01～L08 通用页面布局规范输入 Schema。",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "contractVersion": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "templateId": {
       "enum": [
-        "T01_STANDARD_TABLE_PAGE",
-        "T02_SIDEBAR_QUERY_TABLE",
-        "T03_GIS_HUD_DASHBOARD",
-        "T04_SECTION_ANCHOR_FLOW",
-        "T05_SPLIT_TWO_PANE",
-        "T06_GRID_DASHBOARD",
-        "T07_STEP_WIZARD_FUNNEL"
+        "L01_STANDARD_TABLE_PAGE",
+        "L02_SIDEBAR_TREE_SPLIT",
+        "L03_MASTER_DETAIL_SPLIT",
+        "L04_GIS_HUD_DASHBOARD",
+        "L05_DUAL_PANE_REVIEW",
+        "L06_GRID_DASHBOARD",
+        "L07_SECTION_ANCHOR_FLOW",
+        "L08_STEP_WIZARD_FUNNEL"
       ]
     },
     "mode": {
@@ -24,60 +26,51 @@
         "layout",
         "page"
       ],
-      "description": "由生成流程归一化后显式填写；未明确业务页面时采用 layout。"
+      "description": "输出模式：仅布局(layout) 或 业务页面(page)。"
     },
+    "surface": { "enum": ["embedded", "standalone", "dialog", "drawer"], "description": "当前布局实例的承载区域；页面与每个弹层分别选型" },
+    "layoutKey": { "type": "string", "minLength": 1, "description": "通过 data-layout-id 唯一标识同模板的不同实例" },
     "pageTitle": {
       "type": "string",
       "minLength": 1
-    },
-    "entityName": {
-      "type": "string",
-      "pattern": "^[A-Z][A-Za-z0-9]*$"
     },
     "enabledSlots": {
       "type": "array",
       "uniqueItems": true,
       "items": {
         "enum": [
-          "action-rail",
-          "actions",
-          "actions-footer",
-          "anchor-nav",
-          "append-table",
-          "charts-grid",
-          "container-top",
-          "dashboard-toolbar",
-          "default",
-          "filters",
-          "footer",
-          "header-summary",
-          "left-chart",
-          "left-kpi",
-          "legend",
-          "map-canvas",
-          "map-tools",
-          "master-header",
+          "main-viewport",
+          "filter-bar",
+          "toolbar",
+          "footer-bar",
+          "sidebar-nav",
+          "content-body",
+          "content-header",
+          "content-footer",
           "master-list",
+          "detail-body",
+          "master-filter",
+          "detail-head",
+          "detail-actions",
+          "canvas-bg",
+          "hud-top",
+          "hud-left",
+          "hud-right",
+          "hud-bottom-left",
+          "hud-bottom-right",
+          "pane-left",
+          "pane-right",
+          "dashboard-grid",
           "metric-cards",
-          "pagination",
-          "ranking-board",
-          "right-alarm",
-          "right-kpi",
-          "search-bar",
-          "sections",
-          "sidebar-tree",
-          "site-list",
-          "slave-body",
-          "slave-footer",
-          "slave-toolbar",
-          "stage-viewport",
-          "step-summary",
+          "dashboard-toolbar",
+          "anchor-nav",
+          "sections-stream",
+          "profile-header",
+          "sticky-actions",
           "step-tracker",
-          "summary",
-          "table-bar",
-          "tabs",
-          "tool-bar",
-          "toolbar"
+          "stage-viewport",
+          "action-rail",
+          "step-summary"
         ]
       }
     },
@@ -85,1091 +78,644 @@
       "type": "object",
       "properties": {
         "theme": {
-          "enum": [
-            "inherit",
-            "light",
-            "dark"
-          ],
+          "enum": ["inherit", "light", "dark"],
           "default": "inherit"
         }
       },
       "additionalProperties": false
     },
-    "filters": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/field"
-      },
-      "minItems": 0
-    },
-    "toolbar": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/field"
-      },
-      "minItems": 0
-    },
-    "columns": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/column"
-      },
-      "minItems": 1
-    },
-    "summary": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "minLength": 1
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1
-          },
-          "valueRef": {
-            "type": "string",
-            "minLength": 1
-          },
-          "unit": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "additionalProperties": false,
-        "required": [
-          "key",
-          "label",
-          "valueRef"
-        ]
-      },
-      "minItems": 1
-    },
-    "actions": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/action"
-      },
-      "minItems": 1
-    },
-    "footer": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/action"
-      },
-      "minItems": 1
-    },
-    "pagination": {
+    "layoutProps": {
       "type": "object",
+      "description": "传递给底层布局组件的显式属性",
       "properties": {
-        "enabled": {
-          "type": "boolean"
+        "autoHeight": { "type": "boolean", "description": "L01: 是否自适应高度" },
+        "toolbarPlacement": {
+          "enum": ["separate", "filter-inline"],
+          "description": "L01: 工具栏位置（默认 separate，filter-inline 与筛选同行）"
         },
-        "pageSize": {
-          "type": "integer",
-          "minimum": 1
+        "card": {
+          "type": "boolean",
+          "description": "L01: 是否启用卡片质感承载（浅灰底背景衬托白色卡片与细边框，默认 true）"
         },
-        "pageSizes": {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": {
-            "type": "integer",
-            "minimum": 1
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "enabled"
-      ]
-    },
-    "table": {
-      "type": "object",
-      "properties": {
-        "renderer": {
-          "enum": [
-            "standard",
-            "virtual"
-          ],
-          "default": "standard"
-        },
-        "rowKey": {
-          "type": "string",
-          "minLength": 1
-        }
+        "sidebarWidth": { "type": ["string", "number"], "description": "L02: 侧栏宽度，如 260px" },
+        "collapsible": { "type": "boolean", "description": "L02: 侧栏是否可折叠" },
+        "masterWidth": { "type": ["string", "number"], "description": "L03: 主栏宽度，如 340px" },
+        "theme": { "enum": ["dark", "light"], "description": "L04: HUD 主题" },
+        "leftWidth": { "type": ["string", "number"], "description": "L05: 左栏宽度，如 45%" },
+        "gap": { "type": ["string", "number"], "description": "L05/L06: 栅格/栏间距" },
+        "scrollable": { "type": "boolean", "description": "L06/L07: 是否启用根容器滚动" },
+        "anchorWidth": { "type": ["string", "number"], "description": "L07: 锚点导航栏宽度" },
+        "activeStep": { "type": "integer", "minimum": 0, "description": "L08: 当前激活步骤索引" }
       },
       "additionalProperties": false
     },
-    "dataSourceRef": {
-      "type": "string",
-      "minLength": 1
-    },
-    "tabs": {
+    "viewport": {
       "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "key": {
-                "type": "string",
-                "minLength": 1
-              },
-              "label": {
-                "type": "string",
-                "minLength": 1
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "key",
-              "label"
-            ]
-          },
-          "minItems": 1
-        },
-        "defaultKey": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "items"
-      ]
+      "description": "L01 主视口配置 (表格组件或报表配置)"
+    },
+    "filters": {
+      "type": "array",
+      "description": "L01 筛选项列表"
+    },
+    "toolbar": {
+      "type": "object",
+      "description": "操作工具栏配置"
+    },
+    "footer": {
+      "type": "object",
+      "description": "底部操作栏配置"
+    },
+    "pagination": {
+      "type": "object",
+      "description": "分页栏配置"
     },
     "sidebar": {
-      "$ref": "#/$defs/sidebar"
-    },
-    "map": {
-      "$ref": "#/$defs/map"
-    },
-    "panels": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/panel"
-      },
-      "minItems": 1
-    },
-    "legend": {
       "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string",
-                "minLength": 1
-              },
-              "color": {
-                "type": "string",
-                "pattern": "^#[0-9A-Fa-f]{6}$"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "label",
-              "color"
-            ]
-          },
-          "minItems": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "enabled"
-      ]
+      "description": "L02 侧栏导航/树配置"
     },
-    "mapTools": {
+    "content": {
       "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "enabled"
-      ]
-    },
-    "sections": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "key": { "type": "string", "minLength": 1 },
-          "title": { "type": "string", "minLength": 1 }
-        },
-        "required": ["key", "title"],
-        "additionalProperties": true
-      },
-      "minItems": 1
+      "description": "L02 右侧主体内容配置"
     },
     "master": {
       "type": "object",
-      "properties": {
-        "title": { "type": "string" }
-      },
-      "additionalProperties": true
+      "description": "L03 主列表卡片流配置"
     },
-    "slave": {
+    "detail": {
       "type": "object",
-      "properties": {
-        "title": { "type": "string" }
-      },
-      "additionalProperties": true
+      "description": "L03 从属详情配置"
     },
-    "widgets": {
+    "masterFilter": {
+      "type": "object",
+      "description": "L03 主列表筛选配置"
+    },
+    "detailActions": {
+      "type": "object",
+      "description": "L03 详情操作条配置"
+    },
+    "map": {
+      "type": "object",
+      "description": "L04 地图底图配置"
+    },
+    "panels": {
       "type": "array",
+      "description": "L04 悬浮面板配置",
       "items": {
         "type": "object",
         "properties": {
-          "key": { "type": "string", "minLength": 1 },
-          "title": { "type": "string" },
-          "span": { "type": "integer", "minimum": 1, "maximum": 24 }
+          "slot": {
+            "enum": [
+              "hud-top",
+              "hud-left",
+              "hud-right",
+              "hud-bottom-left",
+              "hud-bottom-right"
+            ],
+            "description": "必须是 L04 允许的合法 HUD 插槽"
+          },
+          "title": { "type": "string" }
         },
-        "required": ["key"],
-        "additionalProperties": true
-      },
-      "minItems": 1
+        "required": ["slot"],
+        "additionalProperties": false
+      }
     },
-    "steps": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "key": { "type": "string", "minLength": 1 },
-          "title": { "type": "string", "minLength": 1 }
-        },
-        "required": ["key", "title"],
-        "additionalProperties": true
-      },
-      "minItems": 1
-    }
-  },
-  "additionalProperties": false,
-  "required": [
-    "mode",
-    "templateId"
-  ],
-  "$defs": {
-    "action": {
+    "legend": {
       "type": "object",
-      "properties": {
-        "key": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "intent": {
-          "enum": [
-            "emit",
-            "navigate",
-            "download",
-            "mutate",
-            "delete"
-          ]
-        },
-        "destructive": {
-          "type": "boolean",
-          "default": false
-        },
-        "confirmation": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "key",
-        "label",
-        "intent"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "anyOf": [
-              {
-                "properties": {
-                  "intent": {
-                    "const": "delete"
-                  }
-                },
-                "required": [
-                  "intent"
-                ]
-              },
-              {
-                "properties": {
-                  "destructive": {
-                    "const": true
-                  }
-                },
-                "required": [
-                  "destructive"
-                ]
-              }
-            ]
-          },
-          "then": {
-            "required": [
-              "confirmation"
-            ]
-          }
-        }
-      ]
+      "description": "L04 图例配置"
     },
-    "column": {
+    "mapTools": {
       "type": "object",
-      "properties": {
-        "key": {
-          "type": "string",
-          "minLength": 1
-        },
-        "prop": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "type": {
-          "enum": [
-            "string",
-            "number",
-            "tag",
-            "datetime",
-            "status",
-            "operation"
-          ]
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "minWidth": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "align": {
-          "enum": [
-            "left",
-            "center",
-            "right"
-          ]
-        },
-        "fixed": {
-          "enum": [
-            "left",
-            "right"
-          ]
-        },
-        "formatRef": {
-          "type": "string",
-          "minLength": 1
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/action"
-          },
-          "minItems": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "key",
-        "label",
-        "type"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "operation"
-              }
-            },
-            "required": [
-              "type"
-            ]
-          },
-          "then": {
-            "required": [
-              "actions"
-            ]
-          },
-          "else": {
-            "properties": {
-              "actions": false
-            }
-          }
-        }
-      ]
+      "description": "L04 地图空间工具配置"
     },
-    "field": {
+    "leftPane": {
       "type": "object",
+      "description": "L05 左栏证据/详情配置"
+    },
+    "rightPane": {
+      "type": "object",
+      "description": "L05 右栏流转/审批配置"
+    },
+    "actions": {
+      "type": "object",
+      "description": "L05 底部操作配置"
+    },
+    "grid": {
+      "type": "object",
+      "description": "L06 看板网格卡片配置",
       "properties": {
-        "key": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "control": {
-          "enum": [
-            "input",
-            "select",
-            "number",
-            "date",
-            "date-range",
-            "tree-select"
-          ]
-        },
-        "initialValue": {
-          "anyOf": [
-            {
-              "type": [
-                "string",
-                "number",
-                "boolean",
-                "null"
-              ]
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": [
-                  "string",
-                  "number",
-                  "boolean",
-                  "null"
-                ]
-              },
-              "minItems": 0
-            }
-          ]
-        },
-        "options": {
+        "columns": { "const": 12, "description": "L06 固定使用 12 栅格" },
+        "cards": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "label": {
-                "type": "string",
-                "minLength": 1
-              },
-              "value": {
-                "type": [
-                  "string",
-                  "number",
-                  "boolean",
-                  "null"
-                ]
-              }
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "span": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "height": { "type": ["string", "number"] }
             },
-            "additionalProperties": false,
-            "required": [
-              "label",
-              "value"
-            ]
-          },
-          "minItems": 0
-        },
-        "optionsRef": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "key",
-        "label",
-        "control"
-      ]
-    },
-    "treeNode": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label": {
-          "type": "string",
-          "minLength": 1
-        },
-        "children": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/treeNode"
-          },
-          "minItems": 0
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "key",
-        "label"
-      ]
-    },
-    "sidebar": {
-      "type": "object",
-      "properties": {
-        "nodes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/treeNode"
-          },
-          "minItems": 0
-        },
-        "dataSourceRef": {
-          "type": "string",
-          "minLength": 1
-        },
-        "filterable": {
-          "type": "boolean",
-          "default": false
-        },
-        "collapsible": {
-          "type": "boolean",
-          "default": false
-        },
-        "selectionQueryKey": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false,
-      "anyOf": [
-        {
-          "required": [
-            "nodes"
-          ]
-        },
-        {
-          "required": [
-            "dataSourceRef"
-          ]
-        }
-      ]
-    },
-    "map": {
-      "type": "object",
-      "properties": {
-        "integration": {
-          "enum": [
-            "slot",
-            "existing-adapter"
-          ]
-        },
-        "adapterRef": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "integration"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "integration": {
-                "const": "existing-adapter"
-              }
-            },
-            "required": [
-              "integration"
-            ]
-          },
-          "then": {
-            "required": [
-              "adapterRef"
-            ]
-          },
-          "else": {
-            "properties": {
-              "adapterRef": false
-            }
+            "required": ["title", "span"],
+            "additionalProperties": false
           }
         }
-      ]
-    },
-    "panel": {
-      "type": "object",
-      "properties": {
-        "slot": {
-          "enum": [
-            "left-kpi",
-            "left-chart",
-            "right-kpi",
-            "right-alarm",
-            "site-list"
-          ]
-        },
-        "kind": {
-          "enum": [
-            "summary",
-            "chart",
-            "list",
-            "table",
-            "custom"
-          ]
-        },
-        "title": {
-          "type": "string",
-          "minLength": 1
-        },
-        "dataSourceRef": {
-          "type": "string",
-          "minLength": 1
-        },
-        "columns": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/column"
-          },
-          "minItems": 1
-        }
       },
-      "additionalProperties": false,
-      "required": [
-        "slot",
-        "kind"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "kind": {
-                "const": "table"
-              }
-            },
-            "required": [
-              "kind"
-            ]
-          },
-          "then": {
-            "required": [
-              "columns"
-            ]
-          },
-          "else": {
-            "properties": {
-              "columns": false
-            }
-          }
-        }
-      ]
+      "required": ["cards"],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "array",
+      "description": "L06 顶部核心 KPI 指标卡"
+    },
+    "sections": {
+      "type": "array",
+      "description": "L07 长卷章节内容流配置"
+    },
+    "profileHeader": {
+      "type": "object",
+      "description": "L07 实体信息头部概要"
+    },
+    "stickyActions": {
+      "type": "object",
+      "description": "L07 吸底操作条配置"
+    },
+    "steps": {
+      "type": "array",
+      "description": "L08 步骤阶段列表",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "icon": { "type": "string" }
+        },
+        "required": ["title"],
+        "additionalProperties": false
+      }
+    },
+    "stepSummary": {
+      "type": "object",
+      "description": "L08 步骤引导摘要"
+    },
+    "actionRail": {
+      "type": "object",
+      "description": "L08 底部动作导轨配置"
     }
   },
+  "required": [
+    "contractVersion",
+    "templateId",
+    "mode"
+  ],
   "allOf": [
     {
       "if": {
         "properties": {
-          "mode": {
-            "const": "layout"
-          }
+          "mode": { "const": "layout" }
         },
-        "required": [
-          "mode"
-        ]
+        "required": ["mode"]
       },
       "then": {
         "properties": {
-          "entityName": false,
+          "pageTitle": false,
+          "viewport": false,
           "filters": false,
           "toolbar": false,
-          "columns": false,
-          "summary": false,
-          "actions": false,
           "footer": false,
           "pagination": false,
-          "table": false,
-          "dataSourceRef": false,
-          "tabs": false,
           "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
           "map": false,
           "panels": false,
           "legend": false,
-          "mapTools": false
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false
         }
       },
       "else": {
-        "required": [
-          "pageTitle"
-        ]
+        "required": ["pageTitle"]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T01_STANDARD_TABLE_PAGE"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L01_STANDARD_TABLE_PAGE" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
           "sidebar": false,
-          "map": false,
-          "panels": false,
-          "legend": false,
-          "mapTools": false,
-          "sections": false,
+          "content": false,
           "master": false,
-          "slave": false,
-          "widgets": false,
-          "steps": false,
-          "enabledSlots": {
-            "items": {
-              "enum": [
-                "search-bar",
-                "tool-bar",
-                "container-top",
-                "table-bar",
-                "default",
-                "append-table",
-                "pagination"
-              ]
-            }
-          }
-        },
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "columns"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "templateId": {
-            "const": "T02_SIDEBAR_QUERY_TABLE"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
-      },
-      "then": {
-        "properties": {
-          "filters": false,
-          "summary": false,
-          "actions": false,
-          "footer": false,
-          "tabs": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
           "map": false,
           "panels": false,
           "legend": false,
           "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "autoHeight": { "type": "boolean" },
+              "toolbarPlacement": { "enum": ["separate", "filter-inline"] },
+              "card": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "sidebar-tree",
-                "toolbar",
-                "pagination"
-              ]
+              "enum": ["main-viewport", "filter-bar", "toolbar", "footer-bar"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "sidebar",
-                "toolbar",
-                "columns"
-              ]
-            }
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["viewport"] }
           }
         ]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T03_GIS_HUD_DASHBOARD"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L02_SIDEBAR_TREE_SPLIT" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
-          "entityName": false,
+          "viewport": false,
+          "filters": false,
+          "footer": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "sidebarWidth": { "type": ["string", "number"] },
+              "collapsible": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          },
+          "enabledSlots": {
+            "items": {
+              "enum": ["sidebar-nav", "content-body", "content-header", "content-footer"]
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["sidebar", "content"] }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "templateId": { "const": "L03_MASTER_DETAIL_SPLIT" } },
+        "required": ["templateId"]
+      },
+      "then": {
+        "properties": {
+          "viewport": false,
           "filters": false,
           "toolbar": false,
-          "columns": false,
-          "summary": false,
-          "actions": false,
           "footer": false,
           "pagination": false,
-          "table": false,
-          "dataSourceRef": false,
-          "tabs": false,
           "sidebar": false,
+          "content": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "masterWidth": { "type": ["string", "number"] }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "map-canvas",
-                "left-kpi",
-                "left-chart",
-                "right-kpi",
-                "right-alarm",
-                "site-list",
-                "legend",
-                "map-tools"
-              ]
+              "enum": ["master-list", "detail-body", "master-filter", "detail-head", "detail-actions"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "map"
-              ]
-            }
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["master", "detail"] }
           }
         ]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T04_SECTION_ANCHOR_FLOW"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L04_GIS_HUD_DASHBOARD" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
+          "viewport": false,
+          "filters": false,
+          "toolbar": false,
+          "footer": false,
+          "pagination": false,
+          "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "theme": { "enum": ["dark", "light"] }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "sections",
-                "header-summary",
-                "anchor-nav",
-                "actions-footer"
-              ]
+              "enum": ["canvas-bg", "hud-top", "hud-left", "hud-right", "hud-bottom-left", "hud-bottom-right"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "sections"
-              ]
-            }
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["map"] }
           }
         ]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T05_SPLIT_TWO_PANE"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L05_DUAL_PANE_REVIEW" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
+          "viewport": false,
+          "filters": false,
+          "toolbar": false,
+          "footer": false,
+          "pagination": false,
+          "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "leftWidth": { "type": ["string", "number"] },
+              "gap": { "type": ["string", "number"] }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "master-list",
-                "slave-body",
-                "master-header",
-                "slave-toolbar",
-                "slave-footer"
-              ]
+              "enum": ["pane-left", "pane-right"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "master",
-                "slave"
-              ]
-            }
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["leftPane", "rightPane", "surface"], "properties": {"surface": {"enum": ["dialog", "drawer"]}} }
           }
         ]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T06_GRID_DASHBOARD"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L06_GRID_DASHBOARD" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
+          "viewport": false,
+          "filters": false,
+          "footer": false,
+          "pagination": false,
+          "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "gap": { "type": ["string", "number"] },
+              "scrollable": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "charts-grid",
-                "dashboard-toolbar",
-                "metric-cards",
-                "ranking-board"
-              ]
+              "enum": ["dashboard-grid", "metric-cards", "dashboard-toolbar"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
-            },
-            "then": {
-              "required": [
-                "widgets"
-              ]
-            }
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["grid"] }
           }
         ]
       }
     },
     {
       "if": {
-        "properties": {
-          "templateId": {
-            "const": "T07_STEP_WIZARD_FUNNEL"
-          }
-        },
-        "required": [
-          "templateId"
-        ]
+        "properties": { "templateId": { "const": "L07_SECTION_ANCHOR_FLOW" } },
+        "required": ["templateId"]
       },
       "then": {
         "properties": {
+          "viewport": false,
+          "filters": false,
+          "toolbar": false,
+          "footer": false,
+          "pagination": false,
+          "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "steps": false,
+          "stepSummary": false,
+          "actionRail": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "anchorWidth": { "type": ["string", "number"] },
+              "scrollable": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          },
           "enabledSlots": {
             "items": {
-              "enum": [
-                "step-tracker",
-                "stage-viewport",
-                "action-rail",
-                "step-summary"
-              ]
+              "enum": ["anchor-nav", "sections-stream", "profile-header", "sticky-actions"]
             }
           }
         },
         "allOf": [
           {
-            "if": {
-              "properties": {
-                "mode": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "mode"
-              ]
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["sections"] }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "templateId": { "const": "L08_STEP_WIZARD_FUNNEL" } },
+        "required": ["templateId"]
+      },
+      "then": {
+        "properties": {
+          "viewport": false,
+          "filters": false,
+          "toolbar": false,
+          "footer": false,
+          "pagination": false,
+          "sidebar": false,
+          "content": false,
+          "master": false,
+          "detail": false,
+          "masterFilter": false,
+          "detailActions": false,
+          "map": false,
+          "panels": false,
+          "legend": false,
+          "mapTools": false,
+          "leftPane": false,
+          "rightPane": false,
+          "actions": false,
+          "grid": false,
+          "metrics": false,
+          "sections": false,
+          "profileHeader": false,
+          "stickyActions": false,
+          "layoutProps": {
+            "type": "object",
+            "properties": {
+              "activeStep": { "type": "integer", "minimum": 0 }
             },
-            "then": {
-              "required": [
-                "steps"
-              ]
+            "additionalProperties": false
+          },
+          "enabledSlots": {
+            "items": {
+              "enum": ["step-tracker", "stage-viewport", "action-rail", "step-summary"]
             }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "mode": { "const": "page" } }, "required": ["mode"] },
+            "then": { "required": ["steps"] }
           }
         ]
       }

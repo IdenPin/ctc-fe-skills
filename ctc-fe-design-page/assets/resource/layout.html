@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PC端常见页面布局模式线框图演示</title>
+  <style>
+    :root {
+      --bg-canvas: #f8fafc;
+      --bg-panel: #ffffff;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #94a3b8;
+      --primary: #3b82f6;
+      --primary-light: #eff6ff;
+      --primary-dark: #2563eb;
+      --accent-purple: #8b5cf6;
+      --accent-teal: #14b8a6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+      --shadow: 0 4px 6px -1px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+      --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04);
+      --radius-sm: 0;
+      --radius: 0;
+      --radius-lg: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      padding: 28px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 20% 0%, rgb(59 130 246 / 0.04) 0%, transparent 35%),
+        radial-gradient(circle at 80% 100%, rgb(139 92 246 / 0.04) 0%, transparent 35%),
+        linear-gradient(to bottom, transparent, transparent 49%, rgb(226 232 240 / 0.6) 50%, transparent 51%);
+      background-size: 100% 100%, 100% 100%, 24px 24px;
+    }
+
+    /* 顶部控制栏 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      background: var(--bg-panel);
+      padding: 14px 18px 14px 22px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toolbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .toolbar-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 4px;
+      background: #f1f5f9;
+      border-radius: 0;
+    }
+
+    .tab-btn {
+      padding: 7px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgb(255 255 255 / 0.6);
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 布局演示容器 */
+    .layout-stage {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      min-height: 640px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .layout-meta {
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .layout-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 0;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #dbeafe 100%);
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      border: 1px solid rgb(59 130 246 / 0.12);
+    }
+
+    .layout-meta h3 {
+      font-size: 15px;
+      color: var(--text-main);
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .layout-meta .en-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
+    .css-badge {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 11px;
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+      padding: 5px 10px;
+      border-radius: 0;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
+    }
+
+    /* 模拟视口外框 */
+    .viewport-box {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: #f8fafc;
+      height: 520px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        inset 0 1px 2px rgb(255 255 255 / 0.8),
+        0 8px 24px -6px rgb(15 23 42 / 0.08);
+    }
+
+    .viewport-frame {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viewport-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 线框原子区块样式 */
+    .wire-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px dashed #94a3b8;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      position: relative;
+      text-align: center;
+      padding: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .wire-block .sub-desc {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .wire-block::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgb(255 255 255 / 0.4) 0%, transparent 50%);
+    }
+
+    .wire-header {
+      background: linear-gradient(to bottom, #e0f2fe, #dbeafe);
+      border-color: #7dd3fc;
+      color: #0369a1;
+    }
+
+    .wire-sidebar {
+      background: linear-gradient(to right, #f8fafc, #f1f5f9);
+      border-color: var(--border-strong);
+      color: #475569;
+    }
+
+    .wire-main {
+      background: linear-gradient(to bottom, #ffffff, #f8fafc);
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .wire-aside {
+      background: linear-gradient(to left, #f8fafc, #ffffff);
+      border-color: var(--border-strong);
+      color: #64748b;
+    }
+
+    .wire-footer {
+      background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+      border-color: var(--border-strong);
+      color: #64748b;
+    }
+
+    .wire-card {
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .wire-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      border-color: var(--primary);
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .chart-placeholder {
+      width: 100%;
+      height: 42px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .chart-bar {
+      width: 8px;
+      background: linear-gradient(to top, var(--primary), #60a5fa);
+      border-radius: 0;
+      opacity: 0.8;
+    }
+
+    /* 模式 1: 左右侧边栏 */
+    .layout-sidebar-mode {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      height: 100%;
+    }
+
+    .layout-sidebar-mode .right-stack {
+      display: grid;
+      grid-template-rows: 50px 36px 1fr;
+      height: 100%;
+    }
+
+    /* 模式 2: T型复合 */
+    .layout-t-mode {
+      display: grid;
+      grid-template-rows: 50px 1fr;
+      height: 100%;
+    }
+
+    .layout-t-mode .bottom-split {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      height: 100%;
+    }
+
+    .layout-t-mode .main-column {
+      display: grid;
+      grid-template-rows: 40px 1fr;
+      height: 100%;
+    }
+
+    /* 模式 3: 上下通栏居中 */
+    .layout-portal-mode {
+      display: grid;
+      grid-template-rows: 50px 1fr 40px;
+      height: 100%;
+    }
+
+    .layout-portal-mode .center-container {
+      width: 70%;
+      max-width: 800px;
+      margin: 0 auto;
+      height: 100%;
+      border-left: 1px dashed var(--border-strong);
+      border-right: 1px dashed var(--border-strong);
+      background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    }
+
+    .safe-area-mark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--border-strong) 0,
+        var(--border-strong) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+      opacity: 0.5;
+    }
+
+    .safe-area-mark.left { left: 15%; }
+    .safe-area-mark.right { right: 15%; }
+
+    /* 模式 4: 三栏圣杯 */
+    .layout-three-col-mode {
+      display: grid;
+      grid-template-rows: 50px 1fr;
+      height: 100%;
+    }
+
+    .layout-three-col-mode .col-wrapper {
+      display: grid;
+      grid-template-columns: 180px 1fr 200px;
+      height: 100%;
+    }
+
+    /* 模式 5: 仪表盘卡片网格 */
+    .layout-dashboard-mode {
+      display: grid;
+      grid-template-rows: 46px 1fr;
+      height: 100%;
+      padding: 12px;
+      gap: 12px;
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 100px 180px 1fr;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+
+    /* 隐藏状态与切换动画 */
+    .view-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .view-panel.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      animation: fadeInUp 0.35s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 响应式 */
+    @media (max-width: 800px) {
+      body {
+        padding: 16px;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-tabs {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: var(--radius);
+      }
+
+      .layout-meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .viewport-box {
+        height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="toolbar">
+    <div class="brand">
+      <div class="brand-text">
+        <div class="toolbar-title">PC 端页面布局线框图原型平台</div>
+        <div class="toolbar-subtitle">常见页面布局模式可视化参考</div>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchLayout('layout-1', this)">1. 左右侧边栏</button>
+      <button class="tab-btn" onclick="switchLayout('layout-2', this)">2. T型复合</button>
+      <button class="tab-btn" onclick="switchLayout('layout-3', this)">3. 上下通栏居中</button>
+      <button class="tab-btn" onclick="switchLayout('layout-4', this)">4. 三栏式</button>
+      <button class="tab-btn" onclick="switchLayout('layout-5', this)">5. 仪表盘卡片</button>
+    </nav>
+  </header>
+
+  <main class="layout-stage">
+
+    <!-- 1. 左右侧边栏 -->
+    <section id="layout-1" class="view-panel active">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">1</span>
+          <h3>左右侧边栏布局 <span class="en-name">Sidebar Layout</span></h3>
+        </div>
+        <span class="css-badge">grid-template-columns: 200px 1fr;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="viewport-frame">
+          <div class="viewport-content">
+            <div class="layout-sidebar-mode">
+              <aside class="wire-block wire-sidebar">
+                <div>Side Navigation</div>
+                <div class="sub-desc">垂直菜单栏 (支持折叠)</div>
+              </aside>
+              <div class="right-stack">
+                <header class="wire-block wire-header">
+                  <div>Global Header</div>
+                  <div class="sub-desc">面包屑 / 全局搜索 / 用户信息</div>
+                </header>
+                <div class="wire-block" style="background: #f8fafc; border-color: #e2e8f0; justify-content: flex-start; padding-left: 12px; color: #64748b; font-weight: 500;">
+                  Tabs Bar (多页签切换)
+                </div>
+                <main class="wire-block wire-main">
+                  <div>Main Content Area</div>
+                  <div class="sub-desc">自适应数据展示区 (表格 / 表单 / 视图)</div>
+                </main>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. T型复合 -->
+    <section id="layout-2" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">2</span>
+          <h3>T型复合布局 <span class="en-name">Top-Nav + Sidebar Layout</span></h3>
+        </div>
+        <span class="css-badge">grid-template-rows: 50px 1fr + Sub-Grid</span>
+      </div>
+      <div class="viewport-box">
+        <div class="viewport-frame">
+          <div class="viewport-content">
+            <div class="layout-t-mode">
+              <header class="wire-block wire-header">
+                <div>Top Header</div>
+                <div class="sub-desc">系统Logo ── 一级主业务模块 ── 全局工具</div>
+              </header>
+              <div class="bottom-split">
+                <aside class="wire-block wire-sidebar">
+                  <div>Sub Navigation</div>
+                  <div class="sub-desc">二级/三级当前子系统菜单</div>
+                </aside>
+                <div class="main-column">
+                  <div class="wire-block" style="background: #f8fafc; border-color: #e2e8f0; color: #64748b; font-weight: 500;">
+                    Breadcrumb / Action Filter Bar
+                  </div>
+                  <main class="wire-block wire-main">
+                    <div>Main Workspace Area</div>
+                  </main>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 上下通栏居中 -->
+    <section id="layout-3" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">3</span>
+          <h3>上下通栏居中布局 <span class="en-name">Header-Body-Footer Layout</span></h3>
+        </div>
+        <span class="css-badge">max-width: 1200px; margin: 0 auto;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="viewport-frame">
+          <div class="viewport-content">
+            <div class="layout-portal-mode" style="position: relative;">
+              <span class="safe-area-mark left"></span>
+              <span class="safe-area-mark right"></span>
+              <header class="wire-block wire-header">
+                <div>Top Navigation Bar (通栏)</div>
+              </header>
+              <div style="background: #f8fafc; overflow: hidden;">
+                <div class="center-container wire-block wire-main">
+                  <div>Centered Container</div>
+                  <div class="sub-desc">居中主体展示区 (定宽 1200px，两侧安全留白)</div>
+                </div>
+              </div>
+              <footer class="wire-block wire-footer">
+                <div>Footer Bar (版权与备案信息)</div>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 三栏式 -->
+    <section id="layout-4" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">4</span>
+          <h3>三栏式布局 <span class="en-name">Holy Grail / 双飞翼衍生</span></h3>
+        </div>
+        <span class="css-badge">grid-template-columns: 180px 1fr 200px;</span>
+      </div>
+      <div class="viewport-box">
+        <div class="viewport-frame">
+          <div class="viewport-content">
+            <div class="layout-three-col-mode">
+              <header class="wire-block wire-header">Global Header</header>
+              <div class="col-wrapper">
+                <aside class="wire-block wire-sidebar">
+                  <div>Left Sidebar</div>
+                  <div class="sub-desc">分类 / 全局过滤</div>
+                </aside>
+                <main class="wire-block wire-main">
+                  <div>Center Main Stream</div>
+                  <div class="sub-desc">主内容流 / 工单详情 / 文章主体</div>
+                </main>
+                <aside class="wire-block wire-aside">
+                  <div>Right Aside</div>
+                  <div class="sub-desc">大纲 TOC / 上下文属性面板</div>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 仪表盘卡片网格 -->
+    <section id="layout-5" class="view-panel">
+      <div class="layout-meta">
+        <div class="layout-title-group">
+          <span class="mode-badge">5</span>
+          <h3>仪表盘卡片网格 <span class="en-name">Card Grid / Dashboard Layout</span></h3>
+        </div>
+        <span class="css-badge">display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr);</span>
+      </div>
+      <div class="viewport-box">
+        <div class="viewport-frame">
+          <div class="viewport-content">
+            <div class="layout-dashboard-mode">
+              <div class="wire-block wire-header" style="justify-content: flex-start; padding-left: 12px; font-weight: 500;">
+                Filter Bar (全局时间跨度 / 组织机构筛选 / 数据刷新)
+              </div>
+              <div class="dashboard-grid">
+                <div class="wire-block wire-card">
+                  <div class="kpi-value">1,248</div>
+                  <div class="kpi-label">KPI Metric A</div>
+                </div>
+                <div class="wire-block wire-card">
+                  <div class="kpi-value" style="color: var(--accent-teal);">98.2%</div>
+                  <div class="kpi-label">KPI Metric B</div>
+                </div>
+                <div class="wire-block wire-card">
+                  <div class="kpi-value" style="color: var(--accent-amber);">36</div>
+                  <div class="kpi-label">KPI Metric C</div>
+                </div>
+                <div class="wire-block wire-card span-2">
+                  <div style="font-weight: 600;">Trend Chart Card (折线图/柱状图)</div>
+                  <div class="chart-placeholder">
+                    <div class="chart-bar" style="height: 30%;"></div>
+                    <div class="chart-bar" style="height: 55%;"></div>
+                    <div class="chart-bar" style="height: 40%;"></div>
+                    <div class="chart-bar" style="height: 70%;"></div>
+                    <div class="chart-bar" style="height: 50%;"></div>
+                    <div class="chart-bar" style="height: 85%;"></div>
+                    <div class="chart-bar" style="height: 60%;"></div>
+                    <div class="chart-bar" style="height: 45%;"></div>
+                    <div class="chart-bar" style="height: 75%;"></div>
+                    <div class="chart-bar" style="height: 55%;"></div>
+                  </div>
+                </div>
+                <div class="wire-block wire-card">
+                  <div style="font-weight: 600;">Ranking Card</div>
+                  <div class="sub-desc">预警/排行明细</div>
+                </div>
+                <div class="wire-block wire-card span-3" style="justify-content: flex-start; padding-top: 12px; font-weight: 600;">
+                  Full Width Detailed Table Card (数据明细列表)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function switchLayout(layoutId, btn) {
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+      document.getElementById(layoutId).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

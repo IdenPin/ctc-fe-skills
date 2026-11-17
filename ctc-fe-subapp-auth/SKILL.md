@@ -16,8 +16,8 @@ metadata:
 ## 适用技术栈与框架无关性
 
 - **核心 SDK**：`@ctc-front/gf-framework-auth@0.3.0` 与 `@ctc-front/bridge-next@0.2.0`。
-- **框架中立**：SDK 内部未打包任何 UI 框架运行时，100% 完整支持 **Vue 2（Options API + Vuex）** 与 **Vue 3（Composition API + Pinia / Vuex 4）**。
-- **构建适配**：开箱兼容 Vite、Webpack 4 与 Webpack 5 构建体系。
+- **框架中立**：SDK 不绑定 UI 框架；本技能提供 Vue 2（Options API + Vuex）和 Vue 3（Composition API + Pinia / Vuex 4）示例。接入前核对已安装 SDK 的导出、目标框架版本和项目构建配置。
+- **构建适配**：不对 Vite、Webpack 4 或 Webpack 5 做通用兼容承诺；按消费项目的实际构建矩阵完成验证。
 
 ## 基座平台与 StorageKey 矩阵（速查）
 
@@ -45,6 +45,15 @@ flowchart TD
 
 使用团队私有 npm 仓库安装正式稳定版：
 
+安装前确认已配置团队指定的 npm registry 与只读访问凭据。按团队私服文档将 token 放入本机环境变量或凭据管理器，不要写入仓库；例如私服若支持 npm token，可在本机 `.npmrc` 配置：
+
+```ini
+@ctc-front:registry=https://<company-registry>/
+//<company-registry-host>/:_authToken=${CTC_NPM_TOKEN}
+```
+
+将占位符替换为团队 registry 信息，并确认 `CTC_NPM_TOKEN` 已设置；registry 地址和认证路径以团队私服配置为准。
+
 ```bash
 # pnpm
 pnpm add @ctc-front/gf-framework-auth@0.3.0 @ctc-front/bridge-next@0.2.0
@@ -55,18 +64,18 @@ npm install @ctc-front/gf-framework-auth@0.3.0 @ctc-front/bridge-next@0.2.0 --sa
 
 ### 2. 通信模块与客户端初始化
 
-- **appBridge 封装**：创建 `src/common/utils/appBridge.js`，管理与基座的消息通道、Token 失效通知（`notifyTokenExpired`）与基座登出回调。参见模板 [references/templates/appBridge.js](references/templates/appBridge.js)。
-- **frameworkAuth 客户端**：创建 `src/common/utils/frameworkAuth.js`，按所属基座传入正确的 `storageKey`，并将 Bridge 会话注入。参见模板 [references/templates/frameworkAuth.js](references/templates/frameworkAuth.js)。
+- **存量 GF 项目**：模板默认沿用 `src/common/utils/appBridge.js` 与 `src/common/utils/frameworkAuth.js`，以减少对既有别名和导入的影响。
+- **采用 `ctc-fe-structure` 的新项目**：将 Bridge 与 SDK 客户端放在 `src/services/auth/`（或项目已确定的服务目录），Axios 实例放在 `src/services/request.ts`；不要照搬旧项目路径。参见模板 [references/templates/appBridge.js](references/templates/appBridge.js) 与 [references/templates/frameworkAuth.js](references/templates/frameworkAuth.js)。
 
 ### 3. Axios 拦截器改造（MUST 门禁）
 
-在 `src/common/utils/request.js` 中改造拦截器逻辑，必须满足以下硬性条件：
+在项目的请求客户端文件中改造拦截器逻辑（存量 GF 项目常见路径为 `src/common/utils/request.js`，新项目可使用 `src/services/request.ts`），必须满足以下硬性条件：
 
 1. **挂载顺序**：`frameworkAuth.attachAxios(service, options)` **必须在自定义业务响应拦截器之前调用**。Axios response 拦截器按 FIFO 执行，若业务拦截器先执行会将 401 提早当做错误 reject，导致 SDK 重试队列无法接管。
 2. **防二次解包守卫**：重试成功的请求会重新穿透整个响应拦截器链。必须在响应拦截器开头添加守卫判断（如 `if (res && res.code !== undefined && !res.request && !res.headers) return res`），避免解包后的数据再次解包导致 undefined 异常。
 3. **未授权识别**：准确配置 `isUnauthorized` 规则，覆盖 HTTP 401/402/403 及网关业务码（如 `40108`）。
 
-参见标准实现 [references/templates/request.snippet.js](references/templates/request.snippet.js)。
+参见标准实现 [references/templates/request.snippet.js](references/templates/request.snippet.js)。模板里的 `Notification` 是项目 UI 通知适配器，接入时必须从实际组件库导入或替换为项目已有的通知方法；它不是浏览器内置对象。
 
 ### 4. 状态双向同步与防白屏死锁（MUST 门禁）
 
@@ -77,7 +86,7 @@ npm install @ctc-front/gf-framework-auth@0.3.0 @ctc-front/bridge-next@0.2.0 --sa
 3. **防死锁保护**：首屏获取用户信息或初始字典时，**必须使用 `try ... catch ... finally` 包裹**，并在 `finally` 中保证骨架屏状态标记（如 `isLoaded`）置为 `true`，防止首屏请求因 401 挂起或网络故障导致页面永久停留在加载动画中。
 4. **Vue 2 生命周期禁忌**：Vue 2 下严禁在 `beforeCreate` 中调用 methods 进行鉴权同步，必须在 `created` 中执行。
 
-- Vue 3 实现模板：[references/templates/vue3/App.vue.snippet.vue](references/templates/vue3/App.vue.snippet.vue) 与 [references/templates/vue3/useFrameworkAuth.ts](references/templates/vue3/useFrameworkAuth.ts)
+- Vue 3 实现模板：[references/templates/vue3/App.vue.snippet.vue](references/templates/vue3/App.vue.snippet.vue) 与 [references/templates/vue3/useFrameworkAuth.ts](references/templates/vue3/useFrameworkAuth.ts)。旧项目可放入 `src/common/composables/`；新架构按消费者放到 `src/app/composables/` 或对应业务子域，并调整其中 `frameworkAuth` 的导入路径。
 - Vue 2 实现模板：[references/templates/App.vue.snippet.vue](references/templates/App.vue.snippet.vue)
 
 ## 规范等级与检查清单

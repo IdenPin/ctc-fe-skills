@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>环保行业高频页面布局模板规范（E01～E06 异常线索与海量业务架构线框图）</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #222;
+      background: #f4f5f7;
+      padding: 16px;
+    }
+
+    /* 顶部控制栏 */
+    .top-bar {
+      border: 1px solid #333;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .top-bar-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #ccc;
+    }
+
+    .top-bar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-bar-tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: #e6f4ea;
+      color: #137333;
+      border: 1px solid #ceead6;
+      border-radius: 2px;
+      font-weight: normal;
+    }
+
+    .view-mode-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      padding: 6px 12px;
+      border: 1px solid #555;
+      background: #fff;
+      color: #222;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: #eee;
+    }
+
+    .tab-btn.active {
+      background: #1a73e8;
+      color: #fff;
+      border-color: #1a73e8;
+    }
+
+    /* 模板卡片外框 */
+    .template-card {
+      border: 2px solid #222;
+      margin-bottom: 24px;
+      background: #fff;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .template-card.active {
+      display: block;
+    }
+
+    body.show-all .template-card {
+      display: block;
+    }
+
+    .template-meta {
+      border-bottom: 1px solid #333;
+      background: #eef2f6;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .template-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a365d;
+    }
+
+    .template-badge {
+      font-size: 11px;
+      background: #2b6cb0;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-right: 6px;
+    }
+
+    .template-desc {
+      color: #4a5568;
+      font-size: 12px;
+    }
+
+    .wireframe-canvas {
+      padding: 14px;
+      background: #fff;
+      position: relative;
+    }
+
+    /* 模块容器公用类 */
+    .wf-module {
+      border: 1px solid #4a5568;
+      background: #f8fafc;
+      padding: 10px;
+    }
+
+    .wf-sub-module {
+      border: 1px dashed #718096;
+      background: #fff;
+      padding: 8px 10px;
+    }
+
+    .wf-title {
+      font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a202c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .wf-sub {
+      font-size: 11px;
+      color: #718096;
+      margin-top: 3px;
+    }
+
+    .wf-badge-rule {
+      font-size: 10px;
+      padding: 1px 5px;
+      background: #fed7d7;
+      color: #9b2c2c;
+      border: 1px solid #feb2b2;
+      border-radius: 2px;
+      font-family: sans-serif;
+    }
+
+    .wf-badge-nat {
+      font-size: 10px;
+      padding: 1px 6px;
+      background: #feebc8;
+      color: #7b341e;
+      border: 1px solid #fbd38d;
+      border-radius: 2px;
+      font-family: sans-serif;
+      font-weight: 600;
+    }
+
+    .wf-placeholder-bar {
+      height: 18px;
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      margin-top: 6px;
+    }
+
+    .wf-placeholder-block {
+      border: 1px dashed #a0aec0;
+      background: #f7fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px;
+      color: #4a5568;
+    }
+
+    .wf-flex-between {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wf-flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .wf-slot {
+      border: 1px solid #718096;
+      background: #fff;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: #2d3748;
+    }
+
+    .wf-btn-drawer {
+      background: #2b6cb0;
+      color: #fff;
+      border: 1px solid #2b6cb0;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 2px;
+    }
+    .wf-btn-drawer:hover {
+      background: #2c5282;
+    }
+
+    .wf-btn-modal {
+      background: #702459;
+      color: #fff;
+      border: 1px solid #702459;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 2px;
+    }
+    .wf-btn-modal:hover {
+      background: #52183f;
+    }
+
+    .gap-8 { gap: 8px; }
+    .mt-8 { margin-top: 8px; }
+    .mb-8 { margin-bottom: 8px; }
+
+    /* 栅格拓扑结构 */
+    .grid-tree-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 12px;
+    }
+
+    .grid-anchor-layout {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 12px;
+    }
+
+    .grid-4-kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .grid-5-filter {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    /* GIS 容器 */
+    .grid-gis-container {
+      position: relative;
+      height: 380px;
+      border: 2px solid #2d3748;
+      background: #1a202c;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .gis-canvas-bg {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #232d3d;
+      color: #a0aec0;
+      font-size: 14px;
+      pointer-events: auto;
+    }
+
+    .gis-hud-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 240px 1fr 260px;
+      grid-template-rows: 40px 1fr 36px;
+      gap: 10px;
+    }
+
+    .hud-panel {
+      pointer-events: auto;
+      background: rgba(26, 32, 44, 0.88);
+      border: 1px solid #4a5568;
+      color: #e2e8f0;
+      padding: 8px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* E04 高密度异常线索表格 */
+    .wire-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+      background: #fff;
+    }
+    .wire-table th {
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      padding: 6px 8px;
+      font-weight: 700;
+      color: #2d3748;
+      white-space: nowrap;
+    }
+    .wire-table td {
+      border: 1px solid #e2e8f0;
+      padding: 6px 8px;
+      color: #4a5568;
+      white-space: nowrap;
+    }
+    .wire-table tr:hover {
+      background: #f7fafc;
+    }
+    .tag-danger {
+      background: #fed7d7;
+      color: #9b2c2c;
+      border: 1px solid #feb2b2;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+    .tag-warn {
+      background: #feebc8;
+      color: #7b341e;
+      border: 1px solid #fbd38d;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+    .tag-success {
+      background: #c6f6d5;
+      color: #22543d;
+      border: 1px solid #9ae6b4;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* 遮罩公用 (Mask) */
+    .view-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .view-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 1. 侧滑抽屉样式 (Drawer) */
+    .drawer-panel {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 68%;
+      min-width: 540px;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.25);
+      z-index: 52;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      border-left: 3px solid #2b6cb0;
+    }
+    .drawer-panel.active {
+      transform: translateX(0);
+    }
+
+    /* 2. 居中大规格复合弹窗样式 (Large Modal Dialog) */
+    .modal-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      width: 82%;
+      max-width: 1040px;
+      height: 84%;
+      max-height: 780px;
+      background: #fff;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.3);
+      z-index: 55;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #702459;
+    }
+    .modal-container.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* 抽屉与弹窗的通用内部结构 */
+    .view-header {
+      padding: 10px 16px;
+      background: #eef2f6;
+      border-bottom: 1px solid #cbd5e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .view-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f8fafc;
+    }
+    .view-footer {
+      padding: 10px 16px;
+      background: #fff;
+      border-top: 1px solid #cbd5e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-close {
+      cursor: pointer;
+      font-size: 15px;
+      border: 1px solid #a0aec0;
+      background: #fff;
+      padding: 2px 8px;
+      line-height: 1;
+      border-radius: 2px;
+    }
+
+    /* 弹窗专用：内部左右分栏，避免垂直过度滚动 */
+    .modal-2col-body {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @media (max-width: 960px) {
+      .grid-tree-layout,
+      .grid-anchor-layout,
+      .grid-4-kpi,
+      .grid-5-filter {
+        grid-template-columns: 1fr;
+      }
+      .drawer-panel {
+        width: 92%;
+        min-width: 0;
+      }
+      .modal-container {
+        width: 95%;
+        height: 92%;
+      }
+      .modal-2col-body {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航与切换 -->
+  <header class="top-bar">
+    <div class="top-bar-header">
+      <div class="top-bar-title">
+        环保行业高频页面布局模板规范（E01 ～ E06）
+        <span class="top-bar-tag">国家级/海量业务线索架构 v2.2</span>
+      </div>
+      <div class="view-mode-group">
+        <button type="button" class="tab-btn active" id="modeSingleBtn">单页切换模式</button>
+        <button type="button" class="tab-btn" id="modeAllBtn">全部平铺检视</button>
+      </div>
+    </div>
+    <nav class="nav-tabs" id="templateNav">
+      <button type="button" class="tab-btn active" data-target="tpl-e04">★ E04. 异常线索核查台账（大列表 ➔ 抽屉/弹窗流转）</button>
+      <button type="button" class="tab-btn" data-target="tpl-e01">E01. 层级时序数据查询页</button>
+      <button type="button" class="tab-btn" data-target="tpl-e02">E02. 通用业务台账检索页</button>
+      <button type="button" class="tab-btn" data-target="tpl-e03">E03. GIS 空间一张图监控页</button>
+      <button type="button" class="tab-btn" data-target="tpl-e05">E05. 排污许可/一企一档长卷页</button>
+      <button type="button" class="tab-btn" data-target="tpl-e06">E06. 站点/设备多维穿透工作台</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ★ E04: 异常线索核查台账与详情流转页 (业务对齐升级版) -->
+    <section class="template-card active" id="tpl-e04">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge" style="background:#c53030;">E04</span>
+          <span class="template-name">异常线索核查台账与处置流转（Table-to-Detail Clue Flow）</span>
+          <span class="wf-badge-nat">异常线索排查国家级标准</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>污染源自动监控异常线索排查、超标/恒值/突变算法线索核实、异常数据闭环核销台账 | 
+          <strong>交互契约：</strong>列表触发哪条打开哪条，支持侧滑抽屉或居中大弹窗承载线索证据链与核查反馈
+        </div>
+      </div>
+      <div class="wireframe-canvas stack-col" style="min-height: 520px; position: relative; overflow: hidden;">
+        
+        <!-- 1. 顶部异常线索多维复合筛选栏 -->
+        <div class="wf-module">
+          <div class="wf-flex-between">
+            <div class="wf-title">
+              [#filter-bar] 全国/跨省异常线索复合筛选条件
+              <span class="wf-badge-rule">支持折叠收起</span>
+            </div>
+            <div class="wf-flex-row">
+              <span class="wf-slot">重置条件</span>
+              <span class="wf-slot" style="background: #2b6cb0; color: #fff;">查询 (检索线索耗时: 0.15s)</span>
+            </div>
+          </div>
+          <div class="grid-5-filter mt-8">
+            <div class="wf-sub-module">区划下钻: [全国 31 个省/直辖市]</div>
+            <div class="wf-sub-module">行业门类: [火电 / 钢铁 / 焦化 / 化工]</div>
+            <div class="wf-sub-module">异常模型: [超标线索 / 恒值突变 / 倒灌稀释 / 离线断传]</div>
+            <div class="wf-sub-module">核查状态: [待下发/属地核查中/属实待处置/已销号]</div>
+            <div class="wf-sub-module">风险等级: [高置信度 (红色) / 疑似异常 (黄色) / 一般]</div>
+          </div>
+        </div>
+
+        <!-- 2. 工具栏与批量操作 -->
+        <div class="wf-module stack-col">
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-flex-row">
+              <span class="wf-title">[#tool-bar] 线索批量调度与导出：</span>
+              <span class="wf-slot" style="background: #c53030; color: #fff;">⚡ 批量下发核查指令 (已勾选 2 条线索)</span>
+              <span class="wf-slot">📥 导出异常线索排查台账 (Excel)</span>
+              <span class="wf-slot">🏷️ 批量标记算法误报 / 归档</span>
+            </div>
+            <div class="wf-flex-row">
+              <span class="wf-slot">列冻结 / 列排序</span>
+              <span class="wf-slot">算法告警刷新: [实时]</span>
+            </div>
+          </div>
+
+          <!-- 3. 海量异常线索大表格视口 (高密度) -->
+          <div style="border: 1px solid #cbd5e0; overflow-x: auto; background: #fff;">
+            <table class="wire-table">
+              <thead>
+                <tr>
+                  <th style="width: 32px;"><input type="checkbox" checked /></th>
+                  <th>线索编号</th>
+                  <th>所属行政区划</th>
+                  <th>排污单位名称</th>
+                  <th>排口/监控点</th>
+                  <th>异常模型与特征值</th>
+                  <th>置信度 / 严重度</th>
+                  <th>线索等级</th>
+                  <th>承办生态环境分局</th>
+                  <th>核查处置状态</th>
+                  <th style="width: 170px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #fff5f5;">
+                  <td><input type="checkbox" checked /></td>
+                  <td><strong>XS-202611-0082</strong></td>
+                  <td>浙江省 / 杭州市 / 某某区</td>
+                  <td><strong>浙江某某精细热电能源有限公司</strong></td>
+                  <td>1号脱硫塔烟气排放口</td>
+                  <td>SO2 持续超标排放 (实测: 184.2mg/m³, 限值: 35)</td>
+                  <td><span class="tag-danger">98% 极高风险 (超标4.2倍)</span></td>
+                  <td><span class="tag-danger">🔴 严重异常线索</span></td>
+                  <td>杭州市生态环境局某某分局</td>
+                  <td><span class="tag-warn">现场核查中</span></td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <button type="button" class="wf-btn-drawer" onclick="openTargetDrawer('XS-202611-0082', '浙江某某精细热电能源有限公司', 'SO2持续超标排放 (4.2倍)')">抽屉核查</button>
+                    <button type="button" class="wf-btn-modal" onclick="openTargetModal('XS-202611-0082', '浙江某某精细热电能源有限公司', 'SO2持续超标排放 (4.2倍)')">弹窗核查</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked /></td>
+                  <td><strong>XS-202611-0083</strong></td>
+                  <td>江苏省 / 南京市 / 栖霞区</td>
+                  <td><strong>江苏某某新材料科技有限公司</strong></td>
+                  <td>废水总排口</td>
+                  <td>氨氮数据长期恒值异常 (波动&lt;0.01mg/L, 持续48h)</td>
+                  <td><span class="tag-danger">92% 高置信度</span></td>
+                  <td><span class="tag-danger">🔴 疑似人为干扰</span></td>
+                  <td>南京市生态环境局栖霞分局</td>
+                  <td><span class="tag-warn">待现场采样比对</span></td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <button type="button" class="wf-btn-drawer" onclick="openTargetDrawer('XS-202611-0083', '江苏某某新材料科技有限公司', '氨氮48小时恒值突变')">抽屉核查</button>
+                    <button type="button" class="wf-btn-modal" onclick="openTargetModal('XS-202611-0083', '江苏某某新材料科技有限公司', '氨氮48小时恒值突变')">弹窗核查</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td><strong>XS-202611-0084</strong></td>
+                  <td>山东省 / 淄博市 / 张店区</td>
+                  <td>某某特种陶瓷耐火材料厂</td>
+                  <td>窑炉废气排放口</td>
+                  <td>生产工况与折算浓度逻辑倒挂异常</td>
+                  <td><span class="tag-warn">84% 中风险</span></td>
+                  <td><span class="tag-warn">🟡 疑似稀释排放</span></td>
+                  <td>淄博市生态环境局</td>
+                  <td><span class="tag-success">属地已核实属实</span></td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <button type="button" class="wf-btn-drawer" onclick="openTargetDrawer('XS-202611-0084', '某某特种陶瓷耐火材料厂', '生产工况与浓度逻辑倒挂')">抽屉核查</button>
+                    <button type="button" class="wf-btn-modal" onclick="openTargetModal('XS-202611-0084', '某某特种陶瓷耐火材料厂', '生产工况与浓度逻辑倒挂')">弹窗核查</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td><strong>XS-202611-0085</strong></td>
+                  <td>河北省 / 唐山市 / 丰润区</td>
+                  <td>唐山某某钢铁冶炼有限责任公司</td>
+                  <td>烧结机头烟气排口</td>
+                  <td>数采仪夜间固定时段断电脱机</td>
+                  <td><span class="tag-warn">78% 中风险</span></td>
+                  <td><span class="tag-warn">🟡 异常断传线索</span></td>
+                  <td>唐山市生态环境局</td>
+                  <td>待分派派发</td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <button type="button" class="wf-btn-drawer" onclick="openTargetDrawer('XS-202611-0085', '唐山某某钢铁冶炼有限责任公司', '数采仪夜间固定时段断电脱机')">抽屉核查</button>
+                    <button type="button" class="wf-btn-modal" onclick="openTargetModal('XS-202611-0085', '唐山某某钢铁冶炼有限责任公司', '数采仪夜间固定时段断电脱机')">弹窗核查</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 4. 分页控制 -->
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-title">[#pagination] 全国海量线索分页控制</div>
+            <div class="wf-slot">共筛选出 <strong>32,680</strong> 条异常线索 | 每页 [50条/页] | &lt; 1 2 3 4 5 ... 654 &gt; | 跳至指定页</div>
+          </div>
+        </div>
+
+        <!-- 统一遮罩 -->
+        <div class="view-overlay" id="commonOverlay"></div>
+
+        <!-- ================= 模式一：侧滑宽幅抽屉 (Slide Drawer) ================= -->
+        <aside class="drawer-panel" id="drawerPanel">
+          <div class="view-header" style="background:#ebf8ff; border-bottom: 2px solid #2b6cb0;">
+            <div>
+              <div class="wf-title" style="font-size: 13px; color:#2b6cb0;">
+                [抽屉核查] 异常线索详情：<span id="drawerClueId">XS-202611-0082</span>
+                <span class="tag-danger">重点异常线索</span>
+              </div>
+              <div class="wf-sub">涉事企业：<span id="drawerEnterprise" style="font-weight:600;">浙江某某精细热电能源有限公司</span> | 特征：<span id="drawerFeature">SO2持续超标排放 (4.2倍)</span></div>
+            </div>
+            <!-- 已取消上一条/下一条，保留标准关闭 -->
+            <button type="button" class="btn-close" id="closeDrawerBtn" title="关闭抽屉 (ESC)">✕ 关闭</button>
+          </div>
+
+          <div class="view-body">
+            <!-- 模块 1: 算法与特征证据链回溯 -->
+            <div class="wf-module">
+              <div class="wf-title" style="color: #c53030;">[#evidence-view] 异常特征算法研判证据与时序回溯曲线</div>
+              <div class="wf-placeholder-block mt-8" style="min-height: 120px; background: #fff;">
+                📈 异常触发前后 12 小时浓度-工况曲线叠加图（标出算法捕获的异常突变点、恒值平台期、烟温与引风机电量工况对比）
+              </div>
+            </div>
+
+            <!-- 模块 2: 属地现场核实反馈 -->
+            <div class="wf-module">
+              <div class="wf-title">[#handle-form] 属地生态环境局现场核查取证反馈</div>
+              <div class="grid-4-kpi mt-8">
+                <div class="wf-sub-module">核查人员: 李执法、陈执法</div>
+                <div class="wf-sub-module">核查结论: <strong style="color:#c53030;">线索基本属实</strong></div>
+                <div class="wf-sub-module" style="grid-column: 3 / 5;">异常成因: 自动监控分析仪采样管路破损导致漏气稀释</div>
+              </div>
+              <div class="wf-placeholder-block mt-8" style="min-height: 70px;">
+                📷 现场勘验照片 (采样管路破损处、站房现场执法笔录 PDF、企业确认整改承诺书)
+              </div>
+            </div>
+
+            <!-- 模块 3: 流转与闭环全流程记录 -->
+            <div class="wf-module">
+              <div class="wf-title">[#audit-timeline] 异常线索研判、派发、核实、销号全链条记录</div>
+              <div class="wf-sub" style="padding: 6px 0; line-height: 1.8;">
+                ① <strong>2026-11-14 08:30</strong> [监控大数据算法] 触发“数据恒值异常模型”，自动生成国家级线索单<br>
+                ② <strong>2026-11-14 09:15</strong> [国家监管中心调度台] 研判确认，通过线索专网下发属地生态环境厅<br>
+                ③ <strong>2026-11-14 10:20</strong> [分局现场执法队] 携带便携式监测仪赴现场开展突击核实与比对<br>
+                ④ <strong>2026-11-14 11:30</strong> [核查人员] 上传现场笔录与管路破损证据，申请核销立案处理...
+              </div>
+            </div>
+          </div>
+
+          <div class="view-footer">
+            <div class="wf-sub">状态：处理完毕关闭抽屉后，保持底层列表当前位置与筛选不变。</div>
+            <div class="wf-flex-row">
+              <span class="wf-slot" style="cursor: pointer;">退回属地重查</span>
+              <span class="wf-slot" style="cursor: pointer;">认定为算法误报</span>
+              <button type="button" class="wf-btn-drawer" style="background:#22543d; border-color:#22543d;">线索属实并闭环销号</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ================= 模式二：居中大规格复合弹窗 (Large Modal Dialog) ================= -->
+        <div class="modal-container" id="modalDialog">
+          <div class="view-header" style="background:#fdf2f8; border-bottom: 2px solid #702459;">
+            <div>
+              <div class="wf-title" style="font-size: 13px; color:#702459;">
+                [弹窗核查] 异常线索详情：<span id="modalClueId">XS-202611-0082</span>
+                <span class="tag-danger">重点异常线索</span>
+              </div>
+              <div class="wf-sub">涉事企业：<span id="modalEnterprise" style="font-weight:600;">浙江某某精细热电能源有限公司</span> | 特征：<span id="modalFeature">SO2持续超标排放 (4.2倍)</span></div>
+            </div>
+            <!-- 已取消上一条/下一条，保留标准关闭 -->
+            <button type="button" class="btn-close" id="closeModalBtn" title="关闭弹窗 (ESC)">✕ 关闭</button>
+          </div>
+
+          <div class="view-body" style="padding: 10px;">
+            <div class="modal-2col-body">
+              <!-- 左栏：异常算法证据回溯 -->
+              <div class="stack-col">
+                <div class="wf-module" style="flex: 1; display:flex; flex-direction:column;">
+                  <div class="wf-title" style="color: #c53030;">[左栏: 异常时序曲线与模型特征]</div>
+                  <div class="wf-placeholder-block mt-8" style="flex: 1; min-height: 120px; background: #fff;">
+                    📈 突变特征时序回放（实测曲线 vs 折算浓度 vs 正常基线）
+                  </div>
+                  <div class="wf-placeholder-block mt-8" style="height: 100px;">
+                    📷 现场勘查取证照片与执法笔录预览
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右栏：核实反馈与时间轴 -->
+              <div class="stack-col" style="overflow-y: auto;">
+                <div class="wf-module">
+                  <div class="wf-title">[右栏: 现场核实认定结论]</div>
+                  <div class="wf-sub-module mt-8">认定结果: <strong style="color:#c53030;">线索属实，涉嫌稀释排放</strong></div>
+                  <div class="wf-sub-module mt-8">现场处理: 已责令立即停机检修，下达限期整改文书</div>
+                </div>
+                <div class="wf-module">
+                  <div class="wf-title">[线索闭环流转链]</div>
+                  <div class="wf-sub" style="line-height: 1.6;">
+                    算法研判生成 ➔ 调度台审核派发 ➔ 现场突击取证 ➔ 闭环归档
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="view-footer">
+            <div class="wf-sub">弹窗模式：居中全景聚焦，处理完毕确定后直接返回列表。</div>
+            <div class="wf-flex-row">
+              <span class="wf-slot" style="cursor: pointer;">退回重查</span>
+              <button type="button" class="wf-btn-modal" style="background:#22543d; border-color:#22543d;">线索属实并提交销号</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- E01: 层级时序数据查询页 -->
+    <section class="template-card" id="tpl-e01">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge">E01</span>
+          <span class="template-name">层级时序数据查询页（Tree-Time-Table）</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>污染源自动监控、有效传输率、水环境断面监测 | 
+          <strong>滚动规则：</strong>双轨独立滚动（左树自滚、右表占满剩余高度内部滚动，页面严禁双滚动条）
+        </div>
+      </div>
+      <div class="wireframe-canvas">
+        <div class="grid-tree-layout">
+          <aside class="wf-module stack-col" style="min-height: 340px;">
+            <div class="wf-title">
+              [#env-tree] 区划/排污口层级树 (260px)
+              <span class="wf-badge-rule">独立滚动</span>
+            </div>
+            <div class="wf-sub-module">🔍 模糊检索企业/站点名称...</div>
+            <div class="wf-placeholder-block" style="flex: 1; align-items: flex-start; text-align: left;">
+              <div style="font-weight: 600; margin-bottom: 4px;">🌲 树层级拓扑：</div>
+              <div>└ 某某市 (地级市)</div>
+              <div>&nbsp;&nbsp;├ 某某区 (区县)</div>
+              <div>&nbsp;&nbsp;│&nbsp;&nbsp;├ 🏭 某某印染责任公司 [在线]</div>
+              <div>&nbsp;&nbsp;│&nbsp;&nbsp;│&nbsp;&nbsp;├ 🔵 废水总排口 (COD/氨氮)</div>
+              <div>&nbsp;&nbsp;│&nbsp;&nbsp;│&nbsp;&nbsp;└ 🔴 锅炉烟气排放口 [超标]</div>
+              <div>&nbsp;&nbsp;│&nbsp;&nbsp;└ 🏭 某某热电厂 [离线]</div>
+              <div>&nbsp;&nbsp;└ 某某县 (区县)</div>
+            </div>
+          </aside>
+
+          <div class="wf-module stack-col">
+            <div class="wf-sub-module wf-flex-between">
+              <div>
+                <div class="wf-title">[#time-factor-bar] 时间维度与监测因子筛选栏</div>
+                <div class="wf-sub">支持时间颗粒度单选 + 时间范围选择器 + 多因子多选</div>
+              </div>
+              <div class="wf-flex-row">
+                <span class="wf-slot">粒度: [实时] [分钟] [小时] [日均]</span>
+                <span class="wf-slot">📅 时间跨度选择</span>
+                <span class="wf-slot">因子: [☑ COD] [☑ 氨氮] [☑ 总磷] [☑ 流量]</span>
+                <span class="wf-slot" style="background: #2b6cb0; color: #fff;">查询 / 导出</span>
+              </div>
+            </div>
+
+            <div class="wf-placeholder-block" style="flex: 1; min-height: 200px;">
+              <div class="wf-title" style="margin-bottom: 6px;">[#chart-table-body] 时序趋势折线 + 高密度数据表格视口</div>
+              <div class="wf-sub" style="margin-bottom: 8px;">上部：双 Y 轴折线图（浓度 vs 流量，标注预警/超标警戒红线）；下部：高密度数据表（支持标红染色）</div>
+              <div style="width: 100%; border: 1px dashed #cbd5e0; padding: 6px; background: #fff; font-size: 11px;">
+                [数据列]：数据时间 | COD实测 (mg/L) | COD折算 | 氨氮 (mg/L) | 排放量 (m³/h) | 达标评估 | 数据标记 (正常/停产/校准/超标)
+              </div>
+            </div>
+
+            <div class="wf-sub-module wf-flex-between">
+              <div class="wf-flex-row">
+                <span class="wf-title">[#data-legend-footer] 状态图例：</span>
+                <span style="color: #2b6cb0;">● 正常达标</span>
+                <span style="color: #c53030; font-weight: 600;">● 超标报警</span>
+                <span style="color: #d69e2e;">● 异常恒值</span>
+                <span style="color: #718096;">○ 设备离线</span>
+              </div>
+              <div class="wf-slot">共 1,420 条 | [10条/页] | &lt; 1 2 3 ... &gt;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- E02: 通用业务台账检索页 -->
+    <section class="template-card" id="tpl-e02">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge">E02</span>
+          <span class="template-name">通用业务台账检索页（Standard Ledger）</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>排污许可证台账、排污单位名录库、设备资产台账 | 
+          <strong>滚动规则：</strong>视口定高，筛选区支持折叠，表格充满剩余视口并在表格内部滚动
+        </div>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module">
+          <div class="wf-flex-between">
+            <div class="wf-title">[#filter-bar] 多维复合业务筛选表单（支持展开/收起）</div>
+            <div class="wf-flex-row">
+              <span class="wf-slot">重置</span>
+              <span class="wf-slot" style="background: #2b6cb0; color: #fff;">查询</span>
+            </div>
+          </div>
+          <div class="grid-4-kpi mt-8">
+            <div class="wf-sub-module">企业名称 / 信用代码</div>
+            <div class="wf-sub-module">行业分类 (下拉树)</div>
+            <div class="wf-sub-module">管理类别 (重点/简化/登记)</div>
+            <div class="wf-sub-module">许可证有效状态 (正常/注销/暂扣)</div>
+          </div>
+        </div>
+
+        <div class="wf-module stack-col">
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-title">[#tool-bar] 业务批量操作与工具栏</div>
+            <div class="wf-flex-row">
+              <span class="wf-slot">+ 登记新证</span>
+              <span class="wf-slot">📥 批量导出 Excel</span>
+              <span class="wf-slot">🏷️ 批量下发核查</span>
+              <span class="wf-slot">⚙️ 列显隐设置</span>
+            </div>
+          </div>
+
+          <div class="wf-placeholder-block" style="min-height: 220px;">
+            <div class="wf-title">[#table-body] 台账数据表格（填满剩余高度，横向/纵向自适应）</div>
+            <div class="wf-sub" style="margin-top: 6px;">
+              [字段]：企业名称 | 社会信用代码 | 许可证编号 | 行业类别 | 发证日期 | 有效起止期 | 排口数 | 状态标签 | 经办人 | 操作 (查看/变更/注销/履约记录)
+            </div>
+          </div>
+
+          <div class="wf-sub-module wf-flex-between">
+            <div class="wf-title">[#pagination] 分页控制</div>
+            <div class="wf-slot">总计 482 家排污单位 | 每页 20 条 | 跳至指定页</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- E03: GIS 空间一张图监控页 -->
+    <section class="template-card" id="tpl-e03">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge">E03</span>
+          <span class="template-name">GIS 空间一张图监控页（GIS HUD Dashboard）</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>综合展示平台、污染源一张图、水环境流域大盘 | 
+          <strong>滚动规则：</strong>全屏无页面滚动条，HUD 浮层外层事件穿透（pointer-events: none），面板恢复交互
+        </div>
+      </div>
+      <div class="wireframe-canvas">
+        <div class="grid-gis-container">
+          <div class="gis-canvas-bg">
+            <div class="wf-title" style="color: #e2e8f0; font-size: 15px;">[#gis-canvas] 全景电子底图视口（高德/天地图/管网水系）</div>
+            <div class="wf-sub" style="color: #a0aec0; margin-top: 4px;">保持地图原生拖拽、缩放、点位悬浮高亮、点击弹出企业微卡片</div>
+          </div>
+
+          <div class="gis-hud-overlay">
+            <div class="hud-panel wf-flex-between" style="grid-column: 1 / 4;">
+              <span class="wf-title" style="color: #63b3ed;">[#hud-kpi-bar] 全市在线监测态势总览</span>
+              <div class="wf-flex-row">
+                <span class="wf-slot" style="background:#2d3748; color:#fff;">联网企业: 1,428 家</span>
+                <span class="wf-slot" style="background:#2d3748; color:#fff;">点位在线率: 98.6%</span>
+                <span class="wf-slot" style="background:#742a2a; color:#fff;">今日超标告警: 14 起</span>
+                <span class="wf-slot" style="background:#22543d; color:#fff;">水质优良率: 87.5%</span>
+              </div>
+            </div>
+
+            <div class="hud-panel stack-col">
+              <div class="wf-title" style="color: #63b3ed;">[#hud-left-panel] 区划水质与达标排行</div>
+              <div class="wf-sub-module" style="background: rgba(0,0,0,0.3); color: #fff;">Ⅰ~Ⅲ类优良水体: 82%</div>
+              <div class="wf-sub-module" style="background: rgba(0,0,0,0.3); color: #fff;">劣Ⅴ类污染水体: 0 个</div>
+              <div class="wf-placeholder-block" style="flex: 1; background: rgba(0,0,0,0.2); color: #cbd5e0;">
+                区县排放达标率 Top 5 排行柱状图
+              </div>
+            </div>
+
+            <div></div>
+
+            <div class="hud-panel stack-col">
+              <div class="wf-title" style="color: #fc8181;">[#hud-right-panel] 实时超标报警流水</div>
+              <div class="wf-sub-module" style="background: rgba(155, 44, 44, 0.4); border-color: #feb2b2; color: #fff;">
+                ⚠️ 10:24 某某热电厂 1号锅炉<br>SO2 浓度 184mg/m³ (超标1.2倍)
+              </div>
+              <div class="wf-sub-module" style="background: rgba(155, 44, 44, 0.4); border-color: #feb2b2; color: #fff;">
+                ⚠️ 09:58 某某印染 废水总排口<br>COD 浓度 112mg/L (超标1.1倍)
+              </div>
+              <div class="wf-placeholder-block" style="flex: 1; background: rgba(0,0,0,0.2); color: #cbd5e0;">
+                未处理报警事件闭环清单
+              </div>
+            </div>
+
+            <div class="hud-panel wf-flex-between" style="grid-column: 1 / 4;">
+              <div class="wf-flex-row">
+                <span class="wf-title" style="color: #cbd5e0;">[#hud-tools] 图例：</span>
+                <span style="color: #68d391;">● 达标</span>
+                <span style="color: #fc8181;">● 超标</span>
+                <span style="color: #a0aec0;">○ 离线</span>
+              </div>
+              <div class="wf-flex-row">
+                <span class="wf-slot" style="background:#2d3748; color:#fff;">🗺️ 废气图层</span>
+                <span class="wf-slot" style="background:#2d3748; color:#fff;">💧 废水图层</span>
+                <span class="wf-slot" style="background:#2d3748; color:#fff;">📏 空间测距</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- E05: 排污许可/一企一档长卷页 -->
+    <section class="template-card" id="tpl-e05">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge">E05</span>
+          <span class="template-name">排污许可/一企一档长卷页（Anchor Multi-Section Archive）</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>排污许可证申报与核发、企业一企一档全景档案、站房建设标准化台账 | 
+          <strong>滚动规则：</strong>单向长卷纵向滚动，侧边锚点菜单悬浮跟随，底部操作栏常驻吸底
+        </div>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module wf-flex-between">
+          <div>
+            <div class="wf-title">[#enterprise-summary] 某某热电能源发展有限公司（重点排污单位）</div>
+            <div class="wf-sub">社会信用代码：91330100MA2****88X | 许可证号：91330100MA2****88X001P | 法人：王某某</div>
+          </div>
+          <div class="wf-flex-row">
+            <span class="wf-slot" style="background: #22543d; color: #fff;">环保信用：绿牌企业</span>
+            <span class="wf-slot">许可有效期限：2024-01-01 至 2028-12-31</span>
+          </div>
+        </div>
+
+        <div class="grid-anchor-layout">
+          <aside class="wf-module stack-col" style="height: fit-content;">
+            <div class="wf-title">[#anchor-rail] 业务锚点</div>
+            <div class="wf-sub-module" style="background: #2b6cb0; color: #fff;">1. 企业基本概况</div>
+            <div class="wf-sub-module">2. 主要产排污节点</div>
+            <div class="wf-sub-module">3. 污染治理设施</div>
+            <div class="wf-sub-module">4. 排放口与限值</div>
+            <div class="wf-sub-module">5. 自行监测方案</div>
+          </aside>
+
+          <div class="stack-col">
+            <div class="wf-module">
+              <div class="wf-title">[#section-group] Section 1: 企业基本概况与生产负荷</div>
+              <div class="wf-placeholder-bar"></div>
+              <div class="wf-sub">行业分类、生产工艺、主要产品产能、原辅料年消耗量、用排水去向...</div>
+            </div>
+
+            <div class="wf-module">
+              <div class="wf-title">Section 2: 废气/废水污染治理设施台账</div>
+              <div class="wf-placeholder-block" style="min-height: 90px;">
+                脱硫设施、脱硝设施、高效布袋除尘器、污水生化处理站运行台账与设计处理风量/水量
+              </div>
+            </div>
+
+            <div class="wf-module">
+              <div class="wf-title">Section 3: 排放口明细与排污许可年限值</div>
+              <div class="wf-placeholder-block" style="min-height: 90px;">
+                1号废气排放口 (SO2限值 35mg/m³, 烟尘 5mg/m³) | 废水排口 (COD限值 50mg/L, 氨氮 5mg/L)
+              </div>
+            </div>
+
+            <div class="wf-module">
+              <div class="wf-title">Section 4: 自行监测方案与手动/自动频次</div>
+              <div class="wf-placeholder-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wf-module wf-flex-between" style="border-top: 2px solid #2b6cb0;">
+          <div class="wf-title">[#sticky-footer] 业务吸底动作条 (Sticky Bottom)</div>
+          <div class="wf-flex-row">
+            <span class="wf-slot">存为草稿</span>
+            <span class="wf-slot" style="background: #dd6b20; color: #fff;">自动合规性比对校验</span>
+            <span class="wf-slot" style="background: #2b6cb0; color: #fff;">提交环保主管部门审核</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- E06: 站点/设备多维穿透工作台 -->
+    <section class="template-card" id="tpl-e06">
+      <div class="template-meta">
+        <div>
+          <span class="template-badge">E06</span>
+          <span class="template-name">站点/设备多维穿透工作台（Station/Instrument Workspace）</span>
+        </div>
+        <div class="template-desc">
+          <strong>对应业务：</strong>监测站点全景深度穿透、CEMS/水质分析仪全生命周期看板、运维巡检深度视图 | 
+          <strong>滚动规则：</strong>顶部状态栏固定，Tab 切换内容容器高度自适应
+        </div>
+      </div>
+      <div class="wireframe-canvas stack-col">
+        <div class="wf-module stack-col">
+          <div class="wf-flex-between">
+            <div class="wf-title">
+              [#device-status-header] 站点：热电厂 1号锅炉烟气 CEMS 在线监测站房
+              <span class="wf-badge-rule" style="background:#c6f6d5; color:#22543d; border-color:#9ae6b4;">● 在线正常</span>
+            </div>
+            <div class="wf-flex-row">
+              <span class="wf-slot">数采仪 MN 码: 330100A001928</span>
+              <span class="wf-slot">通信协议: HJ212-2017</span>
+              <span class="wf-slot">今日有效传输率: 99.8%</span>
+            </div>
+          </div>
+
+          <div class="wf-sub-module wf-flex-row mt-8" style="background: #edf2f7;">
+            <div class="wf-title" style="margin-right: 12px;">[#dimension-tabs] 业务穿透维度：</div>
+            <span class="wf-slot" style="background: #2b6cb0; color: #fff; font-weight: 600;">Tab 1: 实时曲线与数据分析</span>
+            <span class="wf-slot">Tab 2: 超标告警与留样记录 (3)</span>
+            <span class="wf-slot">Tab 3: 质控校准与运维台账</span>
+            <span class="wf-slot">Tab 4: 站房实时视频监控</span>
+          </div>
+        </div>
+
+        <div class="wf-placeholder-block" style="min-height: 240px;">
+          <div class="wf-title" style="margin-bottom: 8px;">[#tab-content-panel] 选中维度渲染区 (当前呈现：Tab 1 实时曲线与数据分析)</div>
+          <div class="wf-sub" style="margin-bottom: 12px;">
+            支持时段动态缩放（1小时 / 8小时 / 24小时）、因子叠加对比（SO2、NOx、颗粒物与氧量、温度多轴联动）
+          </div>
+          <div class="grid-4-kpi" style="width: 100%; max-width: 800px;">
+            <div class="wf-sub-module">当前 SO2: 12.4 mg/m³ (达标)</div>
+            <div class="wf-sub-module">当前 NOx: 32.1 mg/m³ (达标)</div>
+            <div class="wf-sub-module">当前 颗粒物: 1.8 mg/m³ (达标)</div>
+            <div class="wf-sub-module">烟气流速: 18.2 m/s | 烟温: 62℃</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      const nav = document.getElementById('templateNav');
+      const tabButtons = nav.querySelectorAll('.tab-btn');
+      const cards = document.querySelectorAll('.template-card');
+      const modeSingleBtn = document.getElementById('modeSingleBtn');
+      const modeAllBtn = document.getElementById('modeAllBtn');
+
+      // 遮罩与弹层元素
+      const commonOverlay = document.getElementById('commonOverlay');
+      const drawerPanel = document.getElementById('drawerPanel');
+      const modalDialog = document.getElementById('modalDialog');
+      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+
+      // 动态数据填充节点
+      const drawerClueId = document.getElementById('drawerClueId');
+      const drawerEnterprise = document.getElementById('drawerEnterprise');
+      const drawerFeature = document.getElementById('drawerFeature');
+
+      const modalClueId = document.getElementById('modalClueId');
+      const modalEnterprise = document.getElementById('modalEnterprise');
+      const modalFeature = document.getElementById('modalFeature');
+
+      // 点击列表哪条，打开哪条（抽屉）
+      window.openTargetDrawer = function (clueId, enterprise, feature) {
+        closeAllModals();
+        drawerClueId.textContent = clueId;
+        drawerEnterprise.textContent = enterprise;
+        drawerFeature.textContent = feature;
+
+        commonOverlay.classList.add('active');
+        drawerPanel.classList.add('active');
+      };
+
+      // 点击列表哪条，打开哪条（弹窗）
+      window.openTargetModal = function (clueId, enterprise, feature) {
+        closeAllModals();
+        modalClueId.textContent = clueId;
+        modalEnterprise.textContent = enterprise;
+        modalFeature.textContent = feature;
+
+        commonOverlay.classList.add('active');
+        modalDialog.classList.add('active');
+      };
+
+      // 关闭全部弹层
+      function closeAllModals() {
+        commonOverlay.classList.remove('active');
+        drawerPanel.classList.remove('active');
+        modalDialog.classList.remove('active');
+      }
+
+      if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeAllModals);
+      if (closeModalBtn) closeModalBtn.addEventListener('click', closeAllModals);
+      if (commonOverlay) commonOverlay.addEventListener('click', closeAllModals);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAllModals();
+        }
+      });
+
+      // 模板 Tab 切换逻辑
+      function selectTemplate(targetId) {
+        tabButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.target === targetId);
+        });
+        cards.forEach((card) => {
+          card.classList.toggle('active', card.id === targetId);
+        });
+      }
+
+      nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        document.body.classList.remove('show-all');
+        modeSingleBtn.classList.add('active');
+        modeAllBtn.classList.remove('active');
+        selectTemplate(btn.dataset.target);
+      });
+
+      modeSingleBtn.addEventListener('click', () => {
+        document.body.classList.remove('show-all');
+        modeSingleBtn.classList.add('active');
+        modeAllBtn.classList.remove('active');
+      });
+
+      modeAllBtn.addEventListener('click', () => {
+        document.body.classList.add('show-all');
+        modeAllBtn.classList.add('active');
+        modeSingleBtn.classList.remove('active');
+      });
+    })();
+  </script>
+</body>
+</html>
